@@ -133,6 +133,10 @@ const translations: Record<Language, Record<string, string>> = {
         'registration.successDesc': 'سنتواصل معك قريباً إن شاء الله',
         'registration.errorAuth': 'يجب تسجيل الدخول لإرسال طلب التسجيل',
         'registration.errorSubmit': 'لم نتمكن من إرسال طلبك. يرجى المحاولة مرة أخرى.',
+        'registration.hasDisease': 'هل طفلك يعاني من مرض؟',
+        'registration.diseaseDetails': 'تفاصيل المرض أو الحالة الصحية',
+        'registration.hasAllergy': 'هل يعاني طفلك من أي حساسية غذائية؟',
+        'registration.allergyDetails': 'تفاصيل الحساسية الغذائية',
 
         // Doctors Page
         'doctors.pageTitle': 'أطباء الأطفال في ولاية معسكر',
@@ -215,6 +219,11 @@ const translations: Record<Language, Record<string, string>> = {
         'auth.error.emailInvalid': 'يرجى إدخال بريد إلكتروني صحيح',
         'auth.error.passwordRequired': 'يرجى إدخال كلمة المرور',
         'auth.error.signup': 'حدث خطأ أثناء إنشاء الحساب',
+        'auth.forgotPassword': 'هل نسيت كلمة السر؟',
+        'auth.resetPassword': 'إعادة تعيين كلمة المرور',
+        'auth.resetPasswordDesc': 'أدخل بريدك الإلكتروني لاستلام رابط إعادة تعيين كلمة المرور',
+        'auth.sendResetLink': 'إرسال الرابط',
+        'auth.resetEmailSent': 'تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني',
 
         // Admin Dashboard
         'admin.title': 'لوحة تحكم الأدمين',
@@ -229,10 +238,30 @@ const translations: Record<Language, Record<string, string>> = {
         'admin.role': 'الدور',
         'admin.status': 'الحالة',
         'admin.date': 'تاريخ التسجيل',
+        'booking.title': 'حجز موعد زيارة',
+        'booking.success': 'تم الحجز',
+        'booking.successDesc': 'سنتصل بك لتأكيد الموعد',
         'admin.actions': 'الإجراءات',
         'admin.logout': 'خروج',
         'admin.home': 'الرئيسية',
         'admin.noUsers': 'لا يوجد مستخدمين',
+
+        // Owner Dashboard
+        'owner.medicalAlert': 'تنبيهات طبية',
+        'owner.attendanceRate': 'نسبة الحضور',
+        'owner.totalDebt': 'إجمالي الديون',
+        'owner.attendance': 'الحضور',
+        'owner.finance': 'المالية',
+        'owner.stats': 'الإحصائيات',
+        'owner.presence': 'تسجيل الحضور اليومي',
+        'owner.children': 'الأطفال',
+        'owner.staff': 'الطاقم',
+        'owner.paid': 'تم الدفع',
+        'owner.debt': 'دَيْن',
+        'owner.paymentStatus': 'حالة الدفع',
+        'owner.medicalStats': 'إحصائيات طبية',
+        'owner.foodAllergy': 'حساسية غذائية',
+        'owner.chronicDisease': 'أمراض مزمنة',
         'admin.role.admin': 'أدمين',
         'admin.role.owner': 'مالك روضة',
         'admin.role.parent': 'ولي أمر',
@@ -269,6 +298,14 @@ const translations: Record<Language, Record<string, string>> = {
         'auth.error.alreadyRegistered': 'هذا البريد الإلكتروني مسجل بالفعل',
         'auth.error.resendFailed': 'فشل في إعادة إرسال رابط التأكيد',
         'auth.error.notAdmin': 'ليس لديك صلاحيات الأدمين',
+
+        // Chatbot
+        'chatbot.welcome': 'مرحباً، أنا المساعد الذكي لـ "روضتي". كيف يمكنني مساعدتك؟',
+        'chatbot.placeholder': 'اكتب سؤالك هنا...',
+        'chatbot.send': 'إرسال',
+        'chatbot.title': 'المساعد الذكي',
+        'chatbot.typing': 'جاري الكتابة...',
+        'chatbot.error': 'عذراً، حدث خطأ ما. حاول مرة أخرى.',
     },
     fr: {
         // Welcome & General
@@ -394,6 +431,10 @@ const translations: Record<Language, Record<string, string>> = {
         'registration.successDesc': 'Nous vous contacterons bientôt, si Dieu le veut',
         'registration.errorAuth': 'Veuillez vous connecter pour envoyer la demande',
         'registration.errorSubmit': 'Impossible d\'envoyer votre demande. Veuillez réessayer.',
+        'registration.hasDisease': 'Votre enfant souffre-t-il d\'une maladie ?',
+        'registration.diseaseDetails': 'Détails de la maladie ou condition médicale',
+        'registration.hasAllergy': 'Votre enfant a-t-il des allergies alimentaires ?',
+        'registration.allergyDetails': 'Détails des allergies alimentaires',
 
         // Doctors Page
         'doctors.pageTitle': 'Pédiatres à Mascara',
@@ -454,6 +495,9 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Auth
         'auth.login': 'Connexion',
+        'booking.title': 'Réserver une visite',
+        'booking.success': 'Réservation réussie',
+        'booking.successDesc': 'Nous vous contacterons pour confirmer le rendez-vous',
         'auth.signup': 'Nouveau compte',
         'auth.welcome': 'Bienvenue',
         'auth.subtitle': 'Connectez-vous pour accéder à votre compte',
@@ -476,6 +520,11 @@ const translations: Record<Language, Record<string, string>> = {
         'auth.error.emailInvalid': 'Veuillez entrer un email valide',
         'auth.error.passwordRequired': 'Le mot de passe est requis',
         'auth.error.signup': 'Une erreur est survenue lors de la création du compte',
+        'auth.forgotPassword': 'Mot de passe oublié ?',
+        'auth.resetPassword': 'Réinitialiser le mot de passe',
+        'auth.resetPasswordDesc': 'Entrez votre email pour recevoir un lien de réinitialisation',
+        'auth.sendResetLink': 'Envoyer le lien',
+        'auth.resetEmailSent': 'Un lien de réinitialisation a été envoyé à votre adresse email',
 
         // Admin Dashboard
         'admin.title': 'Tableau de bord Admin',
@@ -493,7 +542,24 @@ const translations: Record<Language, Record<string, string>> = {
         'admin.actions': 'Actions',
         'admin.logout': 'Déconnexion',
         'admin.home': 'Accueil',
-        'admin.noUsers': 'Aucun utilisateur trouvé',
+        'admin.noUsers': 'Aucun utilisateur',
+
+        // Owner Dashboard
+        'owner.medicalAlert': 'Alertes médicales',
+        'owner.attendanceRate': 'Taux de présence',
+        'owner.totalDebt': 'Dettes totales',
+        'owner.attendance': 'Présence',
+        'owner.finance': 'Finance',
+        'owner.stats': 'Statistiques',
+        'owner.presence': 'Présence quotidienne',
+        'owner.children': 'Enfants',
+        'owner.staff': 'Personnel',
+        'owner.paid': 'Payé',
+        'owner.debt': 'Dette',
+        'owner.paymentStatus': 'Statut de paiement',
+        'owner.medicalStats': 'Stats médicales',
+        'owner.foodAllergy': 'Allergie alimentaire',
+        'owner.chronicDisease': 'Maladie chronique',
         'admin.role.admin': 'Admin',
         'admin.role.owner': 'Propriétaire',
         'admin.role.parent': 'Parent',
@@ -530,6 +596,14 @@ const translations: Record<Language, Record<string, string>> = {
         'auth.error.alreadyRegistered': 'Cet email est déjà enregistré',
         'auth.error.resendFailed': 'Échec de l\'envoi du lien de confirmation',
         'auth.error.notAdmin': 'Vous n\'avez pas les droits d\'administrateur',
+
+        // Chatbot
+        'chatbot.welcome': 'Bonjour, je suis l\'assistant IA de "Rawdati". Comment puis-je vous aider ?',
+        'chatbot.placeholder': 'Écrivez votre question ici...',
+        'chatbot.send': 'Envoyer',
+        'chatbot.title': 'Assistant IA',
+        'chatbot.typing': 'En train d\'écrire...',
+        'chatbot.error': 'Désolé, une erreur s\'est produite. Réessayez.',
     },
     en: {
         // Welcome & General
@@ -651,10 +725,36 @@ const translations: Record<Language, Record<string, string>> = {
         'registration.messagePlaceholder': 'Any additional information...',
         'registration.loginRequired': 'Login Required',
         'registration.loginRequiredDesc': 'You must be logged in to register your child',
+        'booking.title': 'Book a Visit',
+        'booking.success': 'Booking Confirmed',
+        'booking.successDesc': 'We will contact you to confirm the appointment',
         'registration.successTitle': 'Request sent successfully!',
         'registration.successDesc': 'We will contact you soon, God willing',
         'registration.errorAuth': 'Please log in to send your request',
         'registration.errorSubmit': 'We couldn\'t send your request. Please try again.',
+        'registration.hasDisease': 'Does your child suffer from any disease?',
+        'registration.diseaseDetails': 'Medical condition or disease details',
+        'registration.hasAllergy': 'Does your child have any food allergies?',
+        'registration.allergyDetails': 'Food allergy details',
+
+        // Owner Dashboard New Features
+        'owner.stats': 'Statistics',
+        'owner.attendance': 'Attendance',
+        'owner.finance': 'Finance',
+        'owner.medicalStats': 'Medical Stats',
+        'owner.attendanceRate': 'Attendance Rate',
+        'owner.paid': 'Paid',
+        'owner.debt': 'Debt',
+        'owner.totalDebt': 'Total Debt',
+        'owner.staff': 'Staff/Teachers',
+        'owner.children': 'Children',
+        'owner.presence': 'Attendance Log',
+        'owner.medicalAlert': 'Special Care Needed',
+        'owner.foodAllergy': 'Food Allergy',
+        'owner.chronicDisease': 'Chronic Disease',
+        'owner.paymentStatus': 'Payment Status',
+        'owner.markPresence': 'Mark Present',
+        'owner.markAbsence': 'Mark Absent',
 
         // Doctors Page
         'doctors.pageTitle': 'Pediatricians in Mascara',
@@ -737,6 +837,11 @@ const translations: Record<Language, Record<string, string>> = {
         'auth.error.emailInvalid': 'Please enter a valid email',
         'auth.error.passwordRequired': 'Password is required',
         'auth.error.signup': 'An error occurred during sign up',
+        'auth.forgotPassword': 'Forgot password?',
+        'auth.resetPassword': 'Reset Password',
+        'auth.resetPasswordDesc': 'Enter your email to receive a reset link',
+        'auth.sendResetLink': 'Send Link',
+        'auth.resetEmailSent': 'A reset link has been sent to your email address',
 
         // Admin Dashboard
         'admin.title': 'Admin Dashboard',
@@ -791,6 +896,14 @@ const translations: Record<Language, Record<string, string>> = {
         'auth.error.alreadyRegistered': 'Email already registered',
         'auth.error.resendFailed': 'Failed to resend confirmation link',
         'auth.error.notAdmin': 'You do not have admin privileges',
+
+        // Chatbot
+        'chatbot.welcome': 'Hello, I am the AI assistant of "Rawdati". How can I help you?',
+        'chatbot.placeholder': 'Type your question here...',
+        'chatbot.send': 'Send',
+        'chatbot.title': 'AI Assistant',
+        'chatbot.typing': 'Typing...',
+        'chatbot.error': 'Sorry, something went wrong. Try again.',
     }
 };
 

@@ -7,7 +7,7 @@ CREATE TABLE public.owner_kindergartens (
   UNIQUE(owner_id, kindergarten_id)
 );
 
--- Enable RLS
+-- Enabl
 ALTER TABLE public.owner_kindergartens ENABLE ROW LEVEL SECURITY;
 
 -- Policies for owner_kindergartens

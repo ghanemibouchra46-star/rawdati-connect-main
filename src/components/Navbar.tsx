@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, User, Building2 } from 'lucide-react';
+import { Menu, X, User, Building2, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LanguageSelector from '@/components/LanguageSelector';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -8,7 +8,7 @@ import logoIcon from '@/assets/logo-icon.png';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <nav className="fixed top-0 right-0 left-0 z-50 bg-card/90 backdrop-blur-md border-b-2 border-primary/20">
@@ -48,8 +48,16 @@ const Navbar = () => {
           </div>
 
           {/* Auth Buttons & Language Selector */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2">
             <LanguageSelector />
+
+            {/* Admin Link */}
+            <Link to="/admin">
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-500/10 hover:text-red-500 transition-all duration-300" title={language === 'ar' ? 'لوحة الأدمين' : 'Admin Panel'}>
+                <Shield className="w-5 h-5" />
+              </Button>
+            </Link>
+
             <Link to="/auth">
               <Button variant="ghost" size="lg" className="gap-2 rounded-full font-bold hover:bg-primary/10 hover:text-primary transition-all duration-300">
                 <User className="w-5 h-5" />
@@ -105,6 +113,12 @@ const Navbar = () => {
               </div>
 
               <div className="border-t-2 border-primary/20 pt-4 mt-2 flex flex-col gap-3">
+                <Link to="/admin" onClick={() => setIsOpen(false)}>
+                  <Button variant="ghost" className="justify-start gap-2 w-full rounded-2xl font-bold text-lg py-6 text-red-500 hover:bg-red-500/10 transition-colors">
+                    <Shield className="w-5 h-5" />
+                    <span>{language === 'ar' ? 'لوحة الأدمين' : 'Admin Dashboard'}</span>
+                  </Button>
+                </Link>
                 <Link to="/auth" onClick={() => setIsOpen(false)}>
                   <Button variant="ghost" className="justify-start gap-2 w-full rounded-2xl font-bold text-lg py-6">
                     <User className="w-5 h-5" />
@@ -127,3 +141,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+

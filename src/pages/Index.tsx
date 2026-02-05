@@ -1,17 +1,36 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import StatsSection from '@/components/StatsSection';
+import KindergartenCard from '@/components/KindergartenCard';
+import { kindergartens as localKindergartens } from '@/data/kindergartens';
+import { useKindergartens } from '@/hooks/useKindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Baby, GraduationCap, Stethoscope, Shirt, ArrowLeft, ArrowRight, Star, MapPin, Users, MessageCircle } from 'lucide-react';
+import { GraduationCap, Stethoscope, Shirt, ArrowLeft, ArrowRight, Star, MapPin, Users, MessageCircle, Baby } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import childrenPlaying from '@/assets/children-playing.png';
 import childrenLearning from '@/assets/children-learning.png';
 
+import SearchAutocomplete from '@/components/SearchAutocomplete';
+
+const FEATURED_COUNT = 6;
+
 const Index = () => {
   const { t, language, dir } = useLanguage();
+  const navigate = useNavigate();
+  const { data: supabaseKindergartens } = useKindergartens();
+  const featuredList = (supabaseKindergartens && supabaseKindergartens.length > 0)
+    ? supabaseKindergartens.slice(0, FEATURED_COUNT)
+    : localKindergartens.slice(0, FEATURED_COUNT);
+  const totalCount = (supabaseKindergartens && supabaseKindergartens.length > 0)
+    ? supabaseKindergartens.length
+    : localKindergartens.length;
   const ArrowIcon = dir === 'rtl' ? ArrowLeft : ArrowRight;
+
+  const handleSearch = (query: string) => {
+    navigate(`/kindergartens?search=${encodeURIComponent(query)}`);
+  };
 
   const features = [
     {
@@ -97,12 +116,15 @@ const Index = () => {
               <span className="inline-block mx-2">🏫</span>
             </p>
 
+            <div className="max-w-2xl mx-auto mb-12">
+              <SearchAutocomplete onSearch={handleSearch} />
+            </div>
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/kindergartens">
-                <Button size="lg" className="gap-2 gradient-accent border-0 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 text-lg px-10 py-6 font-bold">
+                <Button size="lg" variant="outline" className="gap-2 text-lg px-10 py-6 bg-card/80 backdrop-blur-sm hover:bg-card transition-all duration-300 font-semibold shadow-soft">
                   <GraduationCap className="w-6 h-6" />
                   {t('hero.explore')}
-                  <ArrowIcon className="w-5 h-5" />
                 </Button>
               </Link>
               <Link to="/about">
@@ -129,6 +151,45 @@ const Index = () => {
 
       {/* Stats Section */}
       <StatsSection />
+
+      {/* Kindergartens Section */}
+      <section className="py-16 bg-muted/20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
+              {t('kindergartens.pageTitle')}
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto mb-6">
+              {t('kindergartens.pageSubtitle')}
+            </p>
+            <Link to="/kindergartens">
+              <Button size="lg" className="gap-2 gradient-accent border-0 shadow-soft hover:shadow-hover">
+                <GraduationCap className="w-5 h-5" />
+                {t('hero.explore')}
+              </Button>
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {featuredList.map((kindergarten) => (
+              <KindergartenCard
+                key={kindergarten.id}
+                kindergarten={kindergarten}
+                onViewDetails={() => navigate('/kindergartens')}
+                onRegister={() => navigate('/kindergartens')}
+                onBook={() => navigate('/kindergartens')}
+              />
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link to="/kindergartens">
+              <Button variant="outline" size="lg" className="gap-2">
+                {t('kindergartens.count').replace('{count}', String(totalCount))} — {language === 'ar' ? 'عرض الكل' : 'Voir tout'}
+                <ArrowIcon className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* Features Section */}
       <section className="py-16 bg-muted/30">

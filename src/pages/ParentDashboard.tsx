@@ -291,7 +291,7 @@ const ParentDashboard = () => {
                 <section>
                     <h2 className="text-lg font-bold text-foreground mb-4">{t('parent.quickActions')}</h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <Card className="hover:shadow-md transition-shadow cursor-pointer hover:border-primary/50">
+                        <Card className="hover:shadow-md transition-shadow cursor-pointer hover:border-primary/50" onClick={() => navigate('/parent/notifications')}>
                             <CardContent className="p-4 text-center">
                                 <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-blue-500/10 flex items-center justify-center">
                                     <Bell className="w-6 h-6 text-blue-500" />
@@ -299,7 +299,7 @@ const ParentDashboard = () => {
                                 <p className="text-sm font-medium">{t('parent.notifications')}</p>
                             </CardContent>
                         </Card>
-                        <Card className="hover:shadow-md transition-shadow cursor-pointer hover:border-primary/50">
+                        <Card className="hover:shadow-md transition-shadow cursor-pointer hover:border-primary/50" onClick={() => navigate('/parent/photos')}>
                             <CardContent className="p-4 text-center">
                                 <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-green-500/10 flex items-center justify-center">
                                     <Image className="w-6 h-6 text-green-500" />
@@ -307,7 +307,7 @@ const ParentDashboard = () => {
                                 <p className="text-sm font-medium">{t('parent.photos')}</p>
                             </CardContent>
                         </Card>
-                        <Card className="hover:shadow-md transition-shadow cursor-pointer hover:border-primary/50">
+                        <Card className="hover:shadow-md transition-shadow cursor-pointer hover:border-primary/50" onClick={() => navigate('/parent/schedule')}>
                             <CardContent className="p-4 text-center">
                                 <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-purple-500/10 flex items-center justify-center">
                                     <Calendar className="w-6 h-6 text-purple-500" />
@@ -315,7 +315,7 @@ const ParentDashboard = () => {
                                 <p className="text-sm font-medium">{t('parent.schedule')}</p>
                             </CardContent>
                         </Card>
-                        <Card className="hover:shadow-md transition-shadow cursor-pointer hover:border-primary/50">
+                        <Card className="hover:shadow-md transition-shadow cursor-pointer hover:border-primary/50" onClick={() => navigate('/parent/settings')}>
                             <CardContent className="p-4 text-center">
                                 <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-orange-500/10 flex items-center justify-center">
                                     <Settings className="w-6 h-6 text-orange-500" />

@@ -12,6 +12,8 @@ const OwnerAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -50,7 +52,7 @@ const OwnerAuth = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
       toast({
         title: 'خطأ',
@@ -71,7 +73,7 @@ const OwnerAuth = () => {
       if (error) {
         toast({
           title: 'خطأ في تسجيل الدخول',
-          description: error.message === 'Invalid login credentials' 
+          description: error.message === 'Invalid login credentials'
             ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
             : error.message,
           variant: 'destructive',
@@ -113,6 +115,47 @@ const OwnerAuth = () => {
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail) {
+      toast({
+        title: 'خطأ',
+        description: 'يرجى إدخال البريد الإلكتروني',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/owner-auth?reset=true`,
+      });
+
+      if (error) {
+        toast({
+          title: 'خطأ',
+          description: error.message,
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'تم الإرسال',
+          description: 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني',
+        });
+        setShowForgotPassword(false);
+      }
+    } catch (error) {
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ غير متوقع',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen gradient-hero flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -137,67 +180,127 @@ const OwnerAuth = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">البريد الإلكتروني</Label>
-                <div className="relative">
-                  <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="example@email.com"
-                    className="pr-10"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={isLoading}
-                    dir="ltr"
-                  />
+            {!showForgotPassword ? (
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">البريد الإلكتروني</Label>
+                  <div className="relative">
+                    <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="example@email.com"
+                      className="pr-10"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={isLoading}
+                      dir="ltr"
+                    />
+                  </div>
                 </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password">كلمة المرور</Label>
-                <div className="relative">
-                  <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    className="pr-10"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading}
-                    dir="ltr"
-                  />
-                </div>
-              </div>
 
-              <Button 
-                type="submit" 
-                className="w-full gap-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>جاري تسجيل الدخول...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>دخول</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </Button>
-            </form>
+                <div className="space-y-2">
+                  <Label htmlFor="password">كلمة المرور</Label>
+                  <div className="relative">
+                    <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      className="pr-10"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={isLoading}
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="text-sm text-secondary hover:underline transition-colors"
+                  >
+                    هل نسيت كلمة السر؟
+                  </button>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full gap-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>جاري تسجيل الدخول...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>دخول</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </Button>
+              </form>
+            ) : (
+              <div className="space-y-4">
+                <div className="text-center space-y-2">
+                  <h3 className="text-lg font-semibold">إعادة تعيين كلمة المرور</h3>
+                  <p className="text-sm text-muted-foreground">أدخل بريدك الإلكتروني لاستلام رابط إعادة تعيين كلمة المرور</p>
+                </div>
+                <form onSubmit={handleResetPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reset-email">البريد الإلكتروني</Label>
+                    <div className="relative">
+                      <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="reset-email"
+                        type="email"
+                        placeholder="example@email.com"
+                        className="pr-10"
+                        dir="ltr"
+                        required
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>جاري الإرسال...</span>
+                      </>
+                    ) : (
+                      <span>إرسال الرابط</span>
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => setShowForgotPassword(false)}
+                  >
+                    العودة لتسجيل الدخول
+                  </Button>
+                </form>
+              </div>
+            )}
 
             <div className="mt-6 text-center text-sm text-muted-foreground">
               <p>للحصول على حساب مدير، يرجى التواصل مع إدارة المنصة</p>
             </div>
 
             <div className="mt-4 text-center">
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className="text-sm text-primary hover:underline"
               >
                 العودة للرئيسية

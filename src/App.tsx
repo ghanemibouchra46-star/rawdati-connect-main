@@ -5,18 +5,25 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import Index from "./pages/Index";
-import Kindergartens from "./pages/Kindergartens";
+import Welcome from "./pages/Welcome";
+import About from "./pages/About";
 import Auth from "./pages/Auth";
+import AdminAuth from "./pages/AdminAuth";
+import AdminDashboard from "./pages/AdminDashboard";
 import OwnerAuth from "./pages/OwnerAuth";
 import OwnerDashboard from "./pages/OwnerDashboard";
 import ParentDashboard from "./pages/ParentDashboard";
-import AdminAuth from "./pages/AdminAuth";
-import AdminDashboard from "./pages/AdminDashboard";
+import ParentNotifications from "./pages/ParentNotifications";
+import ParentPhotos from "./pages/ParentPhotos";
+import ParentSchedule from "./pages/ParentSchedule";
+import ParentSettings from "./pages/ParentSettings";
+import Kindergartens from "./pages/Kindergartens";
+import ClothingStores from "./pages/ClothingStores";
 import Doctors from "./pages/Doctors";
 import SpeechTherapy from "./pages/SpeechTherapy";
-import ClothingStores from "./pages/ClothingStores";
-import About from "./pages/About";
 import NotFound from "./pages/NotFound";
+
+import AIChatbot from "./components/AIChatbot";
 
 const queryClient = new QueryClient();
 
@@ -27,20 +34,25 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <AIChatbot />
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/kindergartens" element={<Kindergartens />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/parent" element={<ParentDashboard />} />
-            <Route path="/owner-auth" element={<OwnerAuth />} />
-            <Route path="/owner" element={<OwnerDashboard />} />
-            <Route path="/doctors" element={<Doctors />} />
-            <Route path="/speech-therapy" element={<SpeechTherapy />} />
-            <Route path="/clothing-stores" element={<ClothingStores />} />
+            <Route path="/welcome" element={<Welcome />} />
+            <Route path="/" element={< Index />} />
             <Route path="/about" element={<About />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="/admin-auth" element={<AdminAuth />} />
             <Route path="/admin" element={<AdminDashboard />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/owner-auth" element={<OwnerAuth />} />
+            <Route path="/owner" element={<OwnerDashboard />} />
+            <Route path="/parent" element={<ParentDashboard />} />
+            <Route path="/parent/notifications" element={<ParentNotifications />} />
+            <Route path="/parent/photos" element={<ParentPhotos />} />
+            <Route path="/parent/schedule" element={<ParentSchedule />} />
+            <Route path="/parent/settings" element={<ParentSettings />} />
+            <Route path="/kindergartens" element={<Kindergartens />} />
+            <Route path="/clothing-stores" element={<ClothingStores />} />
+            <Route path="/doctors" element={<Doctors />} />
+            <Route path="/speech-therapy" element={<SpeechTherapy />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

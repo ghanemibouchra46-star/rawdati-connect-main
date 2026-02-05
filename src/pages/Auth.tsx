@@ -21,6 +21,8 @@ const Auth = () => {
   const [signupPhone, setSignupPhone] = useState('');
   const [showVerification, setShowVerification] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -136,13 +138,16 @@ const Auth = () => {
     } else if (data.user) {
       const { error: profileError } = await supabase
         .from('profiles')
-        .insert({
-          id: data.user.id,
-          full_name: signupName,
-          phone: signupPhone,
-        });
+        .upsert(
+          {
+            id: data.user.id,
+            full_name: signupName,
+            phone: signupPhone,
+          },
+          { onConflict: 'id' }
+        );
 
-      if (profileError && !profileError.message.includes('duplicate')) {
+      if (profileError) {
         console.error('Error creating profile:', profileError);
       }
 
@@ -187,12 +192,46 @@ const Auth = () => {
     setIsLoading(false);
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail.trim()) {
+      toast({ title: t('common.error'), description: t('auth.error.emailInvalid'), variant: 'destructive' });
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/auth?reset=true`,
+    });
+
+    if (error) {
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: t('common.updated'),
+        description: t('auth.resetEmailSent'),
+      });
+      setShowForgotPassword(false);
+    }
+    setIsLoading(false);
+  };
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('verified') === 'true') {
       toast({
         title: t('common.updated'),
         description: t('auth.verified'),
+      });
+    }
+    if (params.get('reset') === 'true') {
+      toast({
+        title: t('common.updated'),
+        description: t('auth.resetEmailSent'),
       });
     }
   }, [t]);
@@ -266,42 +305,163 @@ const Auth = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="login">{t('auth.login')}</TabsTrigger>
-                <TabsTrigger value="signup">{t('auth.signup')}</TabsTrigger>
-              </TabsList>
+            {!showForgotPassword && (
+              <Tabs defaultValue="login" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsTrigger value="login">{t('auth.login')}</TabsTrigger>
+                  <TabsTrigger value="signup">{t('auth.signup')}</TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="login">
-                <form onSubmit={handleLogin} className="space-y-4">
+                <TabsContent value="login">
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="login-email">{t('auth.email')}</Label>
+                      <div className="relative">
+                        <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="login-email"
+                          type="email"
+                          placeholder="example@email.com"
+                          className="pr-10"
+                          dir="ltr"
+                          required
+                          value={loginEmail}
+                          onChange={(e) => setLoginEmail(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="login-password">{t('auth.password')}</Label>
+                      <div className="relative">
+                        <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="login-password"
+                          type="password"
+                          placeholder="••••••••"
+                          className="pr-10"
+                          required
+                          value={loginPassword}
+                          onChange={(e) => setLoginPassword(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotPassword(true)}
+                        className="text-sm text-primary hover:underline transition-colors"
+                      >
+                        {t('auth.forgotPassword')}
+                      </button>
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full gradient-accent border-0 shadow-soft hover:shadow-hover"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? t('auth.loading') : t('auth.login')}
+                    </Button>
+                  </form>
+                </TabsContent>
+
+                <TabsContent value="signup">
+                  <form onSubmit={handleSignup} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-name">{t('auth.fullName')}</Label>
+                      <div className="relative">
+                        <User className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="signup-name"
+                          type="text"
+                          placeholder=""
+                          className="pr-10"
+                          required
+                          value={signupName}
+                          onChange={(e) => setSignupName(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-phone">{t('auth.phone')}</Label>
+                      <div className="relative">
+                        <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="signup-phone"
+                          type="tel"
+                          placeholder="0555123456"
+                          className="pr-10"
+                          dir="ltr"
+                          required
+                          value={signupPhone}
+                          onChange={(e) => setSignupPhone(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email">{t('auth.email')}</Label>
+                      <div className="relative">
+                        <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="signup-email"
+                          type="email"
+                          placeholder="example@email.com"
+                          className="pr-10"
+                          dir="ltr"
+                          required
+                          value={signupEmail}
+                          onChange={(e) => setSignupEmail(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">{t('auth.password')}</Label>
+                      <div className="relative">
+                        <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="signup-password"
+                          type="password"
+                          placeholder="••••••••"
+                          className="pr-10"
+                          required
+                          minLength={6}
+                          value={signupPassword}
+                          onChange={(e) => setSignupPassword(e.target.value)}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">{t('auth.passwordMin')}</p>
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full gradient-accent border-0 shadow-soft hover:shadow-hover"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? t('auth.loading') : t('auth.signup')}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            )}
+
+            {showForgotPassword && (
+              <div className="space-y-4 pt-4">
+                <div className="text-center space-y-2">
+                  <h3 className="text-lg font-semibold">{t('auth.resetPassword')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('auth.resetPasswordDesc')}</p>
+                </div>
+                <form onSubmit={handleResetPassword} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">{t('auth.email')}</Label>
+                    <Label htmlFor="reset-email">{t('auth.email')}</Label>
                     <div className="relative">
                       <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
-                        id="login-email"
+                        id="reset-email"
                         type="email"
                         placeholder="example@email.com"
                         className="pr-10"
                         dir="ltr"
                         required
-                        value={loginEmail}
-                        onChange={(e) => setLoginEmail(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="login-password">{t('auth.password')}</Label>
-                    <div className="relative">
-                      <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="login-password"
-                        type="password"
-                        placeholder="••••••••"
-                        className="pr-10"
-                        required
-                        value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)}
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
                       />
                     </div>
                   </div>
@@ -310,87 +470,19 @@ const Auth = () => {
                     className="w-full gradient-accent border-0 shadow-soft hover:shadow-hover"
                     disabled={isLoading}
                   >
-                    {isLoading ? t('auth.loading') : t('auth.login')}
+                    {isLoading ? t('auth.loading') : t('auth.sendResetLink')}
                   </Button>
-                </form>
-              </TabsContent>
-
-              <TabsContent value="signup">
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-name">{t('auth.fullName')}</Label>
-                    <div className="relative">
-                      <User className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="signup-name"
-                        type="text"
-                        placeholder=""
-                        className="pr-10"
-                        required
-                        value={signupName}
-                        onChange={(e) => setSignupName(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-phone">{t('auth.phone')}</Label>
-                    <div className="relative">
-                      <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="signup-phone"
-                        type="tel"
-                        placeholder="0555123456"
-                        className="pr-10"
-                        dir="ltr"
-                        required
-                        value={signupPhone}
-                        onChange={(e) => setSignupPhone(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">{t('auth.email')}</Label>
-                    <div className="relative">
-                      <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="signup-email"
-                        type="email"
-                        placeholder="example@email.com"
-                        className="pr-10"
-                        dir="ltr"
-                        required
-                        value={signupEmail}
-                        onChange={(e) => setSignupEmail(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">{t('auth.password')}</Label>
-                    <div className="relative">
-                      <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="signup-password"
-                        type="password"
-                        placeholder="••••••••"
-                        className="pr-10"
-                        required
-                        minLength={6}
-                        value={signupPassword}
-                        onChange={(e) => setSignupPassword(e.target.value)}
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground">{t('auth.passwordMin')}</p>
-                  </div>
                   <Button
-                    type="submit"
-                    className="w-full gradient-accent border-0 shadow-soft hover:shadow-hover"
-                    disabled={isLoading}
+                    type="button"
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => setShowForgotPassword(false)}
                   >
-                    {isLoading ? t('auth.loading') : t('auth.signup')}
+                    {t('auth.backLogin')}
                   </Button>
                 </form>
-              </TabsContent>
-            </Tabs>
+              </div>
+            )}
 
             <div className="mt-6 text-center">
               <Link

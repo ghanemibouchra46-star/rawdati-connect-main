@@ -68,12 +68,106 @@ export type Database = {
         }
         Relationships: []
       }
+      kindergartens: {
+        Row: {
+          id: string
+          name_ar: string
+          name_fr: string
+          municipality: string
+          municipality_ar: string
+          municipality_fr: string
+          address: string
+          address_ar: string
+          address_fr: string
+          phone: string
+          price_per_month: number
+          age_min: number
+          age_max: number
+          working_hours_open: string
+          working_hours_close: string
+          rating: number
+          review_count: number
+          images: Json
+          services: string[]
+          activities: Json
+          facilities: Json
+          price_breakdown: Json
+          has_autism_wing: boolean
+          description_ar: string | null
+          description_fr: string | null
+          coordinates: Json | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          name_ar: string
+          name_fr: string
+          municipality: string
+          municipality_ar: string
+          municipality_fr: string
+          address: string
+          address_ar: string
+          address_fr: string
+          phone: string
+          price_per_month: number
+          age_min?: number
+          age_max?: number
+          working_hours_open?: string
+          working_hours_close?: string
+          rating?: number
+          review_count?: number
+          images?: Json
+          services?: string[]
+          activities?: Json
+          facilities?: Json
+          price_breakdown?: Json
+          has_autism_wing?: boolean
+          description_ar?: string | null
+          description_fr?: string | null
+          coordinates?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name_ar?: string
+          name_fr?: string
+          municipality?: string
+          municipality_ar?: string
+          municipality_fr?: string
+          address?: string
+          address_ar?: string
+          address_fr?: string
+          phone?: string
+          price_per_month?: number
+          age_min?: number
+          age_max?: number
+          working_hours_open?: string
+          working_hours_close?: string
+          rating?: number
+          review_count?: number
+          images?: Json
+          services?: string[]
+          activities?: Json
+          facilities?: Json
+          price_breakdown?: Json
+          has_autism_wing?: boolean
+          description_ar?: string | null
+          description_fr?: string | null
+          coordinates?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
           full_name: string | null
           id: string
           phone: string | null
+          status: string | null
           updated_at: string
         }
         Insert: {
@@ -81,6 +175,7 @@ export type Database = {
           full_name?: string | null
           id: string
           phone?: string | null
+          status?: string | null
           updated_at?: string
         }
         Update: {
@@ -88,6 +183,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          status?: string | null
           updated_at?: string
         }
         Relationships: []

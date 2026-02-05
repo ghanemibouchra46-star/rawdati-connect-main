@@ -6,15 +6,28 @@ import KindergartenDetailModal from '@/components/KindergartenDetailModal';
 import RegistrationModal from '@/components/RegistrationModal';
 import Footer from '@/components/Footer';
 import BookingModal from '@/components/BookingModal';
-import { kindergartens, Kindergarten } from '@/data/kindergartens';
-import { GraduationCap, Search } from 'lucide-react';
+import { kindergartens as localKindergartens, Kindergarten } from '@/data/kindergartens';
+import { useKindergartens } from '@/hooks/useKindergartens';
+import { GraduationCap, Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
+import SearchAutocomplete from '@/components/SearchAutocomplete';
+import { useSearchParams } from 'react-router-dom';
 
 const Kindergartens = () => {
   const { t, language } = useLanguage();
-  const [searchQuery, setSearchQuery] = useState('');
+  const { data: supabaseKindergartens, isLoading: isLoadingKg } = useKindergartens();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlSearchQuery = searchParams.get('search') || '';
+
+  const kindergartens = (supabaseKindergartens && supabaseKindergartens.length > 0)
+    ? supabaseKindergartens
+    : localKindergartens;
+
+  const [searchQuery, setSearchQuery] = useState(urlSearchQuery);
   const [selectedMunicipality, setSelectedMunicipality] = useState('');
+
+  // ... rest of state
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 15000]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
@@ -93,14 +106,12 @@ const Kindergartens = () => {
             </p>
 
             {/* Search Bar */}
-            <div className="max-w-md mx-auto relative">
-              <Search className={`absolute ${language === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground`} />
-              <Input
-                type="text"
-                placeholder={t('kindergartens.searchPlaceholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`${language === 'ar' ? 'pr-12' : 'pl-12'} h-12 text-lg`}
+            <div className="max-w-2xl mx-auto">
+              <SearchAutocomplete
+                onSearch={(query) => {
+                  setSearchQuery(query);
+                  setSearchParams({ search: query });
+                }}
               />
             </div>
           </div>
@@ -128,7 +139,12 @@ const Kindergartens = () => {
 
             {/* Cards Grid */}
             <div className="flex-1">
-              {filteredKindergartens.length > 0 ? (
+              {isLoadingKg ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+                  <p className="text-muted-foreground">{t('auth.loading')}</p>
+                </div>
+              ) : filteredKindergartens.length > 0 ? (
                 <>
                   <p className="text-sm text-muted-foreground mb-6">
                     {t('kindergartens.count').replace('{count}', filteredKindergartens.length.toString())}

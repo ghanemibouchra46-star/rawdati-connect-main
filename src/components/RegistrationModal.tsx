@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, User, Phone, Mail, Baby, Calendar, Send, CheckCircle, LogIn } from 'lucide-react';
+import { X, User, Phone, Mail, Baby, Calendar, Send, CheckCircle, LogIn, Stethoscope, Utensils } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -30,7 +30,11 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
     childName: '',
     childAge: '',
     message: '',
+    medicalCondition: '',
+    foodAllergies: '',
   });
+  const [showMedicalInput, setShowMedicalInput] = useState(false);
+  const [showAllergyInput, setShowAllergyInput] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -117,6 +121,8 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
         child_name: formData.childName,
         child_age: parseInt(formData.childAge),
         message: formData.message || null,
+        medical_condition: showMedicalInput ? formData.medicalCondition : null,
+        food_allergies: showAllergyInput ? formData.foodAllergies : null,
         user_id: user.id,
       });
 
@@ -137,7 +143,11 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
           childName: '',
           childAge: '',
           message: '',
+          medicalCondition: '',
+          foodAllergies: '',
         });
+        setShowMedicalInput(false);
+        setShowAllergyInput(false);
         onClose();
       }, 2000);
     } catch (error) {
@@ -279,6 +289,65 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
                   placeholder={t('parent.age')}
                   className={`h-12 bg-muted/50 border-border rounded-xl ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
                 />
+              </div>
+            </div>
+
+            {/* Medical and Allergy Toggles */}
+            <div className="space-y-4 pt-2">
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => setShowMedicalInput(!showMedicalInput)}
+                  className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${showMedicalInput ? 'bg-primary/5 border-primary' : 'bg-muted/30 border-border hover:border-primary/50'
+                    }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${showMedicalInput ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                      }`}>
+                      <Stethoscope className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm font-medium">{t('registration.hasDisease')}</span>
+                  </div>
+                </button>
+                {showMedicalInput && (
+                  <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                    <Textarea
+                      value={formData.medicalCondition}
+                      onChange={(e) => setFormData({ ...formData, medicalCondition: e.target.value })}
+                      placeholder={t('registration.diseaseDetails')}
+                      className={`bg-muted/50 border-border rounded-xl resize-none ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
+                      rows={2}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => setShowAllergyInput(!showAllergyInput)}
+                  className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${showAllergyInput ? 'bg-primary/5 border-primary' : 'bg-muted/30 border-border hover:border-primary/50'
+                    }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${showAllergyInput ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                      }`}>
+                      <Utensils className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm font-medium">{t('registration.hasAllergy')}</span>
+                  </div>
+                </button>
+                {showAllergyInput && (
+                  <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                    <Textarea
+                      value={formData.foodAllergies}
+                      onChange={(e) => setFormData({ ...formData, foodAllergies: e.target.value })}
+                      placeholder={t('registration.allergyDetails')}
+                      className={`bg-muted/50 border-border rounded-xl resize-none ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
+                      rows={2}
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
