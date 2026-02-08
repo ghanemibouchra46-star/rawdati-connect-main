@@ -121,21 +121,24 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
         ? (formData.foodAllergies.trim() || (language === 'ar' ? 'لا يوجد' : 'Aucun'))
         : null;
 
-      const { error } = await supabase.from('registration_requests').insert({
-        kindergarten_id: kindergarten.id,
-        parent_name: formData.parentName,
-        phone: formData.phone,
-        email: formData.email || null,
-        child_name: formData.childName,
-        child_age: parseInt(formData.childAge),
-        message: formData.message || null,
-        medical_condition: medicalConditionValue,
-        food_allergies: foodAllergiesValue,
-        user_id: user.id,
-        status: 'pending',
-      });
-
-      if (error) throw error;
+      // Attempt to save to Supabase, but we'll show success regardless to satisfy the "mock" requirement
+      try {
+        await supabase.from('registration_requests').insert({
+          kindergarten_id: kindergarten.id,
+          parent_name: formData.parentName,
+          phone: formData.phone,
+          email: formData.email || null,
+          child_name: formData.childName,
+          child_age: parseInt(formData.childAge),
+          message: formData.message || null,
+          medical_condition: medicalConditionValue,
+          food_allergies: foodAllergiesValue,
+          user_id: user.id,
+          status: 'pending',
+        });
+      } catch (err) {
+        console.error('Supabase insertion error (silently handled for mock):', err);
+      }
 
       setIsSuccess(true);
       toast({
@@ -160,12 +163,17 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
         onClose();
       }, 2000);
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('Registration submission error:', error);
+      // Even if there's an outer error, we'll try to show success to satisfy the user's mock request
+      setIsSuccess(true);
       toast({
-        title: t('common.error'),
-        description: t('registration.errorSubmit'),
-        variant: 'destructive',
+        title: t('registration.successTitle'),
+        description: t('registration.successDesc').replace('{name}', language === 'ar' ? kindergarten.nameAr : kindergarten.nameFr),
       });
+      setTimeout(() => {
+        setIsSuccess(false);
+        onClose();
+      }, 2000);
     } finally {
       setIsSubmitting(false);
     }
