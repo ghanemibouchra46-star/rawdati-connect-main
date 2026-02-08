@@ -129,8 +129,8 @@ const translations: Record<Language, Record<string, string>> = {
         'registration.messagePlaceholder': 'أي معلومات إضافية تود مشاركتها...',
         'registration.loginRequired': 'تسجيل الدخول مطلوب',
         'registration.loginRequiredDesc': 'يجب تسجيل الدخول لإرسال طلب تسجيل طفلك',
-        'registration.successTitle': 'تم التسجيل بنجاح!',
-        'registration.successDesc': 'لقد تم تأكيد تسجيل طفلك في {name} بنجاح. سنتواصل معك قريباً.',
+        'registration.successTitle': 'تم ارسال طلبك بنجاح',
+        'registration.successDesc': 'لقد تم ارسال طلبك لتسجيل طفلك في {name} بنجاح. سنتواصل معك قريباً.',
         'registration.errorAuth': 'يجب تسجيل الدخول لإرسال طلب التسجيل',
         'registration.errorSubmit': 'لم نتمكن من إرسال طلبك. يرجى المحاولة مرة أخرى.',
         'registration.hasDisease': 'هل طفلك يعاني من مرض؟',
@@ -232,6 +232,7 @@ const translations: Record<Language, Record<string, string>> = {
         'auth.passwordResetSuccess': 'تم تغيير كلمة المرور بنجاح!',
         'auth.invalidOtp': 'رمز التحقق غير صحيح',
         'auth.setNewPassword': 'تعيين كلمة مرور جديدة',
+        'auth.success': 'تم تسجيل الدخول بنجاح',
 
         // Admin Dashboard
         'admin.title': 'لوحة تحكم الأدمين',
@@ -541,6 +542,7 @@ const translations: Record<Language, Record<string, string>> = {
         'auth.passwordResetSuccess': 'Mot de passe changé avec succès !',
         'auth.invalidOtp': 'Code de vérification invalide',
         'auth.setNewPassword': 'Définir un nouveau mot de passe',
+        'auth.success': 'Connexion réussie',
 
         // Admin Dashboard
         'admin.title': 'Tableau de bord Admin',
@@ -752,6 +754,7 @@ const translations: Record<Language, Record<string, string>> = {
         'registration.diseaseDetails': 'Medical condition or disease details',
         'registration.hasAllergy': 'Does your child have any food allergies?',
         'registration.allergyDetails': 'Food allergy details',
+        'auth.success': 'Login successful',
 
         // Owner Dashboard New Features
         'owner.stats': 'Statistics',

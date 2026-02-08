@@ -89,7 +89,7 @@ const AdminAuth = () => {
 
             toast({
                 title: t('auth.welcome'),
-                description: t('common.updated'),
+                description: t('auth.success'),
             });
 
             // Explicitly navigate to admin dashboard

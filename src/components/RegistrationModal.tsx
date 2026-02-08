@@ -132,7 +132,7 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
         medical_condition: medicalConditionValue,
         food_allergies: foodAllergiesValue,
         user_id: user.id,
-        status: 'approved',
+        status: 'pending',
       });
 
       if (error) throw error;
@@ -220,7 +220,7 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
               <CheckCircle className="w-10 h-10 text-secondary" />
             </div>
             <h3 className="text-xl font-bold text-foreground mb-2">{t('registration.successTitle')}</h3>
-            <p className="text-muted-foreground">{t('registration.successDesc')}</p>
+            <p className="text-muted-foreground">{t('registration.successDesc').replace('{name}', language === 'ar' ? kindergarten.nameAr : kindergarten.nameFr)}</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-5" dir={dir}>
