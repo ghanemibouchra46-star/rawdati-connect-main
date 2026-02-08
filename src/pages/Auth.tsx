@@ -22,7 +22,11 @@ const Auth = () => {
   const [showVerification, setShowVerification] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetStep, setResetStep] = useState<'input' | 'verify' | 'new_password'>('input');
   const [resetEmail, setResetEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -213,9 +217,58 @@ const Auth = () => {
     } else {
       toast({
         title: t('common.updated'),
-        description: t('auth.resetEmailSent'),
+        description: t('auth.otpSent'),
       });
+      setResetStep('verify');
+    }
+    setIsLoading(false);
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length !== 6) {
+      toast({ title: t('common.error'), description: t('auth.otpPlaceholder'), variant: 'destructive' });
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await supabase.auth.verifyOtp({
+      email: resetEmail,
+      token: otp,
+      type: 'recovery',
+    });
+
+    if (error) {
+      toast({ title: t('common.error'), description: t('auth.invalidOtp'), variant: 'destructive' });
+    } else {
+      setResetStep('new_password');
+    }
+    setIsLoading(false);
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 6) {
+      toast({ title: t('common.error'), description: t('auth.passwordMin'), variant: 'destructive' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: t('common.error'), description: t('auth.error.passwordMismatch'), variant: 'destructive' });
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+    if (error) {
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: t('common.updated'), description: t('auth.passwordResetSuccess') });
       setShowForgotPassword(false);
+      setResetStep('input');
+      setOtp('');
+      setNewPassword('');
+      setConfirmPassword('');
     }
     setIsLoading(false);
   };
@@ -446,41 +499,114 @@ const Auth = () => {
               <div className="space-y-4 pt-4">
                 <div className="text-center space-y-2">
                   <h3 className="text-lg font-semibold">{t('auth.resetPassword')}</h3>
-                  <p className="text-sm text-muted-foreground">{t('auth.resetPasswordDesc')}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {resetStep === 'input' ? t('auth.resetPasswordDesc') :
+                      resetStep === 'verify' ? t('auth.otpSent') :
+                        t('auth.setNewPassword')}
+                  </p>
                 </div>
-                <form onSubmit={handleResetPassword} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="reset-email">{t('auth.email')}</Label>
-                    <div className="relative">
-                      <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+
+                {resetStep === 'input' && (
+                  <form onSubmit={handleResetPassword} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-email">{t('auth.email')}</Label>
+                      <div className="relative">
+                        <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="reset-email"
+                          type="email"
+                          placeholder="example@email.com"
+                          className="pr-10"
+                          dir="ltr"
+                          required
+                          value={resetEmail}
+                          onChange={(e) => setResetEmail(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full gradient-accent border-0 shadow-soft hover:shadow-hover"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? t('auth.loading') : t('auth.sendResetLink')}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => setShowForgotPassword(false)}
+                    >
+                      {t('auth.backLogin')}
+                    </Button>
+                  </form>
+                )}
+
+                {resetStep === 'verify' && (
+                  <form onSubmit={handleVerifyOtp} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="otp">{t('auth.verifyOtp')}</Label>
                       <Input
-                        id="reset-email"
-                        type="email"
-                        placeholder="example@email.com"
-                        className="pr-10"
-                        dir="ltr"
+                        id="otp"
+                        type="text"
+                        maxLength={6}
+                        placeholder="000000"
+                        className="text-center text-2xl tracking-[1rem] h-16"
                         required
-                        value={resetEmail}
-                        onChange={(e) => setResetEmail(e.target.value)}
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                      />
+                      <p className="text-xs text-center text-muted-foreground">{t('auth.otpPlaceholder')}</p>
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full gradient-accent border-0 shadow-soft hover:shadow-hover"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? t('auth.loading') : t('auth.verifyOtp')}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => setResetStep('input')}
+                    >
+                      {language === 'ar' ? 'تغيير البريد الإلكتروني' : 'Change Email'}
+                    </Button>
+                  </form>
+                )}
+
+                {resetStep === 'new_password' && (
+                  <form onSubmit={handleUpdatePassword} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password">{t('auth.newPassword')}</Label>
+                      <Input
+                        id="new-password"
+                        type="password"
+                        required
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
                       />
                     </div>
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full gradient-accent border-0 shadow-soft hover:shadow-hover"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? t('auth.loading') : t('auth.sendResetLink')}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="w-full"
-                    onClick={() => setShowForgotPassword(false)}
-                  >
-                    {t('auth.backLogin')}
-                  </Button>
-                </form>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password">{t('auth.confirmNewPassword')}</Label>
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        required
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full gradient-accent border-0 shadow-soft hover:shadow-hover"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? t('auth.loading') : t('auth.setNewPassword')}
+                    </Button>
+                  </form>
+                )}
               </div>
             )}
 

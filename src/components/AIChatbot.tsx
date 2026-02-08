@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { kindergartens } from '@/data/kindergartens';
+import { kindergartens, municipalities } from '@/data/kindergartens';
 import { cn } from '@/lib/utils';
 
 interface Message {
@@ -44,34 +44,105 @@ const AIChatbot = () => {
     const getAIResponse = (userText: string): string => {
         const text = userText.toLowerCase();
 
-        if (text.includes('روضة') || text.includes('jardin') || text.includes('kindergarten')) {
-            const topKgs = kindergartens.slice(0, 3).map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
+        // Find specific kindergarten mentioned
+        const specificKg = kindergartens.find(k =>
+            text.includes(k.name.toLowerCase()) ||
+            text.includes(k.nameAr.toLowerCase()) ||
+            text.includes(k.nameFr.toLowerCase())
+        );
+
+        if (specificKg) {
+            const name = language === 'ar' ? specificKg.nameAr : specificKg.nameFr;
+            const address = language === 'ar' ? specificKg.addressAr : specificKg.addressFr;
+            const price = specificKg.pricePerMonth;
+            const phone = specificKg.phone;
+            const servicesList = specificKg.services.map(s => {
+                const service = kindergartens[0].services; // This is wrong in the original data structure, services are just IDs
+                // Better approach: filter services array from data/kindergartens
+                return s;
+            }).join('، ');
+
+            if (language === 'ar') {
+                return `${name} تقع في ${address}. سعرها شهرياً حوالي ${price} دج. يمكنك التواصل معهم عبر الهاتف: ${phone}. هل تريد معرفة المزيد عن خدماتهم؟`;
+            } else {
+                return `${name} est situé à ${address}. Le prix mensuel est d'environ ${price} DA. Vous pouvez les contacter au : ${phone}. Voulez-vous en savoir plus sur leurs services ?`;
+            }
+        }
+
+        // Check for municipalities
+        const mun = municipalities.find(m =>
+            text.includes(m.nameAr.toLowerCase()) ||
+            text.includes(m.nameFr.toLowerCase()) ||
+            text.includes(m.id.toLowerCase())
+        );
+
+        if (mun) {
+            const munName = language === 'ar' ? mun.nameAr : mun.nameFr;
+            const kgsInMun = kindergartens.filter(k => k.municipality === mun.id);
+            const kgsNames = kgsInMun.map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
+
+            if (kgsInMun.length > 0) {
+                return language === 'ar'
+                    ? `في ${munName}، توجد الروضات التالية: ${kgsNames}. هل تود الاستفسار عن واحدة منها؟`
+                    : `À ${munName}, il y a les jardins d'enfants suivants : ${kgsNames}. Voulez-vous des renseignements sur l'un d'entre eux ?`;
+            } else {
+                return language === 'ar'
+                    ? `عذراً، لا توجد روضات مسجلة حالياً في ${munName}.`
+                    : `Désolé, il n'y a pas de jardins d'enfants enregistrés actuellement à ${munName}.`;
+            }
+        }
+
+        // Check for specific services/features
+        if (text.includes('حافلة') || text.includes('نقل') || text.includes('bus') || text.includes('transport')) {
+            const busKgs = kindergartens.filter(k => k.services.includes('bus')).map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
             return language === 'ar'
-                ? `لدينا العديد من الروضات المميزة في معسكر، منها: ${topKgs}. يمكنك استكشاف القائمة الكاملة في قسم الروضات.`
-                : `Nous avons plusieurs jardins d'enfants excellents à Mascara, tels que : ${topKgs}. Vous pouvez explorer la liste complète dans la section Jardins d'enfants.`;
+                ? `الروضات التي توفر خدمة النقل هي: ${busKgs}.`
+                : `Les jardins d'enfants qui proposent un service de transport sont : ${busKgs}.`;
+        }
+
+        if (text.includes('وجبات') || text.includes('أكل') || text.includes('meals') || text.includes('repas') || text.includes('restauration')) {
+            const mealsKgs = kindergartens.filter(k => k.services.includes('meals')).map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
+            return language === 'ar'
+                ? `الروضات التي توفر الوجبات الغذائية هي: ${mealsKgs}.`
+                : `Les jardins d'enfants qui proposent des repas sont : ${mealsKgs}.`;
+        }
+
+        if (text.includes('توحد') || text.includes('autisme') || text.includes('autism')) {
+            const autismKgs = kindergartens.filter(k => k.hasAutismWing).map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
+            return language === 'ar'
+                ? `الروضات التي لديها جناح خاص لأطفال التوحد هي: ${autismKgs}.`
+                : `Les jardins d'enfants ayant une aile spéciale pour l'autisme sont : ${autismKgs}.`;
+        }
+
+        if (text.includes('سعر') || text.includes('ثمن') || text.includes('prix') || text.includes('price')) {
+            return language === 'ar'
+                ? 'تختلف الأسعار حسب الروضة والخدمات المختارة. تتراوح أسعار الروضات في معسكر بين 4500 و 9000 دج شهرياً. أي روضة تهمك لأعطيك سعرها بالتحديد؟'
+                : 'Les prix varient selon le jardin d\'enfants et les services choisis. Ils se situent généralement entre 4500 et 9000 DA par mois à Mascara. Quel jardin vous intéresse pour un prix précis ?';
+        }
+
+        // Default response context-aware
+        if (text.includes('روضة') || text.includes('jardin') || text.includes('kindergarten')) {
+            const topKgs = kindergartens.slice(0, 5).map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
+            return language === 'ar'
+                ? `لدينا العديد من الروضات المميزة في معسكر، مثل: ${topKgs}. يمكنك إخباري باسم البلدية أو اسم الروضة التي تبحث عنها.`
+                : `Nous avons plusieurs jardins d'enfants excellents à Mascara, tels que : ${topKgs}. Vous pouvez me dire le nom de la commune ou du jardin que vous recherchez.`;
         }
 
         if (text.includes('طبيب') || text.includes('médecin') || text.includes('doctor')) {
             return language === 'ar'
-                ? 'يمكنني مساعدتك في العثور على أطباء الأطفال المتخصصين في ولاية معسكر من خلال قسم الأطباء.'
-                : 'Je peux vous aider à trouver des pédiatres spécialisés dans la wilaya de Mascara via la section Médecins.';
+                ? 'يمكنني مساعدتك في العثور على أطباء الأطفال المتخصصين في ولاية معسكر من خلال قسم الأطباء المتوفر في القائمة الرئيسية.'
+                : 'Je peux vous aider à trouver des pédiatres spécialisés dans la wilaya de Mascara via la section Médecins disponible dans le menu principal.';
         }
 
         if (text.includes('ملابس') || text.includes('vêtements') || text.includes('clothing')) {
             return language === 'ar'
-                ? 'لدينا قائمة بأفضل محلات ملابس الأطفال في معسكر. يمكنك العثور عليها في قسم المحلات.'
-                : 'Nous avons une liste des meilleures boutiques de vêtements pour enfants à Mascara. Vous pouvez les trouver dans la section Boutiques.';
-        }
-
-        if (text.includes('أرطفونيا') || text.includes('orthophoniste')) {
-            return language === 'ar'
-                ? 'يتوفر لدينا قائمة بأخصائيي الأرطفونيا المعتمدين في ولاية معسكر.'
-                : 'Nous avons une liste d\'orthophonistes certifiés dans la wilaya de Mascara.';
+                ? 'لدينا قائمة بأفضل محلات ملابس الأطفال في معسكر. يمكنك العثور عليها في قسم المحلات في التطبيق.'
+                : 'Nous avons une liste des meilleures boutiques de vêtements pour enfants à Mascara. Vous pouvez les trouver dans la section Boutiques de l\'application.';
         }
 
         return language === 'ar'
-            ? 'أنا هنا لمساعدتك في العثور على أفضل الخدمات لأطفالك في معسكر. هل تود الاستفسار عن الروضات، الأطباء، أو المحلات؟'
-            : 'Je suis là pour vous aider à trouver les meilleurs services pour vos enfants à Mascara. Voulez-vous vous renseigner sur les jardins d\'enfants, les médecins ou les boutiques ?';
+            ? 'أنا هنا لمساعدتك في العثور على أفضل الخدمات لأطفالك في معسكر. يمكنك سؤالي عن روضة معينة، أو خدمات مثل النقل، أو الروضات في بلدية معينة.'
+            : 'Je suis là pour vous aider à trouver les meilleurs services pour vos enfants à Mascara. Vous pouvez me poser des questions sur un jardin spécifique, des services comme le transport, ou les jardins d\'enfants dans une commune précise.';
     };
 
     const handleSend = () => {

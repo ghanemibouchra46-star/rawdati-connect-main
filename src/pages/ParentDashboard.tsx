@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
+import { kindergartens } from '@/data/kindergartens';
 
 interface Child {
     id: string;
@@ -58,51 +59,29 @@ const ParentDashboard = () => {
             setProfile(profileData);
         }
 
-        setChildren([
-            {
-                id: '1',
-                name: 'أحمد',
-                age: 4,
-                photo_url: null,
-                kindergarten_name: 'روضة الأمل',
-                status: 'active'
-            },
-            {
-                id: '2',
-                name: 'سارة',
-                age: 3,
-                photo_url: null,
-                kindergarten_name: 'روضة النور',
-                status: 'active'
-            }
-        ]);
+        const { data: registrationData } = await supabase
+            .from('registration_requests')
+            .select('*')
+            .eq('user_id', session.user.id);
 
-        setActivities([
-            {
-                id: '1',
-                child_name: 'أحمد',
-                activity_type: 'learning',
-                description: 'تعلم الحروف الأبجدية اليوم وأبدع في كتابة اسمه',
-                photo_url: null,
-                created_at: new Date().toISOString()
-            },
-            {
-                id: '2',
-                child_name: 'سارة',
-                activity_type: 'play',
-                description: 'لعبت مع أصدقائها في الحديقة',
-                photo_url: null,
-                created_at: new Date(Date.now() - 3600000).toISOString()
-            },
-            {
-                id: '3',
-                child_name: 'أحمد',
-                activity_type: 'meal',
-                description: 'تناول وجبة الغداء كاملة',
-                photo_url: null,
-                created_at: new Date(Date.now() - 7200000).toISOString()
-            }
-        ]);
+        if (registrationData) {
+            const mappedChildren = registrationData.map(reg => {
+                const kg = kindergartens.find(k => k.id === reg.kindergarten_id);
+                return {
+                    id: reg.id,
+                    name: reg.child_name,
+                    age: reg.child_age,
+                    photo_url: null,
+                    kindergarten_name: language === 'ar' ? (kg?.nameAr || reg.kindergarten_id) : (kg?.nameFr || reg.kindergarten_id),
+                    status: reg.status
+                };
+            });
+            setChildren(mappedChildren);
+        } else {
+            setChildren([]);
+        }
+
+        setActivities([]); // Set to empty as we don't have a real activities table yet
 
         setIsLoading(false);
     };

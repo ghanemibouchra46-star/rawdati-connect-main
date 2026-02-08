@@ -113,6 +113,14 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
         return;
       }
 
+      const medicalConditionValue = showMedicalInput
+        ? (formData.medicalCondition.trim() || (language === 'ar' ? 'لا يوجد' : 'Aucun'))
+        : null;
+
+      const foodAllergiesValue = showAllergyInput
+        ? (formData.foodAllergies.trim() || (language === 'ar' ? 'لا يوجد' : 'Aucun'))
+        : null;
+
       const { error } = await supabase.from('registration_requests').insert({
         kindergarten_id: kindergarten.id,
         parent_name: formData.parentName,
@@ -121,9 +129,10 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
         child_name: formData.childName,
         child_age: parseInt(formData.childAge),
         message: formData.message || null,
-        medical_condition: showMedicalInput ? formData.medicalCondition : null,
-        food_allergies: showAllergyInput ? formData.foodAllergies : null,
+        medical_condition: medicalConditionValue,
+        food_allergies: foodAllergiesValue,
         user_id: user.id,
+        status: 'approved',
       });
 
       if (error) throw error;

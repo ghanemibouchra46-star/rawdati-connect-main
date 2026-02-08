@@ -15,10 +15,13 @@ const AdminAuth = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>('login');
+    const [mode, setMode] = useState<'login' | 'signup' | 'forgot' | 'verify' | 'new_password'>('login');
     const [resetEmail, setResetEmail] = useState('');
     const [fullName, setFullName] = useState('');
     const [phone, setPhone] = useState('');
+    const [otp, setOtp] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const navigate = useNavigate();
     const { toast } = useToast();
 
@@ -71,7 +74,7 @@ const AdminAuth = () => {
                 .select('role')
                 .eq('user_id', data.user.id)
                 .eq('role', 'admin')
-                .single();
+                .maybeSingle();
 
             if (roleError || !roleData) {
                 await supabase.auth.signOut();
@@ -88,7 +91,11 @@ const AdminAuth = () => {
                 title: t('auth.welcome'),
                 description: t('common.updated'),
             });
-            navigate('/admin');
+
+            // Explicitly navigate to admin dashboard
+            setTimeout(() => {
+                navigate('/admin');
+            }, 100);
         }
 
         setIsLoading(false);
@@ -191,7 +198,8 @@ const AdminAuth = () => {
 
     const handleResetPassword = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!resetEmail.trim()) {
+        const contact = resetEmail.trim();
+        if (!contact) {
             toast({
                 title: t('common.error'),
                 description: t('auth.error.emailInvalid'),
@@ -201,7 +209,9 @@ const AdminAuth = () => {
         }
 
         setIsLoading(true);
-        const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        const isEmail = contact.includes('@');
+
+        const { error } = await supabase.auth.resetPasswordForEmail(contact, {
             redirectTo: `${window.location.origin}/admin-auth?reset=true`,
         });
 
@@ -214,19 +224,66 @@ const AdminAuth = () => {
         } else {
             toast({
                 title: t('common.updated'),
-                description: t('auth.resetEmailSent'),
+                description: t('auth.otpSent'),
             });
+            setMode('verify');
+        }
+        setIsLoading(false);
+    };
+
+    const handleVerifyOtp = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (otp.length !== 6) {
+            toast({ title: t('common.error'), description: t('auth.otpPlaceholder'), variant: 'destructive' });
+            return;
+        }
+
+        setIsLoading(true);
+        const { error } = await supabase.auth.verifyOtp({
+            email: resetEmail,
+            token: otp,
+            type: 'recovery',
+        });
+
+        if (error) {
+            toast({ title: t('common.error'), description: t('auth.invalidOtp'), variant: 'destructive' });
+        } else {
+            setMode('new_password');
+        }
+        setIsLoading(false);
+    };
+
+    const handleUpdatePassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (newPassword.length < 6) {
+            toast({ title: t('common.error'), description: t('auth.passwordMin'), variant: 'destructive' });
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            toast({ title: t('common.error'), description: language === 'ar' ? 'كلمات المرور غير متطابقة' : 'Passwords do not match', variant: 'destructive' });
+            return;
+        }
+
+        setIsLoading(true);
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+        if (error) {
+            toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
+        } else {
+            toast({ title: t('common.updated'), description: t('auth.passwordResetSuccess') });
             setMode('login');
-            setResetEmail('');
+            setPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
         }
         setIsLoading(false);
     };
 
     const getTitle = () => {
         switch (mode) {
-            case 'signup':
-                return language === 'ar' ? 'إنشاء حساب أدمين' : language === 'fr' ? 'Créer un compte admin' : 'Create Admin Account';
             case 'forgot':
+            case 'verify':
+            case 'new_password':
                 return language === 'ar' ? 'استعادة كلمة المرور' : language === 'fr' ? 'Récupérer le mot de passe' : 'Reset Password';
             default:
                 return t('admin.auth.title');
@@ -238,7 +295,11 @@ const AdminAuth = () => {
             case 'signup':
                 return language === 'ar' ? 'أدخل بياناتك لإنشاء حساب جديد' : language === 'fr' ? 'Entrez vos informations pour créer un nouveau compte' : 'Enter your details to create a new account';
             case 'forgot':
-                return language === 'ar' ? 'أدخل بريدك الإلكتروني لاستلام رابط إعادة تعيين كلمة المرور' : language === 'fr' ? 'Entrez votre email pour recevoir un lien de réinitialisation' : 'Enter your email to receive a reset link';
+                return language === 'ar' ? 'أدخل بريدك الإلكتروني لاستلام رمز إعادة تعيين كلمة المرور' : language === 'fr' ? 'Entrez votre email pour recevoir un code de réinitialisation' : 'Enter your email to receive a reset code';
+            case 'verify':
+                return t('auth.otpSent');
+            case 'new_password':
+                return t('auth.setNewPassword');
             default:
                 return t('admin.auth.desc');
         }
@@ -445,6 +506,74 @@ const AdminAuth = () => {
                                     onClick={() => setMode('login')}
                                 >
                                     {t('auth.backLogin')}
+                                </Button>
+                            </form>
+                        )}
+
+                        {mode === 'verify' && (
+                            <form onSubmit={handleVerifyOtp} className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="otp" className="text-gray-300">{t('auth.verifyOtp')}</Label>
+                                    <Input
+                                        id="otp"
+                                        type="text"
+                                        maxLength={6}
+                                        placeholder="000000"
+                                        className="text-center text-2xl tracking-[1rem] bg-slate-700 border-slate-600 text-white h-16"
+                                        required
+                                        value={otp}
+                                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                                    />
+                                    <p className="text-xs text-center text-gray-500">{t('auth.otpPlaceholder')}</p>
+                                </div>
+                                <Button
+                                    type="submit"
+                                    className="w-full bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white shadow-lg"
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? t('auth.loading') : t('auth.verifyOtp')}
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    className="w-full text-gray-400 hover:text-white"
+                                    onClick={() => setMode('forgot')}
+                                >
+                                    {language === 'ar' ? 'تغيير البريد الإلكتروني' : 'Change Email'}
+                                </Button>
+                            </form>
+                        )}
+
+                        {mode === 'new_password' && (
+                            <form onSubmit={handleUpdatePassword} className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="new-password" className="text-gray-300">{t('auth.newPassword')}</Label>
+                                    <Input
+                                        id="new-password"
+                                        type="password"
+                                        className="bg-slate-700 border-slate-600 text-white"
+                                        required
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="confirm-password" className="text-gray-300">{t('auth.confirmNewPassword')}</Label>
+                                    <Input
+                                        id="confirm-password"
+                                        type="password"
+                                        className="bg-slate-700 border-slate-600 text-white"
+                                        required
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                    />
+                                </div>
+                                <Button
+                                    type="submit"
+                                    className="w-full bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white shadow-lg"
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? t('auth.loading') : t('auth.setNewPassword')}
                                 </Button>
                             </form>
                         )}

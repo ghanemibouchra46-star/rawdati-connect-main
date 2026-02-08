@@ -13,7 +13,11 @@ const OwnerAuth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetStep, setResetStep] = useState<'input' | 'verify' | 'new_password'>('input');
   const [resetEmail, setResetEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -141,9 +145,9 @@ const OwnerAuth = () => {
       } else {
         toast({
           title: 'تم الإرسال',
-          description: 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني',
+          description: 'تم إرسال رمز التحقق إلى بريدك الإلكتروني',
         });
-        setShowForgotPassword(false);
+        setResetStep('verify');
       }
     } catch (error) {
       toast({
@@ -151,6 +155,65 @@ const OwnerAuth = () => {
         description: 'حدث خطأ غير متوقع',
         variant: 'destructive',
       });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length !== 6) {
+      toast({ title: 'خطأ', description: 'يرجى إدخال الرمز المكون من 6 أرقام', variant: 'destructive' });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email: resetEmail,
+        token: otp,
+        type: 'recovery',
+      });
+
+      if (error) {
+        toast({ title: 'خطأ', description: 'رمز التحقق غير صحيح', variant: 'destructive' });
+      } else {
+        setResetStep('new_password');
+      }
+    } catch (error) {
+      toast({ title: 'خطأ', description: 'حدث خطأ غير متوقع', variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 6) {
+      toast({ title: 'خطأ', description: 'يجب أن تكون كلمة المرور 6 أحرف على الأقل', variant: 'destructive' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: 'خطأ', description: 'كلمات المرور غير متطابقة', variant: 'destructive' });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+      if (error) {
+        toast({ title: 'خطأ', description: error.message, variant: 'destructive' });
+      } else {
+        toast({ title: 'نجاح', description: 'تم تغيير كلمة المرور بنجاح' });
+        setShowForgotPassword(false);
+        setResetStep('input');
+        setOtp('');
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+    } catch (error) {
+      toast({ title: 'خطأ', description: 'حدث خطأ غير متوقع', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -247,50 +310,140 @@ const OwnerAuth = () => {
             ) : (
               <div className="space-y-4">
                 <div className="text-center space-y-2">
-                  <h3 className="text-lg font-semibold">إعادة تعيين كلمة المرور</h3>
-                  <p className="text-sm text-muted-foreground">أدخل بريدك الإلكتروني لاستلام رابط إعادة تعيين كلمة المرور</p>
+                  <h3 className="text-lg font-semibold">
+                    {resetStep === 'input' ? 'إعادة تعيين كلمة المرور' :
+                      resetStep === 'verify' ? 'التحقق من الرمز' :
+                        'تعيين كلمة مرور جديدة'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {resetStep === 'input' ? 'أدخل بريدك الإلكتروني لاستلام رمز إعادة تعيين كلمة المرور' :
+                      resetStep === 'verify' ? 'أدخل الرمز المكون من 6 أرقام المرسل إلى بريدك' :
+                        'أدخل كلمة المرور الجديدة'}
+                  </p>
                 </div>
-                <form onSubmit={handleResetPassword} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="reset-email">البريد الإلكتروني</Label>
-                    <div className="relative">
-                      <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+
+                {resetStep === 'input' && (
+                  <form onSubmit={handleResetPassword} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-email">البريد الإلكتروني</Label>
+                      <div className="relative">
+                        <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="reset-email"
+                          type="email"
+                          placeholder="example@email.com"
+                          className="pr-10"
+                          dir="ltr"
+                          required
+                          value={resetEmail}
+                          onChange={(e) => setResetEmail(e.target.value)}
+                          disabled={isLoading}
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>جاري الإرسال...</span>
+                        </>
+                      ) : (
+                        <span>إرسال الرمز</span>
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => setShowForgotPassword(false)}
+                    >
+                      العودة لتسجيل الدخول
+                    </Button>
+                  </form>
+                )}
+
+                {resetStep === 'verify' && (
+                  <form onSubmit={handleVerifyOtp} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="otp">رمز التحقق</Label>
                       <Input
-                        id="reset-email"
-                        type="email"
-                        placeholder="example@email.com"
-                        className="pr-10"
-                        dir="ltr"
+                        id="otp"
+                        type="text"
+                        maxLength={6}
+                        placeholder="000000"
+                        className="text-center text-2xl tracking-[1rem] h-16"
                         required
-                        value={resetEmail}
-                        onChange={(e) => setResetEmail(e.target.value)}
-                        disabled={isLoading}
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                       />
                     </div>
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>جاري الإرسال...</span>
-                      </>
-                    ) : (
-                      <span>إرسال الرابط</span>
-                    )}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="w-full"
-                    onClick={() => setShowForgotPassword(false)}
-                  >
-                    العودة لتسجيل الدخول
-                  </Button>
-                </form>
+                    <Button
+                      type="submit"
+                      className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>جاري التحقق...</span>
+                        </>
+                      ) : (
+                        <span>تحقق من الرمز</span>
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => setResetStep('input')}
+                    >
+                      تغيير البريد الإلكتروني
+                    </Button>
+                  </form>
+                )}
+
+                {resetStep === 'new_password' && (
+                  <form onSubmit={handleUpdatePassword} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password">كلمة المرور الجديدة</Label>
+                      <Input
+                        id="new-password"
+                        type="password"
+                        required
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password">تأكيد كلمة المرور الجديدة</Label>
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        required
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>جاري التغيير...</span>
+                        </>
+                      ) : (
+                        <span>حفظ كلمة المرور</span>
+                      )}
+                    </Button>
+                  </form>
+                )}
               </div>
             )}
 
