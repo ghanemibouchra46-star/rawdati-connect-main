@@ -248,7 +248,7 @@ const translations: Record<Language, Record<string, string>> = {
         'admin.status': 'الحالة',
         'admin.date': 'تاريخ التسجيل',
         'booking.title': 'حجز موعد زيارة',
-        'booking.success': 'تم الحجز',
+        'booking.success': 'تم حجز موعد',
         'booking.successDesc': 'سنتصل بك لتأكيد الموعد',
         'admin.actions': 'الإجراءات',
         'admin.logout': 'خروج',
