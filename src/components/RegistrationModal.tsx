@@ -69,10 +69,6 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
       toast({ title: t('common.error'), description: t('auth.error.phoneRequired'), variant: 'destructive' });
       return false;
     }
-    if (!/^\d{10}$/.test(formData.phone)) {
-      toast({ title: t('common.error'), description: t('auth.error.phoneInvalid'), variant: 'destructive' });
-      return false;
-    }
     if (!formData.childName.trim()) {
       toast({ title: t('common.error'), description: t('registration.childName'), variant: 'destructive' });
       return false;

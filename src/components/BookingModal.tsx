@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { X, Calendar as CalendarIcon, Clock, User, Phone, CheckCircle, Loader2 } from 'lucide-react';
+import { X, Calendar as CalendarIcon, Clock, User, Phone, CheckCircle, Loader2, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
@@ -30,17 +30,20 @@ const BookingModal = ({ kindergarten, isOpen, onClose }: BookingModalProps) => {
     const [isSuccess, setIsSuccess] = useState(false);
     const [parentName, setParentName] = useState('');
     const [phone, setPhone] = useState('');
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    const [email, setEmail] = useState('');
 
     useEffect(() => {
+        const checkAuth = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            setIsAuthenticated(!!session);
+            if (session?.user) {
+                setEmail(session.user.email || '');
+            }
+        };
+
         if (isOpen) {
-            // Check for user session to pre-fill info
-            const checkUser = async () => {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) {
-                    // Ideally fetch profile here, but for now we wait for user input or use metadata if available
-                }
-            };
-            checkUser();
+            checkAuth();
         }
     }, [isOpen]);
 
@@ -122,7 +125,25 @@ const BookingModal = ({ kindergarten, isOpen, onClose }: BookingModalProps) => {
                     </button>
                 </div>
 
-                {isSuccess ? (
+                {isAuthenticated === false ? (
+                    <div className="p-8 text-center" dir={dir}>
+                        <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
+                            <LogIn className="w-10 h-10 text-primary" />
+                        </div>
+                        <h3 className="text-xl font-bold text-foreground mb-2">{t('registration.loginRequired')}</h3>
+                        <p className="text-muted-foreground mb-6">{t('registration.loginRequiredDesc')}</p>
+                        <Button
+                            onClick={() => {
+                                onClose();
+                                window.location.href = '/auth';
+                            }}
+                            className="gradient-accent border-0 rounded-xl shadow-soft text-primary-foreground font-bold gap-2"
+                        >
+                            <LogIn className="w-5 h-5" />
+                            {t('auth.login')}
+                        </Button>
+                    </div>
+                ) : isSuccess ? (
                     <div className="p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
                         <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
                             <CheckCircle className="w-8 h-8 text-green-600" />
