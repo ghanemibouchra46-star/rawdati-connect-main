@@ -119,7 +119,7 @@ const AdminAuth = () => {
 
         setIsLoading(true);
 
-        // Create user
+        // Create user with explicit admin role in metadata
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
@@ -127,6 +127,7 @@ const AdminAuth = () => {
                 data: {
                     full_name: fullName,
                     phone: phone,
+                    role: 'admin',
                 }
             }
         });
@@ -142,55 +143,13 @@ const AdminAuth = () => {
         }
 
         if (data.user) {
-            // Sign in immediately to get an authenticated session
-            const { error: signInError } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            });
-
-            if (signInError) {
-                // If email confirmation is required
-                toast({
-                    title: language === 'ar' ? 'تم إنشاء الحساب!' : language === 'fr' ? 'Compte créé!' : 'Account Created!',
-                    description: language === 'ar' ? 'يرجى تأكيد بريدك الإلكتروني ثم تسجيل الدخول' : language === 'fr' ? 'Veuillez confirmer votre email puis vous connecter' : 'Please confirm your email then log in',
-                });
-                setMode('login');
-                setPassword('');
-                setIsLoading(false);
-                return;
-            }
-
-            // Create profile with authenticated session
-            const { error: profileError } = await supabase.from('profiles').upsert({
-                id: data.user.id,
-                full_name: fullName,
-                phone: phone,
-            });
-
-            // Add admin role with authenticated session
-            const { error: roleError } = await supabase.from('user_roles').insert({
-                user_id: data.user.id,
-                role: 'admin',
-            });
-
-            if (roleError) {
-                console.error('Role insert error:', roleError);
-                // Sign out if role assignment failed
-                await supabase.auth.signOut();
-                toast({
-                    title: t('common.error'),
-                    description: language === 'ar' ? 'فشل في إضافة صلاحيات الأدمين. تواصل مع المسؤول.' : language === 'fr' ? 'Échec de l\'ajout des droits admin. Contactez l\'administrateur.' : 'Failed to add admin rights. Contact administrator.',
-                    variant: 'destructive',
-                });
-                setIsLoading(false);
-                return;
-            }
-
+            // Role is now handled by database trigger
             toast({
                 title: language === 'ar' ? 'تم إنشاء الحساب!' : language === 'fr' ? 'Compte créé!' : 'Account Created!',
-                description: language === 'ar' ? 'مرحباً بك في لوحة التحكم' : language === 'fr' ? 'Bienvenue dans le tableau de bord' : 'Welcome to the dashboard',
+                description: language === 'ar' ? 'يرجى تأكيد بريدك الإلكتروني ثم تسجيل الدخول' : language === 'fr' ? 'Veuillez confirmer votre email puis vous connecter' : 'Please confirm your email then log in',
             });
-            navigate('/admin');
+            setMode('login');
+            setPassword('');
         }
 
         setIsLoading(false);

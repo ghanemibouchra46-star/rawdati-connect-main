@@ -127,6 +127,7 @@ const Auth = () => {
         data: {
           full_name: signupName,
           phone: signupPhone,
+          role: 'parent',
         }
       }
     });
@@ -140,28 +141,7 @@ const Auth = () => {
         variant: 'destructive',
       });
     } else if (data.user) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert(
-          {
-            id: data.user.id,
-            full_name: signupName,
-            phone: signupPhone,
-          },
-          { onConflict: 'id' }
-        );
-
-      if (profileError) {
-        console.error('Error creating profile:', profileError);
-      }
-
-      await supabase
-        .from('user_roles')
-        .insert({
-          user_id: data.user.id,
-          role: 'parent',
-        });
-
+      // Profile and role are now handled by database trigger
       setVerificationEmail(signupEmail);
       setShowVerification(true);
 

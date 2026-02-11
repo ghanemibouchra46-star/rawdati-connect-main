@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -50,7 +51,8 @@ const AdminDashboard = () => {
         totalUsers: 0,
         totalKindergartens: 0,
         pendingApprovals: 0,
-        activeParents: 0
+        activeParents: 0,
+        activeOwners: 0
     });
 
     useEffect(() => {
@@ -112,12 +114,16 @@ const AdminDashboard = () => {
             setUsers(usersWithRoles);
             setKindergartens(kgData as Kindergarten[] || []);
 
+            const activeOwners = usersWithRoles.filter(u => u.role === 'owner').length;
+            const activeParents = usersWithRoles.filter(u => u.role === 'parent').length;
+
             // Calculate stats
             setStats({
                 totalUsers: usersWithRoles.length,
                 totalKindergartens: (kgData || []).length,
                 pendingApprovals: (kgData || []).filter(k => k.status === 'pending').length,
-                activeParents: usersWithRoles.filter(u => u.role === 'parent').length
+                activeParents: activeParents,
+                activeOwners: activeOwners
             });
 
         } catch (error) {
@@ -308,21 +314,21 @@ const AdminDashboard = () => {
                                         <div className="relative w-40 h-40">
                                             <svg className="w-full h-full" viewBox="0 0 36 36">
                                                 <path className="text-slate-800" strokeDasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                                                <path className="text-red-500" strokeDasharray="30, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
+                                                <path className="text-red-500" strokeDasharray={`${stats.totalUsers > 0 ? (stats.activeOwners / stats.totalUsers) * 100 : 0}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
                                             </svg>
                                             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                                                 <span className="text-2xl font-bold text-white">{stats.totalUsers}</span>
-                                                <span className="text-[10px] text-slate-400 uppercase tracking-tighter">Users</span>
+                                                <span className="text-[10px] text-slate-400 uppercase tracking-tighter">{language === 'ar' ? 'مستخدم' : 'Users'}</span>
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-4 text-xs">
                                             <div className="flex items-center gap-2 text-slate-400">
                                                 <div className="w-2 h-2 rounded-full bg-red-500" />
-                                                Owners (30%)
+                                                {language === 'ar' ? 'أصحاب الروضات' : 'Owners'} ({stats.totalUsers > 0 ? Math.round((stats.activeOwners / stats.totalUsers) * 100) : 0}%)
                                             </div>
                                             <div className="flex items-center gap-2 text-slate-400">
                                                 <div className="w-2 h-2 rounded-full bg-slate-700" />
-                                                Parents (70%)
+                                                {language === 'ar' ? 'أولياء الأمور' : 'Parents'} ({stats.totalUsers > 0 ? Math.round((stats.activeParents / stats.totalUsers) * 100) : 0}%)
                                             </div>
                                         </div>
                                     </div>
