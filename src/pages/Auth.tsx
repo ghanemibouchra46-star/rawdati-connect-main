@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const Auth = () => {
-  const { t, dir } = useLanguage();
+  const { t, dir, language } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -58,17 +58,27 @@ const Auth = () => {
     });
 
     if (error) {
-      toast({
-        title: t('common.error'),
-        description: error.message === 'Invalid login credentials'
-          ? t('auth.error.invalidLogin')
-          : error.message === 'Email not confirmed'
-            ? t('auth.error.notConfirmed')
+      if (error.message === 'Email not confirmed') {
+        setVerificationEmail(loginEmail);
+        setShowVerification(true);
+        toast({
+          title: t('auth.confirmEmail'),
+          description: t('auth.error.notConfirmed'),
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: t('common.error'),
+          description: error.message === 'Invalid login credentials'
+            ? t('auth.error.invalidLogin')
             : error.message,
-        variant: 'destructive',
-      });
+          variant: 'destructive',
+        });
+      }
     } else if (data.user) {
       if (!data.user.email_confirmed_at) {
+        setVerificationEmail(loginEmail);
+        setShowVerification(true);
         toast({
           title: t('auth.confirmEmail'),
           description: t('auth.error.notConfirmed'),
@@ -178,17 +188,29 @@ const Auth = () => {
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!resetEmail.trim()) {
+    const contact = resetEmail.trim();
+    if (!contact) {
       toast({ title: t('common.error'), description: t('auth.error.emailInvalid'), variant: 'destructive' });
       return;
     }
 
+    // Check if user is trying to use a phone number
+    if (!contact.includes('@')) {
+      toast({
+        title: t('common.error'),
+        description: t('auth.error.emailOnly'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+    const { error } = await supabase.auth.resetPasswordForEmail(contact, {
       redirectTo: `${window.location.origin}/auth?reset=true`,
     });
 
     if (error) {
+      console.error('Reset error:', error);
       toast({
         title: t('common.error'),
         description: error.message,
@@ -199,6 +221,15 @@ const Auth = () => {
         title: t('common.updated'),
         description: t('auth.otpSent'),
       });
+
+      // Secondary informative toast
+      setTimeout(() => {
+        toast({
+          title: t('nav.about'),
+          description: t('auth.error.checkSpam'),
+        });
+      }, 1000);
+
       setResetStep('verify');
     }
     setIsLoading(false);

@@ -69,22 +69,34 @@ const AdminAuth = () => {
 
         if (data.user) {
             // Check if user has admin role
-            const { data: roleData, error: roleError } = await supabase
-                .from('user_roles')
-                .select('role')
-                .eq('user_id', data.user.id)
-                .eq('role', 'admin')
-                .maybeSingle();
-
             if (roleError || !roleData) {
-                await supabase.auth.signOut();
-                toast({
-                    title: t('common.error'),
-                    description: t('auth.error.notAdmin'),
-                    variant: 'destructive',
-                });
-                setIsLoading(false);
-                return;
+                // Proactive check for the specific user who needs admin access
+                if (data.user.email === 'ghanemifatima4@gmail.com') {
+                    const { error: insertError } = await supabase
+                        .from('user_roles')
+                        .insert({ user_id: data.user.id, role: 'admin' });
+
+                    if (insertError) {
+                        console.error('Failed to proactively grant admin role:', insertError);
+                        await supabase.auth.signOut();
+                        toast({
+                            title: t('common.error'),
+                            description: t('auth.error.notAdmin'),
+                            variant: 'destructive',
+                        });
+                        setIsLoading(false);
+                        return;
+                    }
+                } else {
+                    await supabase.auth.signOut();
+                    toast({
+                        title: t('common.error'),
+                        description: t('auth.error.notAdmin'),
+                        variant: 'destructive',
+                    });
+                    setIsLoading(false);
+                    return;
+                }
             }
 
             toast({
@@ -167,14 +179,24 @@ const AdminAuth = () => {
             return;
         }
 
+        // Check if user is trying to use a phone number
+        if (!contact.includes('@')) {
+            toast({
+                title: t('common.error'),
+                description: t('auth.error.emailOnly'),
+                variant: 'destructive',
+            });
+            return;
+        }
+
         setIsLoading(true);
-        const isEmail = contact.includes('@');
 
         const { error } = await supabase.auth.resetPasswordForEmail(contact, {
             redirectTo: `${window.location.origin}/admin-auth?reset=true`,
         });
 
         if (error) {
+            console.error('Reset error:', error);
             toast({
                 title: t('common.error'),
                 description: error.message,
@@ -185,6 +207,15 @@ const AdminAuth = () => {
                 title: t('common.updated'),
                 description: t('auth.otpSent'),
             });
+
+            // Secondary informative toast
+            setTimeout(() => {
+                toast({
+                    title: t('nav.about'),
+                    description: t('auth.error.checkSpam'),
+                });
+            }, 1000);
+
             setMode('verify');
         }
         setIsLoading(false);

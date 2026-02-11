@@ -233,6 +233,8 @@ const translations: Record<Language, Record<string, string>> = {
         'auth.invalidOtp': 'رمز التحقق غير صحيح',
         'auth.setNewPassword': 'تعيين كلمة مرور جديدة',
         'auth.success': 'تم تسجيل الدخول بنجاح',
+        'auth.error.checkSpam': 'إذا لم يصلك البريد، يرجى التحقق من ملف البريد المزعج (Spam) أو المحاولة بعد ساعة بسبب قيود الإرسال.',
+        'auth.error.emailOnly': 'حالياً، استعادة كلمة المرور متاحة عبر البريد الإلكتروني فقط.',
 
         // Admin Dashboard
         'admin.title': 'لوحة تحكم الأدمين',
@@ -543,6 +545,8 @@ const translations: Record<Language, Record<string, string>> = {
         'auth.invalidOtp': 'Code de vérification invalide',
         'auth.setNewPassword': 'Définir un nouveau mot de passe',
         'auth.success': 'Connexion réussie',
+        'auth.error.checkSpam': 'Si vous ne recevez pas l\'e-mail, veuillez vérifier vos spams ou réessayer dans une heure en raison des limites d\'envoi.',
+        'auth.error.emailOnly': 'Actuellement, la réinitialisation du mot de passe est disponible par e-mail uniquement.',
 
         // Admin Dashboard
         'admin.title': 'Tableau de bord Admin',
