@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Baby, Mail, Lock, Shield, ArrowRight, User, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,18 +16,40 @@ const AdminAuth = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [mode, setMode] = useState<'login' | 'signup' | 'forgot' | 'verify' | 'new_password'>('login');
-    const [resetEmail, setResetEmail] = useState('');
+    const [resetEmail, setResetEmail] = useState(() => localStorage.getItem('adminResetEmail') || '');
     const [fullName, setFullName] = useState('');
     const [phone, setPhone] = useState('');
     const [otp, setOtp] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { toast } = useToast();
+    const [resendTimer, setResendTimer] = useState(0);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showSignupPassword, setShowSignupPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (resendTimer > 0) {
+            interval = setInterval(() => {
+                setResendTimer((prev) => prev - 1);
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [resendTimer]);
+
+    useEffect(() => {
+        const isRecovery = searchParams.get('recovery') === 'true';
+        if (isRecovery) {
+            setMode('new_password');
+        }
         checkAdminSession();
-    }, []);
+    }, [searchParams]);
+
+
 
     const checkAdminSession = async () => {
         const { data: { session } } = await supabase.auth.getSession();
@@ -56,22 +78,39 @@ const AdminAuth = () => {
         });
 
         if (error) {
-            toast({
-                title: t('common.error'),
-                description: error.message === 'Invalid login credentials'
-                    ? t('auth.error.invalidLogin')
-                    : error.message,
-                variant: 'destructive',
-            });
+            console.error('Admin login error:', error);
+            if (error.message === 'Email not confirmed') {
+                toast({
+                    title: t('auth.confirmEmail'),
+                    description: t('auth.error.notConfirmed'),
+                    variant: 'destructive',
+                });
+            } else {
+                toast({
+                    title: t('common.error'),
+                    description: error.message === 'Invalid login credentials'
+                        ? t('auth.error.invalidLogin')
+                        : error.message,
+                    variant: 'destructive',
+                });
+            }
             setIsLoading(false);
             return;
         }
 
         if (data.user) {
             // Check if user has admin role
+            const { data: roleData, error: roleError } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', data.user.id)
+                .eq('role', 'admin')
+                .single();
+
             if (roleError || !roleData) {
                 // Proactive check for the specific user who needs admin access
                 if (data.user.email === 'ghanemifatima4@gmail.com') {
+                    console.log('Proactively granting admin role to ghanemifatima4@gmail.com');
                     const { error: insertError } = await supabase
                         .from('user_roles')
                         .insert({ user_id: data.user.id, role: 'admin' });
@@ -88,6 +127,7 @@ const AdminAuth = () => {
                         return;
                     }
                 } else {
+                    console.warn(`User ${data.user.email} attempted admin login without admin role.`);
                     await supabase.auth.signOut();
                     toast({
                         title: t('common.error'),
@@ -192,7 +232,7 @@ const AdminAuth = () => {
         setIsLoading(true);
 
         const { error } = await supabase.auth.resetPasswordForEmail(contact, {
-            redirectTo: `${window.location.origin}/admin-auth?reset=true`,
+            redirectTo: "http://localhost:8081/admin-auth",
         });
 
         if (error) {
@@ -216,7 +256,27 @@ const AdminAuth = () => {
                 });
             }, 1000);
 
+            localStorage.setItem('adminResetEmail', contact);
             setMode('verify');
+            setOtp('');
+        }
+        setIsLoading(false);
+    };
+
+    const handleResendOtp = async () => {
+        if (resendTimer > 0) return;
+
+        setIsLoading(true);
+        const contact = resetEmail.trim();
+        const { error } = await supabase.auth.resetPasswordForEmail(contact, {
+            redirectTo: "http://localhost:8081/admin-auth",
+        });
+
+        if (error) {
+            toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
+        } else {
+            toast({ title: t('common.updated'), description: t('auth.otpSent') });
+            setResendTimer(60);
         }
         setIsLoading(false);
     };
@@ -236,6 +296,7 @@ const AdminAuth = () => {
         });
 
         if (error) {
+            console.error('Admin OTP verification error:', error);
             toast({ title: t('common.error'), description: t('auth.invalidOtp'), variant: 'destructive' });
         } else {
             setMode('new_password');
@@ -329,7 +390,7 @@ const AdminAuth = () => {
                                         <Input
                                             id="email"
                                             type="email"
-                                            placeholder="admin@rawdati.com"
+                                            placeholder="ghanemifatima4@gmail.com"
                                             className="pr-10 bg-slate-700 border-slate-600 text-white placeholder:text-gray-500"
                                             dir="ltr"
                                             required
@@ -344,13 +405,20 @@ const AdminAuth = () => {
                                         <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                         <Input
                                             id="password"
-                                            type="password"
+                                            type={showPassword ? "text" : "password"}
                                             placeholder="••••••••"
                                             className="pr-10 bg-slate-700 border-slate-600 text-white"
                                             required
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                                        >
+                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
                                     </div>
                                 </div>
                                 <div className="flex justify-end">
@@ -502,35 +570,66 @@ const AdminAuth = () => {
 
                         {mode === 'verify' && (
                             <form onSubmit={handleVerifyOtp} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="otp" className="text-gray-300">{t('auth.verifyOtp')}</Label>
+                                <div className="bg-slate-700/50 rounded-lg p-6 text-center border border-slate-600">
+                                    <Mail className="w-10 h-10 text-red-500 mx-auto mb-4" />
+                                    <p className="text-sm text-gray-200 font-medium mb-2">
+                                        {t('auth.otpSent')}
+                                    </p>
+                                    <p className="text-xs text-gray-400 mb-4">
+                                        {t('auth.otpPlaceholder')}
+                                    </p>
                                     <Input
-                                        id="otp"
                                         type="text"
-                                        maxLength={6}
                                         placeholder="000000"
-                                        className="text-center text-2xl tracking-[1rem] bg-slate-700 border-slate-600 text-white h-16"
+                                        className="bg-slate-700 border-slate-600 text-white text-center text-2xl tracking-[1em] font-mono"
+                                        maxLength={6}
                                         required
                                         value={otp}
-                                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                                        onChange={(e) => setOtp(e.target.value)}
                                     />
-                                    <p className="text-xs text-center text-gray-500">{t('auth.otpPlaceholder')}</p>
                                 </div>
                                 <Button
                                     type="submit"
                                     className="w-full bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white shadow-lg"
-                                    disabled={isLoading}
+                                    disabled={isLoading || otp.length !== 6}
                                 >
                                     {isLoading ? t('auth.loading') : t('auth.verifyOtp')}
                                 </Button>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    className="w-full text-gray-400 hover:text-white"
-                                    onClick={() => setMode('forgot')}
-                                >
-                                    {language === 'ar' ? 'تغيير البريد الإلكتروني' : 'Change Email'}
-                                </Button>
+
+                                <div className="flex flex-col gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        className="w-full text-xs text-gray-400 hover:text-white"
+                                        onClick={handleResendOtp}
+                                        disabled={isLoading || resendTimer > 0}
+                                    >
+                                        {resendTimer > 0
+                                            ? `${t('auth.resendCode')} (${resendTimer}s)`
+                                            : t('auth.resendCode')}
+                                    </Button>
+
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        className="w-full text-xs text-gray-400 hover:text-white"
+                                        onClick={() => setMode('forgot')}
+                                    >
+                                        {language === 'ar' ? 'تغيير البريد الإلكتروني' : 'Change Email'}
+                                    </Button>
+                                </div>
+
+                                <div className="mt-8 p-4 bg-slate-800/50 rounded-lg text-xs space-y-2 text-gray-400 border border-dashed border-slate-600 text-right" dir="rtl">
+                                    <p className="font-semibold text-gray-200 mb-1">
+                                        لم يصلك الرمز؟
+                                    </p>
+                                    <ul className="list-disc list-inside space-y-1">
+                                        <li>تأكد من مجلد الرسائل غير المرغوب فيها (Spam).</li>
+                                        <li>تأكد من كتابة البريد الإلكتروني بشكل صحيح.</li>
+                                        <li>يرجى الانتظار دقيقتين قبل المحاولة مرة أخرى.</li>
+                                        <li>يمكنك نسخ الرمز الموجود في نهاية الرابط الذي يصلك.</li>
+                                    </ul>
+                                </div>
                             </form>
                         )}
 
@@ -538,25 +637,45 @@ const AdminAuth = () => {
                             <form onSubmit={handleUpdatePassword} className="space-y-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="new-password" className="text-gray-300">{t('auth.newPassword')}</Label>
-                                    <Input
-                                        id="new-password"
-                                        type="password"
-                                        className="bg-slate-700 border-slate-600 text-white"
-                                        required
-                                        value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
-                                    />
+                                    <div className="relative">
+                                        <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                        <Input
+                                            id="new-password"
+                                            type={showNewPassword ? "text" : "password"}
+                                            className="pr-10 bg-slate-700 border-slate-600 text-white"
+                                            required
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowNewPassword(!showNewPassword)}
+                                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                                        >
+                                            {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="confirm-password" className="text-gray-300">{t('auth.confirmNewPassword')}</Label>
-                                    <Input
-                                        id="confirm-password"
-                                        type="password"
-                                        className="bg-slate-700 border-slate-600 text-white"
-                                        required
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                    />
+                                    <div className="relative">
+                                        <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                        <Input
+                                            id="confirm-password"
+                                            type={showConfirmPassword ? "text" : "password"}
+                                            className="pr-10 bg-slate-700 border-slate-600 text-white"
+                                            required
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                                        >
+                                            {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
                                 </div>
                                 <Button
                                     type="submit"

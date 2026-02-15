@@ -2,8 +2,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { LanguageProvider } from "./contexts/LanguageContext";
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { supabase } from "./integrations/supabase/client";
+import { LanguageProvider, useLanguage } from "./contexts/LanguageContext";
+import { useToast } from "./hooks/use-toast";
 import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
 import About from "./pages/About";
@@ -21,11 +24,52 @@ import Kindergartens from "./pages/Kindergartens";
 import ClothingStores from "./pages/ClothingStores";
 import Doctors from "./pages/Doctors";
 import SpeechTherapy from "./pages/SpeechTherapy";
+import Recovery from "./pages/Recovery";
 import NotFound from "./pages/NotFound";
 
 import AIChatbot from "./components/AIChatbot";
 
 const queryClient = new QueryClient();
+
+const AuthHandler = () => {
+  const navigate = useNavigate();
+  const { language } = useLanguage();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Aggressive manual check for tokens (Fallback for onAuthStateChange)
+    const checkTokenManual = () => {
+      const hash = window.location.hash;
+      const search = window.location.search;
+      if (hash.includes('access_token=') && (hash.includes('type=recovery') || search.includes('type=recovery'))) {
+        console.log("Manual token capture: Recovery detected");
+        toast({
+          title: language === 'ar' ? "تم كشف جلسة استعادة" : "Recovery session detected",
+          description: language === 'ar' ? "يرجى تعيين كلمة المرور الجديدة" : "Please set your new password",
+        });
+        navigate('/auth?recovery=true', { replace: true });
+        return true;
+      }
+      return false;
+    };
+
+    checkTokenManual();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth event:", event, session ? "Session set" : "No session");
+      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && window.location.href.includes('type=recovery'))) {
+        navigate('/auth?recovery=true', { replace: true });
+        toast({
+          title: language === 'ar' ? "تم تفعيل وضع الاستعادة" : "Recovery mode active",
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate, language, toast]);
+
+  return null;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -33,7 +77,8 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <Router>
+          <AuthHandler />
           <AIChatbot />
           <Routes>
             <Route path="/welcome" element={<Welcome />} />
@@ -53,9 +98,10 @@ const App = () => (
             <Route path="/clothing-stores" element={<ClothingStores />} />
             <Route path="/doctors" element={<Doctors />} />
             <Route path="/speech-therapy" element={<SpeechTherapy />} />
+            <Route path="/recovery" element={<Recovery />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
+        </Router>
       </TooltipProvider>
     </LanguageProvider>
   </QueryClientProvider>

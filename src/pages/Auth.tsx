@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Baby, Mail, Lock, User, ArrowRight, CheckCircle, Phone } from 'lucide-react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Baby, Mail, Lock, User, ArrowRight, CheckCircle, Phone, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,15 +22,37 @@ const Auth = () => {
   const [showVerification, setShowVerification] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [resetStep, setResetStep] = useState<'input' | 'verify' | 'new_password'>('input');
-  const [resetEmail, setResetEmail] = useState('');
+  const [resetEmail, setResetEmail] = useState(() => localStorage.getItem('resetEmail') || '');
   const [otp, setOtp] = useState('');
+  const [resetStep, setResetStep] = useState<'input' | 'verify' | 'new_password'>('input');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const [resendTimer, setResendTimer] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
+  useEffect(() => {
+    const isRecovery = searchParams.get('recovery') === 'true';
+    if (isRecovery) {
+      setShowForgotPassword(true);
+      setResetStep('new_password');
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
         if (session.user.email_confirmed_at) {
@@ -46,7 +68,7 @@ const Auth = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,7 +228,7 @@ const Auth = () => {
 
     setIsLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(contact, {
-      redirectTo: `${window.location.origin}/auth?reset=true`,
+      redirectTo: "http://localhost:8081/auth",
     });
 
     if (error) {
@@ -230,7 +252,27 @@ const Auth = () => {
         });
       }, 1000);
 
+      localStorage.setItem('resetEmail', contact);
       setResetStep('verify');
+      setOtp(''); // Clear any previous OTP
+    }
+    setIsLoading(false);
+  };
+
+  const handleResendOtp = async () => {
+    if (resendTimer > 0) return;
+
+    setIsLoading(true);
+    const contact = resetEmail.trim();
+    const { error } = await supabase.auth.resetPasswordForEmail(contact, {
+      redirectTo: "http://localhost:8081/auth",
+    });
+
+    if (error) {
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: t('common.updated'), description: t('auth.otpSent') });
+      setResendTimer(60);
     }
     setIsLoading(false);
   };
@@ -250,6 +292,7 @@ const Auth = () => {
     });
 
     if (error) {
+      console.error('OTP verification error:', error);
       toast({ title: t('common.error'), description: t('auth.invalidOtp'), variant: 'destructive' });
     } else {
       setResetStep('new_password');
@@ -400,13 +443,20 @@ const Auth = () => {
                         <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
                           id="login-password"
-                          type="password"
+                          type={showPassword ? "text" : "password"}
                           placeholder="••••••••"
                           className="pr-10"
                           required
                           value={loginPassword}
                           onChange={(e) => setLoginPassword(e.target.value)}
                         />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
                       </div>
                     </div>
                     <div className="flex justify-end">
@@ -483,7 +533,7 @@ const Auth = () => {
                         <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
                           id="signup-password"
-                          type="password"
+                          type={showSignupPassword ? "text" : "password"}
                           placeholder="••••••••"
                           className="pr-10"
                           required
@@ -491,6 +541,13 @@ const Auth = () => {
                           value={signupPassword}
                           onChange={(e) => setSignupPassword(e.target.value)}
                         />
+                        <button
+                          type="button"
+                          onClick={() => setShowSignupPassword(!showSignupPassword)}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showSignupPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
                       </div>
                       <p className="text-xs text-muted-foreground">{t('auth.passwordMin')}</p>
                     </div>
@@ -555,35 +612,66 @@ const Auth = () => {
 
                 {resetStep === 'verify' && (
                   <form onSubmit={handleVerifyOtp} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="otp">{t('auth.verifyOtp')}</Label>
+                    <div className="bg-muted/50 rounded-lg p-6 text-center">
+                      <Mail className="w-10 h-10 text-primary mx-auto mb-4" />
+                      <p className="text-sm text-foreground font-medium mb-2">
+                        {t('auth.otpSent')}
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-4">
+                        {t('auth.otpPlaceholder')}
+                      </p>
                       <Input
-                        id="otp"
                         type="text"
-                        maxLength={6}
                         placeholder="000000"
-                        className="text-center text-2xl tracking-[1rem] h-16"
+                        className="text-center text-2xl tracking-[1em] font-mono"
+                        maxLength={6}
                         required
                         value={otp}
-                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                        onChange={(e) => setOtp(e.target.value)}
                       />
-                      <p className="text-xs text-center text-muted-foreground">{t('auth.otpPlaceholder')}</p>
                     </div>
                     <Button
                       type="submit"
-                      className="w-full gradient-accent border-0 shadow-soft hover:shadow-hover"
-                      disabled={isLoading}
+                      className="w-full"
+                      disabled={isLoading || otp.length !== 6}
                     >
                       {isLoading ? t('auth.loading') : t('auth.verifyOtp')}
                     </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="w-full"
-                      onClick={() => setResetStep('input')}
-                    >
-                      {language === 'ar' ? 'تغيير البريد الإلكتروني' : 'Change Email'}
-                    </Button>
+
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="w-full text-xs"
+                        onClick={handleResendOtp}
+                        disabled={isLoading || resendTimer > 0}
+                      >
+                        {resendTimer > 0
+                          ? `${t('auth.resendCode')} (${resendTimer}s)`
+                          : t('auth.resendCode')}
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="w-full text-xs"
+                        onClick={() => setResetStep('input')}
+                      >
+                        {language === 'ar' ? 'تغيير البريد الإلكتروني' : 'Change Email'}
+                      </Button>
+                    </div>
+
+                    <div className="mt-8 p-4 bg-muted/30 rounded-lg text-xs space-y-2 text-muted-foreground border border-dashed">
+                      <p className="font-semibold text-foreground mb-1">
+                        {language === 'ar' ? 'لم يصلك الرمز؟' : 'Didn\'t receive the code?'}
+                      </p>
+                      <ul className="list-disc list-inside space-y-1">
+                        <li>{language === 'ar' ? 'تأكد من مجلد الرسائل غير المرغوب فيها (Spam).' : 'Check your Spam/Junk folder.'}</li>
+                        <li>{language === 'ar' ? 'تأكد من كتابة البريد الإلكتروني بشكل صحيح.' : 'Make sure the email is typed correctly.'}</li>
+                        <li>{language === 'ar' ? 'يرجى الانتظار دقيقتين قبل المحاولة مرة أخرى.' : 'Please wait 2 minutes before retrying.'}</li>
+                        <li>{language === 'ar' ? 'يمكنك نسخ الرمز الموجود في نهاية الرابط الذي يصلك.' : 'You can copy the code from the end of the link sent to you.'}</li>
+                      </ul>
+                    </div>
                   </form>
                 )}
 
@@ -591,23 +679,45 @@ const Auth = () => {
                   <form onSubmit={handleUpdatePassword} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="new-password">{t('auth.newPassword')}</Label>
-                      <Input
-                        id="new-password"
-                        type="password"
-                        required
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                      />
+                      <div className="relative">
+                        <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="new-password"
+                          type={showNewPassword ? "text" : "password"}
+                          className="pr-10"
+                          required
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="confirm-password">{t('auth.confirmNewPassword')}</Label>
-                      <Input
-                        id="confirm-password"
-                        type="password"
-                        required
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                      />
+                      <div className="relative">
+                        <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="confirm-password"
+                          type={showConfirmPassword ? "text" : "password"}
+                          className="pr-10"
+                          required
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
                     </div>
                     <Button
                       type="submit"
