@@ -43,11 +43,20 @@ const AuthHandler = () => {
       const search = window.location.search;
       if (hash.includes('access_token=') && (hash.includes('type=recovery') || search.includes('type=recovery'))) {
         console.log("Manual token capture: Recovery detected");
+
+        // Check current path to determine where to redirect
+        if (window.location.pathname.includes('/admin-auth')) {
+          navigate('/admin-auth?recovery=true', { replace: true });
+        } else if (window.location.pathname.includes('/owner-auth')) {
+          navigate('/owner-auth?recovery=true', { replace: true });
+        } else {
+          navigate('/auth?recovery=true', { replace: true });
+        }
+
         toast({
           title: language === 'ar' ? "تم كشف جلسة استعادة" : "Recovery session detected",
           description: language === 'ar' ? "يرجى تعيين كلمة المرور الجديدة" : "Please set your new password",
         });
-        navigate('/auth?recovery=true', { replace: true });
         return true;
       }
       return false;
@@ -58,7 +67,13 @@ const AuthHandler = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth event:", event, session ? "Session set" : "No session");
       if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && window.location.href.includes('type=recovery'))) {
-        navigate('/auth?recovery=true', { replace: true });
+        if (window.location.pathname.includes('/admin-auth')) {
+          navigate('/admin-auth?recovery=true', { replace: true });
+        } else if (window.location.pathname.includes('/owner-auth')) {
+          navigate('/owner-auth?recovery=true', { replace: true });
+        } else {
+          navigate('/auth?recovery=true', { replace: true });
+        }
         toast({
           title: language === 'ar' ? "تم تفعيل وضع الاستعادة" : "Recovery mode active",
         });

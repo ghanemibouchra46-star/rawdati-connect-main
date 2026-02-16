@@ -233,7 +233,7 @@ const AdminAuth = () => {
         setIsLoading(true);
 
         const { error } = await supabase.auth.resetPasswordForEmail(contact, {
-            redirectTo: "http://localhost:8081/admin-auth",
+            redirectTo: `${window.location.origin}/admin-auth`,
         });
 
         if (error) {
@@ -270,7 +270,7 @@ const AdminAuth = () => {
         setIsLoading(true);
         const contact = resetEmail.trim();
         const { error } = await supabase.auth.resetPasswordForEmail(contact, {
-            redirectTo: "http://localhost:8081/admin-auth",
+            redirectTo: `${window.location.origin}/admin-auth`,
         });
 
         if (error) {
