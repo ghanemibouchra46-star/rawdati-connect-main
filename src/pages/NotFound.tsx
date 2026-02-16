@@ -13,8 +13,15 @@ const NotFound = () => {
     // Aggressive check for recovery tokens in ANY part of the URL
     if (fullPath.includes('type=recovery') || fullPath.includes('access_token=')) {
       console.log("Recovery token detected on 404 page, redirecting...");
-      // Fix for old links missing the hash
-      navigate('/auth?recovery=true', { replace: true });
+
+      // Smart redirect based on URL or stored intent
+      if (fullPath.includes('admin') || localStorage.getItem('adminResetEmail')) {
+        navigate('/admin-auth?recovery=true', { replace: true });
+      } else if (fullPath.includes('owner')) {
+        navigate('/owner-auth?recovery=true', { replace: true });
+      } else {
+        navigate('/auth?recovery=true', { replace: true });
+      }
       return;
     }
 

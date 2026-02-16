@@ -109,35 +109,14 @@ const AdminAuth = () => {
                 .single();
 
             if (roleError || !roleData) {
-                // Proactive check for the specific user who needs admin access
-                if (data.user.email === 'ghanemifatima4@gmail.com') {
-                    console.log('Proactively granting admin role to ghanemifatima4@gmail.com');
-                    const { error: insertError } = await supabase
-                        .from('user_roles')
-                        .insert({ user_id: data.user.id, role: 'admin' });
-
-                    if (insertError) {
-                        console.error('Failed to proactively grant admin role:', insertError);
-                        await supabase.auth.signOut();
-                        toast({
-                            title: t('common.error'),
-                            description: t('auth.error.notAdmin'),
-                            variant: 'destructive',
-                        });
-                        setIsLoading(false);
-                        return;
-                    }
-                } else {
-                    console.warn(`User ${data.user.email} attempted admin login without admin role.`);
-                    await supabase.auth.signOut();
-                    toast({
-                        title: t('common.error'),
-                        description: `${t('auth.error.notAdmin')} (${data.user.email})`,
-                        variant: 'destructive',
-                    });
-                    setIsLoading(false);
-                    return;
-                }
+                await supabase.auth.signOut();
+                toast({
+                    title: t('common.error'),
+                    description: t('auth.error.notAdmin'),
+                    variant: 'destructive',
+                });
+                setIsLoading(false);
+                return;
             }
 
             toast({
