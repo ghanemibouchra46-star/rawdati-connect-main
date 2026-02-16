@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Baby, Mail, Lock, Shield, ArrowRight, User, Phone } from 'lucide-react';
+import { Baby, Mail, Lock, Shield, ArrowRight, User, Phone, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
