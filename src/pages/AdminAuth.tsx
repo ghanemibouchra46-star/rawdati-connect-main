@@ -73,8 +73,8 @@ const AdminAuth = () => {
         setIsLoading(true);
 
         const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
+            email: email.trim(),
+            password: password.trim(),
         });
 
         if (error) {
@@ -86,10 +86,11 @@ const AdminAuth = () => {
                     variant: 'destructive',
                 });
             } else {
+                const isInvalidCreds = error.message === 'Invalid login credentials';
                 toast({
                     title: t('common.error'),
-                    description: error.message === 'Invalid login credentials'
-                        ? t('auth.error.invalidLogin')
+                    description: isInvalidCreds
+                        ? `${t('auth.error.invalidLogin')} ${language === 'ar' ? '- تأكد من تأكيد البريد الإلكتروني في Supabase إذا لزم الأمر' : '- Verify email confirmation in Supabase if required'}`
                         : error.message,
                     variant: 'destructive',
                 });
@@ -131,7 +132,7 @@ const AdminAuth = () => {
                     await supabase.auth.signOut();
                     toast({
                         title: t('common.error'),
-                        description: t('auth.error.notAdmin'),
+                        description: `${t('auth.error.notAdmin')} (${data.user.email})`,
                         variant: 'destructive',
                     });
                     setIsLoading(false);
