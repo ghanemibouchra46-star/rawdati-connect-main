@@ -112,7 +112,7 @@ const AdminDashboard = () => {
             }));
 
             setUsers(usersWithRoles);
-            setKindergartens(kgData as Kindergarten[] || []);
+            setKindergartens((kgData as unknown as Kindergarten[]) || []);
 
             const activeOwners = usersWithRoles.filter(u => u.role === 'owner').length;
             const activeParents = usersWithRoles.filter(u => u.role === 'parent').length;
@@ -140,7 +140,7 @@ const AdminDashboard = () => {
     const updateUserStatus = async (userId: string, status: 'approved' | 'rejected') => {
         const { error } = await supabase
             .from('profiles')
-            .update({ status })
+            .update({ status: status as any })
             .eq('id', userId);
 
         if (error) {
@@ -155,7 +155,7 @@ const AdminDashboard = () => {
     const updateKGStatus = async (kgId: string, status: 'approved' | 'rejected') => {
         const { error } = await supabase
             .from('kindergartens')
-            .update({ status })
+            .update({ status: status as any })
             .eq('id', kgId);
 
         if (error) {
@@ -445,6 +445,32 @@ const AdminDashboard = () => {
                                                     <p className="text-xs text-slate-300">{new Date(user.created_at).toLocaleDateString()}</p>
                                                 </div>
                                                 <Badge variant="outline" className="capitalize text-slate-400 border-white/10">{user.role}</Badge>
+
+                                                {user.role === 'owner' && (
+                                                    <div className="flex gap-1">
+                                                        {user.status !== 'approved' && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="text-green-500 hover:text-green-400 hover:bg-green-500/10"
+                                                                onClick={() => updateUserStatus(user.id, 'approved')}
+                                                            >
+                                                                <UserCheck className="w-4 h-4" />
+                                                            </Button>
+                                                        )}
+                                                        {user.status !== 'rejected' && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                                                                onClick={() => updateUserStatus(user.id, 'rejected')}
+                                                            >
+                                                                <UserX className="w-4 h-4" />
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                )}
+
                                                 <Button variant="ghost" size="icon" className="text-slate-500 hover:text-white"><ChevronRight className="w-5 h-5" /></Button>
                                             </div>
                                         </div>
