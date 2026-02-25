@@ -39,6 +39,20 @@ interface Kindergarten {
     created_at: string;
 }
 
+interface RegistrationRequest {
+    id: string;
+    kindergarten_id: string;
+    parent_name: string;
+    phone: string;
+    email: string | null;
+    child_name: string;
+    child_age: number;
+    message: string | null;
+    status: 'pending' | 'approved' | 'rejected';
+    created_at: string;
+    user_id?: string;
+}
+
 const AdminDashboard = () => {
     const { t, dir, language } = useLanguage();
     const navigate = useNavigate();
@@ -47,6 +61,7 @@ const AdminDashboard = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [users, setUsers] = useState<UserProfile[]>([]);
     const [kindergartens, setKindergartens] = useState<Kindergarten[]>([]);
+    const [registrationRequests, setRegistrationRequests] = useState<RegistrationRequest[]>([]);
     const [stats, setStats] = useState({
         totalUsers: 0,
         totalKindergartens: 0,
@@ -106,6 +121,12 @@ const AdminDashboard = () => {
                 .select('*')
                 .order('created_at', { ascending: false });
 
+            // Fetch registration requests
+            const { data: regData } = await supabase
+                .from('registration_requests')
+                .select('*')
+                .order('created_at', { ascending: false });
+
             const usersWithRoles = (profiles || []).map(profile => ({
                 ...profile,
                 role: roles?.find(r => r.user_id === profile.id)?.role || 'parent'
@@ -113,6 +134,7 @@ const AdminDashboard = () => {
 
             setUsers(usersWithRoles);
             setKindergartens((kgData as unknown as Kindergarten[]) || []);
+            setRegistrationRequests((regData as unknown as RegistrationRequest[]) || []);
 
             const activeOwners = usersWithRoles.filter(u => u.role === 'owner').length;
             const activeParents = usersWithRoles.filter(u => u.role === 'parent').length;
@@ -262,6 +284,10 @@ const AdminDashboard = () => {
                         <TabsTrigger value="kindergartens" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
                             <Building2 className="w-4 h-4 mx-2" />
                             {language === 'ar' ? 'الروضات' : 'Kindergartens'}
+                        </TabsTrigger>
+                        <TabsTrigger value="registrations" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
+                            <Baby className="w-4 h-4 mx-2" />
+                            {language === 'ar' ? 'طلبات التسجيل' : 'Registrations'}
                         </TabsTrigger>
                         <TabsTrigger value="users" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
                             <Users className="w-4 h-4 mx-2" />
@@ -413,6 +439,72 @@ const AdminDashboard = () => {
                                                         </TableCell>
                                                     </TableRow>
                                                 ))
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="registrations">
+                        <Card className="bg-slate-900 border-white/5">
+                            <CardHeader>
+                                <CardTitle className="text-white">{language === 'ar' ? 'طلبات تسجيل الأطفال' : 'Child Registration Requests'}</CardTitle>
+                                <CardDescription>{language === 'ar' ? 'متابعة طلبات التسجيل المرسلة من الأولياء' : 'Monitor registration requests sent by parents'}</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="overflow-x-auto">
+                                    <Table>
+                                        <TableHeader className="bg-white/5">
+                                            <TableRow className="border-white/5">
+                                                <TableHead className="text-slate-400">{language === 'ar' ? 'الطفل' : 'Child'}</TableHead>
+                                                <TableHead className="text-slate-400">{language === 'ar' ? 'ولي الأمر' : 'Parent'}</TableHead>
+                                                <TableHead className="text-slate-400">{language === 'ar' ? 'الروضة' : 'Kindergarten'}</TableHead>
+                                                <TableHead className="text-slate-400">{language === 'ar' ? 'التوجيه' : 'Status'}</TableHead>
+                                                <TableHead className="text-slate-400">{language === 'ar' ? 'التاريخ' : 'Date'}</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {registrationRequests.length === 0 ? (
+                                                <TableRow>
+                                                    <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                                                        {language === 'ar' ? 'لا توجد طلبات تسجيل' : 'No registration requests found'}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ) : (
+                                                registrationRequests.map((reg) => {
+                                                    const kg = kindergartens.find(k => k.id === reg.kindergarten_id);
+                                                    return (
+                                                        <TableRow key={reg.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                                                            <TableCell>
+                                                                <div className="font-medium text-white">{reg.child_name}</div>
+                                                                <div className="text-xs text-slate-500">{reg.child_age} {language === 'ar' ? 'سنوات' : 'years'}</div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div className="text-white">{reg.parent_name}</div>
+                                                                <div className="text-xs text-slate-500">{reg.phone}</div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div className="text-white">{kg?.name || reg.kindergarten_id}</div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Badge
+                                                                    className={
+                                                                        reg.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                                                            reg.status === 'rejected' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                                                                                'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                                                                    }
+                                                                >
+                                                                    {reg.status}
+                                                                </Badge>
+                                                            </TableCell>
+                                                            <TableCell className="text-slate-400 text-sm">
+                                                                {new Date(reg.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })
                                             )}
                                         </TableBody>
                                     </Table>
