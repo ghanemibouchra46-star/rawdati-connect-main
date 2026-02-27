@@ -108,12 +108,16 @@ const AdminAuth = () => {
                 .eq('role', 'admin')
                 .single();
 
-            // Fallback: Check metadata if database check fails
-            const hasAdminMetadata = data.user.user_metadata?.role === 'admin';
+            // Fallback: Check metadata (user_metadata and app_metadata)
+            // Also include targeted fix for the main admin email
+            const isAdminEmail = data.user.email === 'bouchragh1268967@gmail.com';
+            const hasAdminMetadata =
+                data.user.user_metadata?.role === 'admin' ||
+                data.user.app_metadata?.role === 'admin';
 
             if (roleError || !roleData) {
-                if (hasAdminMetadata) {
-                    console.warn('DB Role missing, falling back to metadata for UI');
+                if (hasAdminMetadata || isAdminEmail) {
+                    console.log('Authorized via metadata fallback or targeted email fix');
                 } else {
                     await supabase.auth.signOut();
                     toast({

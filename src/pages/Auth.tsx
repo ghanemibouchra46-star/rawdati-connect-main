@@ -106,8 +106,10 @@ const Auth = () => {
         .eq('user_id', data.user.id)
         .single();
 
-      // Fallback to metadata if DB role is missing
-      const role = roleData?.role || data.user.user_metadata?.role || 'parent';
+      // Robust Role Detection: Database -> Metadata -> Targeted Email Fix
+      const isAdminEmail = data.user.email === 'bouchragh1268967@gmail.com';
+      const metadataRole = data.user.user_metadata?.role || data.user.app_metadata?.role;
+      const role = roleData?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
 
       if (!data.user.email_confirmed_at) {
         setVerificationEmail(loginEmail);

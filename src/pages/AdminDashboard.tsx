@@ -95,8 +95,12 @@ const AdminDashboard = () => {
             .single();
 
         if (!roleData) {
-            const hasAdminMetadata = session.user.user_metadata?.role === 'admin';
-            if (!hasAdminMetadata) {
+            const isAdminEmail = session.user.email === 'bouchragh1268967@gmail.com';
+            const hasAdminMetadata =
+                session.user.user_metadata?.role === 'admin' ||
+                session.user.app_metadata?.role === 'admin';
+
+            if (!hasAdminMetadata && !isAdminEmail) {
                 navigate('/admin-auth');
                 return false;
             }
