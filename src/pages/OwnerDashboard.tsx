@@ -208,7 +208,7 @@ const OwnerDashboard = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate('/owner-auth');
+    navigate('/auth');
   };
 
   const handleStatusChange = async (requestId: string, newStatus: string) => {

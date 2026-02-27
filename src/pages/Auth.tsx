@@ -98,6 +98,15 @@ const Auth = () => {
         });
       }
     } else if (data.user) {
+      // Check for user role and redirect accordingly
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', data.user.id)
+        .single();
+
+      const role = roleData?.role || 'parent';
+
       if (!data.user.email_confirmed_at) {
         setVerificationEmail(loginEmail);
         setShowVerification(true);
@@ -108,10 +117,18 @@ const Auth = () => {
         });
       } else {
         toast({
-          title: t('common.updated'),
-          description: t('auth.welcome'),
+          title: t('auth.welcome'),
+          description: t('auth.success'),
         });
-        navigate('/parent');
+
+        // Role-based navigation
+        if (role === 'admin') {
+          navigate('/admin');
+        } else if (role === 'owner') {
+          navigate('/owner');
+        } else {
+          navigate('/parent');
+        }
       }
     }
 
@@ -731,13 +748,20 @@ const Auth = () => {
               </div>
             )}
 
-            <div className="mt-6 text-center">
+            <div className="mt-6 flex flex-col items-center gap-3">
               <Link
                 to="/"
                 className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
               >
                 <ArrowRight className="w-4 h-4" />
                 {t('auth.backHome')}
+              </Link>
+              <Link
+                to="/admin-auth"
+                className="text-xs text-muted-foreground/60 hover:text-primary transition-colors inline-flex items-center gap-1"
+              >
+                <Lock className="w-3 h-3" />
+                {language === 'ar' ? 'دخول المسؤولين' : 'Accès Admin'}
               </Link>
             </div>
           </CardContent>
