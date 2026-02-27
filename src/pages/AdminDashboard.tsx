@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import { Separator } from '@/components/ui/separator';
+import { kindergartens as localKindergartens } from '@/data/kindergartens';
 
 interface UserProfile {
     id: string;
@@ -31,12 +32,32 @@ interface UserProfile {
 
 interface Kindergarten {
     id: string;
-    name: string;
-    owner_id: string;
-    address: string;
-    city: string;
+    name_ar: string;
+    name_fr: string;
+    address_ar: string;
+    address_fr: string;
+    municipality: string;
+    municipality_ar: string;
+    municipality_fr: string;
+    owner_id?: string;
     status: 'pending' | 'approved' | 'rejected';
     created_at: string;
+}
+
+// Adapter to convert local kindergarten data to admin format
+function adaptKindergarten(kg: typeof localKindergartens[0]): Kindergarten {
+    return {
+        id: kg.id,
+        name_ar: kg.nameAr,
+        name_fr: kg.nameFr,
+        address_ar: kg.addressAr,
+        address_fr: kg.addressFr,
+        municipality: kg.municipality,
+        municipality_ar: kg.municipalityAr,
+        municipality_fr: kg.municipalityFr,
+        status: 'approved',
+        created_at: new Date().toISOString(),
+    };
 }
 
 interface RegistrationRequest {
@@ -124,11 +145,8 @@ const AdminDashboard = () => {
                 .from('user_roles')
                 .select('user_id, role');
 
-            // Fetch kindergartens
-            const { data: kgData } = await supabase
-                .from('kindergartens')
-                .select('*')
-                .order('created_at', { ascending: false });
+            // Load kindergartens from local data (not from DB - data is static)
+            const adaptedKindergartens = localKindergartens.map(adaptKindergarten);
 
             // Fetch registration requests
             const { data: regData } = await supabase
@@ -142,7 +160,7 @@ const AdminDashboard = () => {
             }));
 
             setUsers(usersWithRoles);
-            setKindergartens((kgData as unknown as Kindergarten[]) || []);
+            setKindergartens(adaptedKindergartens);
             setRegistrationRequests((regData as unknown as RegistrationRequest[]) || []);
 
             const activeOwners = usersWithRoles.filter(u => u.role === 'owner').length;
@@ -151,8 +169,8 @@ const AdminDashboard = () => {
             // Calculate stats
             setStats({
                 totalUsers: usersWithRoles.length,
-                totalKindergartens: (kgData || []).length,
-                pendingApprovals: (kgData || []).filter(k => k.status === 'pending').length,
+                totalKindergartens: adaptedKindergartens.length,
+                pendingApprovals: 0,
                 activeParents: activeParents,
                 activeOwners: activeOwners
             });
@@ -323,12 +341,14 @@ const AdminDashboard = () => {
                                                         <Building2 className="w-5 h-5 text-red-500" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-medium text-white">{kg.name}</p>
-                                                        <p className="text-xs text-slate-400">{kg.city}</p>
+                                                        <p className="text-sm font-medium text-white">{language === 'ar' ? kg.name_ar : kg.name_fr}</p>
+                                                        <p className="text-xs text-slate-400">{language === 'ar' ? kg.municipality_ar : kg.municipality_fr}</p>
                                                     </div>
                                                 </div>
                                                 <Badge variant={kg.status === 'approved' ? 'default' : 'secondary'} className={kg.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' : ''}>
-                                                    {kg.status}
+                                                    {kg.status === 'approved' ? (language === 'ar' ? 'موافق عليه' : 'Approved') :
+                                                        kg.status === 'rejected' ? (language === 'ar' ? 'مرفوض' : 'Rejected') :
+                                                            (language === 'ar' ? 'معلق' : 'Pending')}
                                                 </Badge>
                                             </div>
                                         ))}
@@ -409,9 +429,9 @@ const AdminDashboard = () => {
                                             ) : (
                                                 kindergartens.map((kg) => (
                                                     <TableRow key={kg.id} className="border-white/5 hover:bg-white/5 transition-colors">
-                                                        <TableCell className="font-medium text-white">{kg.name}</TableCell>
-                                                        <TableCell className="text-slate-400 text-sm max-w-[200px] truncate">{kg.address}</TableCell>
-                                                        <TableCell className="text-slate-400">{kg.city}</TableCell>
+                                                        <TableCell className="font-medium text-white">{language === 'ar' ? kg.name_ar : kg.name_fr}</TableCell>
+                                                        <TableCell className="text-slate-400 text-sm max-w-[200px] truncate">{language === 'ar' ? kg.address_ar : kg.address_fr}</TableCell>
+                                                        <TableCell className="text-slate-400">{language === 'ar' ? kg.municipality_ar : kg.municipality_fr}</TableCell>
                                                         <TableCell>
                                                             <Badge
                                                                 className={
@@ -495,7 +515,7 @@ const AdminDashboard = () => {
                                                                 <div className="text-xs text-slate-500">{reg.phone}</div>
                                                             </TableCell>
                                                             <TableCell>
-                                                                <div className="text-white">{kg?.name || reg.kindergarten_id}</div>
+                                                                <div className="text-white">{kindergartens.find(k => k.id === reg.kindergarten_id)?.[language === 'ar' ? 'name_ar' : 'name_fr'] || reg.kindergarten_id}</div>
                                                             </TableCell>
                                                             <TableCell>
                                                                 <Badge
