@@ -19,6 +19,7 @@ const Auth = () => {
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
+  const [signupRole, setSignupRole] = useState<'parent' | 'owner' | 'admin'>('parent');
   const [showVerification, setShowVerification] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -176,7 +177,7 @@ const Auth = () => {
         data: {
           full_name: signupName,
           phone: signupPhone,
-          role: 'parent',
+          role: signupRole,
         }
       }
     });
@@ -497,6 +498,35 @@ const Auth = () => {
 
                 <TabsContent value="signup">
                   <form onSubmit={handleSignup} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>{t('auth.role') || (language === 'ar' ? 'نوع الحساب' : 'Type de compte')}</Label>
+                      <div className="grid grid-cols-3 gap-2">
+                        <Button
+                          type="button"
+                          variant={signupRole === 'parent' ? 'default' : 'outline'}
+                          className={`text-xs px-2 ${signupRole === 'parent' ? 'gradient-accent border-0' : ''}`}
+                          onClick={() => setSignupRole('parent')}
+                        >
+                          {language === 'ar' ? 'ولي أمر' : 'Parent'}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={signupRole === 'owner' ? 'default' : 'outline'}
+                          className={`text-xs px-2 ${signupRole === 'owner' ? 'gradient-accent border-0' : ''}`}
+                          onClick={() => setSignupRole('owner')}
+                        >
+                          {language === 'ar' ? 'مدير روضة' : 'Directeur'}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={signupRole === 'admin' ? 'default' : 'outline'}
+                          className={`text-xs px-2 ${signupRole === 'admin' ? 'gradient-accent border-0' : ''}`}
+                          onClick={() => setSignupRole('admin')}
+                        >
+                          {language === 'ar' ? 'مسؤول' : 'Admin'}
+                        </Button>
+                      </div>
+                    </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-name">{t('auth.fullName')}</Label>
                       <div className="relative">
