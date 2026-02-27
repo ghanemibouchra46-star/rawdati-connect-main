@@ -54,7 +54,6 @@ const AdminAuth = () => {
     const checkAdminSession = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-            // Check if user is admin
             const { data: roleData } = await supabase
                 .from('user_roles')
                 .select('role')
@@ -62,7 +61,14 @@ const AdminAuth = () => {
                 .eq('role', 'admin')
                 .single();
 
-            if (roleData) {
+            const userEmail = session.user.email?.toLowerCase() || '';
+            const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
+            const isAdminEmail = adminEmails.includes(userEmail);
+            const hasAdminMetadata =
+                session.user.user_metadata?.role === 'admin' ||
+                session.user.app_metadata?.role === 'admin';
+
+            if (roleData || isAdminEmail || hasAdminMetadata) {
                 navigate('/admin');
             }
         }
@@ -109,8 +115,10 @@ const AdminAuth = () => {
                 .single();
 
             // Fallback: Check metadata (user_metadata and app_metadata)
-            // Also include targeted fix for the main admin email
-            const isAdminEmail = data.user.email === 'bouchragh1268967@gmail.com';
+            // Also include targeted fix for the main admin emails (case-insensitive)
+            const userEmail = data.user.email?.toLowerCase() || '';
+            const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
+            const isAdminEmail = adminEmails.includes(userEmail);
             const hasAdminMetadata =
                 data.user.user_metadata?.role === 'admin' ||
                 data.user.app_metadata?.role === 'admin';
