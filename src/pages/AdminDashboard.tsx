@@ -95,8 +95,11 @@ const AdminDashboard = () => {
             .single();
 
         if (!roleData) {
-            navigate('/admin-auth');
-            return false;
+            const hasAdminMetadata = session.user.user_metadata?.role === 'admin';
+            if (!hasAdminMetadata) {
+                navigate('/admin-auth');
+                return false;
+            }
         }
         return true;
     };

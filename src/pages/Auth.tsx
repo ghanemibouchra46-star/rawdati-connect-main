@@ -106,7 +106,8 @@ const Auth = () => {
         .eq('user_id', data.user.id)
         .single();
 
-      const role = roleData?.role || 'parent';
+      // Fallback to metadata if DB role is missing
+      const role = roleData?.role || data.user.user_metadata?.role || 'parent';
 
       if (!data.user.email_confirmed_at) {
         setVerificationEmail(loginEmail);

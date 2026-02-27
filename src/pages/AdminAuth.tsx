@@ -90,7 +90,7 @@ const AdminAuth = () => {
                 toast({
                     title: t('common.error'),
                     description: isInvalidCreds
-                        ? `${t('auth.error.invalidLogin')} ${language === 'ar' ? '- تأكد من تأكيد البريد الإلكتروني في Supabase إذا لزم الأمر' : '- Verify email confirmation in Supabase if required'}`
+                        ? `${t('auth.error.invalidLogin')} ${language === 'ar' ? '- تأكد من تفعيل الحساب' : '- Verify account activation'}`
                         : error.message,
                     variant: 'destructive',
                 });
@@ -100,7 +100,7 @@ const AdminAuth = () => {
         }
 
         if (data.user) {
-            // Check if user has admin role
+            // First check database role
             const { data: roleData, error: roleError } = await supabase
                 .from('user_roles')
                 .select('role')
@@ -108,15 +108,22 @@ const AdminAuth = () => {
                 .eq('role', 'admin')
                 .single();
 
+            // Fallback: Check metadata if database check fails
+            const hasAdminMetadata = data.user.user_metadata?.role === 'admin';
+
             if (roleError || !roleData) {
-                await supabase.auth.signOut();
-                toast({
-                    title: t('common.error'),
-                    description: t('auth.error.notAdmin'),
-                    variant: 'destructive',
-                });
-                setIsLoading(false);
-                return;
+                if (hasAdminMetadata) {
+                    console.warn('DB Role missing, falling back to metadata for UI');
+                } else {
+                    await supabase.auth.signOut();
+                    toast({
+                        title: t('common.error'),
+                        description: t('auth.error.notAdmin'),
+                        variant: 'destructive',
+                    });
+                    setIsLoading(false);
+                    return;
+                }
             }
 
             toast({

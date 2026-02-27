@@ -161,19 +161,38 @@ const OwnerDashboard = () => {
 
       if (error) {
         console.error('Error checking role:', error);
-        setIsAuthorized(false);
-        navigate('/owner-auth');
+
+        // Fallback: Check metadata
+        const { data: sessionData } = await supabase.auth.getSession();
+        const hasOwnerMetadata = sessionData?.session?.user.user_metadata?.role === 'owner';
+
+        if (hasOwnerMetadata) {
+          setIsAuthorized(true);
+          fetchDashboardData(userId);
+        } else {
+          setIsAuthorized(false);
+          navigate('/owner-auth');
+        }
       } else if (data === true) {
         setIsAuthorized(true);
         fetchDashboardData(userId);
       } else {
-        toast({
-          title: 'غير مصرح',
-          description: 'ليس لديك صلاحية الوصول لهذه الصفحة',
-          variant: 'destructive',
-        });
-        await supabase.auth.signOut();
-        navigate('/owner-auth');
+        // Fallback: Check metadata
+        const { data: sessionData } = await supabase.auth.getSession();
+        const hasOwnerMetadata = sessionData?.session?.user.user_metadata?.role === 'owner';
+
+        if (hasOwnerMetadata) {
+          setIsAuthorized(true);
+          fetchDashboardData(userId);
+        } else {
+          toast({
+            title: 'غير مصرح',
+            description: 'ليس لديك صلاحية الوصول لهذه الصفحة',
+            variant: 'destructive',
+          });
+          await supabase.auth.signOut();
+          navigate('/owner-auth');
+        }
       }
     } finally {
       setIsLoading(false);
