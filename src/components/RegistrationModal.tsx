@@ -117,23 +117,30 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
         ? (formData.foodAllergies.trim() || (language === 'ar' ? 'لا يوجد' : 'Aucun'))
         : null;
 
-      // Attempt to save to Supabase, but we'll show success regardless to satisfy the "mock" requirement
-      try {
-        await supabase.from('registration_requests').insert({
-          kindergarten_id: kindergarten.id,
-          parent_name: formData.parentName,
-          phone: formData.phone,
-          email: formData.email || null,
-          child_name: formData.childName,
-          child_age: parseInt(formData.childAge),
-          message: formData.message || null,
-          medical_condition: medicalConditionValue,
-          food_allergies: foodAllergiesValue,
-          user_id: user.id,
-          status: 'pending',
+      // Attempt to save to Supabase
+      const { error: insertError } = await supabase.from('registration_requests').insert({
+        kindergarten_id: kindergarten.id,
+        parent_name: formData.parentName,
+        phone: formData.phone,
+        email: formData.email || null,
+        child_name: formData.childName,
+        child_age: parseInt(formData.childAge),
+        message: formData.message || null,
+        medical_condition: medicalConditionValue,
+        food_allergies: foodAllergiesValue,
+        user_id: user.id,
+        status: 'pending',
+      });
+
+      if (insertError) {
+        console.error('Supabase insertion error:', insertError);
+        toast({
+          title: t('common.error'),
+          description: language === 'ar' ? 'فشل إرسال البيانات إلى Supabase: ' + insertError.message : 'Failed to send data to Supabase: ' + insertError.message,
+          variant: 'destructive',
         });
-      } catch (err) {
-        console.error('Supabase insertion error (silently handled for mock):', err);
+        setIsSubmitting(false);
+        return;
       }
 
       setIsSuccess(true);

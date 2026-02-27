@@ -75,19 +75,25 @@ const BookingModal = ({ kindergarten, isOpen, onClose }: BookingModalProps) => {
                 return;
             }
 
-            // Attempt to save to Supabase, but show success regardless for mock
-            try {
-                const { error } = await (supabase.from('bookings') as any).insert({
-                    kindergarten_id: kindergarten.id,
-                    user_id: user.id,
-                    parent_name: parentName,
-                    phone: phone,
-                    booking_date: format(date, 'yyyy-MM-dd'),
-                    booking_time: selectedTime,
+            // Attempt to save to Supabase
+            const { error: insertError } = await (supabase.from('bookings') as any).insert({
+                kindergarten_id: kindergarten.id,
+                user_id: user.id,
+                parent_name: parentName,
+                phone: phone,
+                booking_date: format(date, 'yyyy-MM-dd'),
+                booking_time: selectedTime,
+            });
+
+            if (insertError) {
+                console.error('Booking insertion error:', insertError);
+                toast({
+                    title: t('common.error'),
+                    description: language === 'ar' ? 'فشل إرسال البيانات إلى Supabase: ' + insertError.message : 'Failed to send data to Supabase: ' + insertError.message,
+                    variant: 'destructive',
                 });
-                if (error) console.error('Booking insertion error:', error);
-            } catch (err) {
-                console.error('Booking insertion error (silently handled for mock):', err);
+                setIsSubmitting(false);
+                return;
             }
 
             setIsSuccess(true);
