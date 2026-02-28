@@ -81,12 +81,12 @@ const AdminDashboard = () => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [users, setUsers] = useState<UserProfile[]>([]);
-    const [kindergartens, setKindergartens] = useState<Kindergarten[]>([]);
+    const [kindergartens, setKindergartens] = useState<Kindergarten[]>(localKindergartens.map(adaptKindergarten));
     const [registrationRequests, setRegistrationRequests] = useState<RegistrationRequest[]>([]);
     const [activeTab, setActiveTab] = useState('overview');
     const [stats, setStats] = useState({
         totalUsers: 0,
-        totalKindergartens: 0,
+        totalKindergartens: localKindergartens.length,
         pendingApprovals: 0,
         activeParents: 0,
         activeOwners: 0
@@ -135,26 +135,22 @@ const AdminDashboard = () => {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            // Fetch profiles
-            const { data: profiles } = await supabase
-                .from('profiles')
-                .select('*');
+            // 1. Fetch Kindergartens first
+            let rawKgData: any[] = [];
+            try {
+                const { data, error } = await supabase
+                    .from('kindergartens')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                if (error) throw error;
+                rawKgData = data || [];
+            } catch (e) {
+                console.error("KG fetch error:", e);
+            }
 
-            // Fetch user roles
-            const { data: roles } = await supabase
-                .from('user_roles')
-                .select('*');
-
-            // Fetch kindergartens
-            const { data: kgData, error: kgError } = await supabase
-                .from('kindergartens')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            let adaptedKindergartens: Kindergarten[] = [];
-
-            if (!kgError && kgData && kgData.length > 0) {
-                adaptedKindergartens = (kgData as any[]).map(kg => ({
+            let finalKGs: Kindergarten[] = [];
+            if (rawKgData && rawKgData.length > 0) {
+                finalKGs = rawKgData.map(kg => ({
                     id: kg.id,
                     name_ar: kg.name_ar || kg.nameAr || kg.name || 'N/A',
                     name_fr: kg.name_fr || kg.nameFr || kg.name || 'N/A',
@@ -164,37 +160,56 @@ const AdminDashboard = () => {
                     municipality_ar: kg.municipality_ar || kg.city_ar || kg.municipality || 'N/A',
                     municipality_fr: kg.municipality_fr || kg.city_fr || kg.municipality || 'N/A',
                     status: kg.status || 'pending',
-                    created_at: kg.created_at,
+                    created_at: kg.created_at || new Date().toISOString(),
                 }));
             } else {
-                // Fallback to local data if database is empty or error
-                console.log("No Supabase kindergartens found, falling back to local data");
-                adaptedKindergartens = localKindergartens.map(adaptKindergarten);
+                console.log("No DB kindergartens, using local data");
+                finalKGs = localKindergartens.map(adaptKindergarten);
             }
 
-            // Fetch registration requests
-            const { data: regData } = await supabase
-                .from('registration_requests')
-                .select('*')
-                .order('created_at', { ascending: false });
+            // 2. Fetch Profiles and Roles
+            let profiles: any[] = [];
+            let roles: any[] = [];
+            try {
+                const [pRes, rRes] = await Promise.all([
+                    supabase.from('profiles').select('*'),
+                    supabase.from('user_roles').select('*')
+                ]);
+                profiles = pRes.data || [];
+                roles = rRes.data || [];
+            } catch (e) {
+                console.error("Profiles/Roles fetch error:", e);
+            }
 
-            const usersWithRoles = (profiles || []).map(profile => ({
+            // 3. Fetch Registrations
+            let regData: any[] = [];
+            try {
+                const { data } = await supabase
+                    .from('registration_requests')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                regData = data || [];
+            } catch (e) {
+                console.error("Registration fetch error:", e);
+            }
+
+            const usersWithRoles = profiles.map(profile => ({
                 ...profile,
-                role: roles?.find(r => r.user_id === profile.id)?.role || 'parent'
+                role: roles.find(r => r.user_id === profile.id)?.role || 'parent'
             }));
 
+            // Update all states
             setUsers(usersWithRoles);
-            setKindergartens(adaptedKindergartens);
-            setRegistrationRequests((regData as unknown as RegistrationRequest[]) || []);
+            setKindergartens(finalKGs);
+            setRegistrationRequests(regData);
 
             const activeOwners = usersWithRoles.filter(u => u.role === 'owner').length;
             const activeParents = usersWithRoles.filter(u => u.role === 'parent').length;
-            const pendingKGs = adaptedKindergartens.filter(kg => kg.status === 'pending').length;
+            const pendingKGs = finalKGs.filter(kg => kg.status === 'pending').length;
 
-            // Calculate stats
             setStats({
                 totalUsers: usersWithRoles.length,
-                totalKindergartens: adaptedKindergartens.length,
+                totalKindergartens: finalKGs.length,
                 pendingApprovals: pendingKGs,
                 activeParents: activeParents,
                 activeOwners: activeOwners
@@ -202,11 +217,7 @@ const AdminDashboard = () => {
 
         } catch (error) {
             console.error('Fetch error:', error);
-            toast({
-                title: t('common.error'),
-                description: language === 'ar' ? 'حدث خطأ أثناء جلب البيانات' : 'Error fetching data',
-                variant: 'destructive',
-            });
+            // Even on error, we still have local data from initial state
         }
         setIsLoading(false);
     };
