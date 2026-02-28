@@ -556,7 +556,7 @@ const Auth = () => {
                   <form onSubmit={handleSignup} className="space-y-4">
                     <div className="space-y-2">
                       <Label>{t('auth.role') || (language === 'ar' ? 'نوع الحساب' : 'Type de compte')}</Label>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 gap-2">
                         <Button
                           type="button"
                           variant={signupRole === 'parent' ? 'default' : 'outline'}
@@ -572,14 +572,6 @@ const Auth = () => {
                           onClick={() => setSignupRole('owner')}
                         >
                           {language === 'ar' ? 'مدير روضة' : 'Directeur'}
-                        </Button>
-                        <Button
-                          type="button"
-                          variant={signupRole === 'admin' ? 'default' : 'outline'}
-                          className={`text-xs px-2 ${signupRole === 'admin' ? 'gradient-accent border-0' : ''}`}
-                          onClick={() => setSignupRole('admin')}
-                        >
-                          {language === 'ar' ? 'مسؤول' : 'Admin'}
                         </Button>
                       </div>
                     </div>
@@ -841,13 +833,6 @@ const Auth = () => {
               >
                 <ArrowRight className="w-4 h-4" />
                 {t('auth.backHome')}
-              </Link>
-              <Link
-                to="/admin-auth"
-                className="text-xs text-muted-foreground/60 hover:text-primary transition-colors inline-flex items-center gap-1"
-              >
-                <Lock className="w-3 h-3" />
-                {language === 'ar' ? 'دخول المسؤولين' : 'Accès Admin'}
               </Link>
             </div>
           </CardContent>
