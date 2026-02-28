@@ -83,6 +83,7 @@ const AdminDashboard = () => {
     const [users, setUsers] = useState<UserProfile[]>([]);
     const [kindergartens, setKindergartens] = useState<Kindergarten[]>([]);
     const [registrationRequests, setRegistrationRequests] = useState<RegistrationRequest[]>([]);
+    const [activeTab, setActiveTab] = useState('overview');
     const [stats, setStats] = useState({
         totalUsers: 0,
         totalKindergartens: 0,
@@ -123,8 +124,8 @@ const AdminDashboard = () => {
                 session.user.user_metadata?.role === 'admin' ||
                 session.user.app_metadata?.role === 'admin';
 
-            if (!hasAdminMetadata && !isAdminEmail) {
-                navigate('/admin-auth');
+            if (!isAdminEmail && !hasAdminMetadata) {
+                navigate('/');
                 return false;
             }
         }
@@ -134,19 +135,34 @@ const AdminDashboard = () => {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            // Fetch users/profiles
+            // Fetch profiles
             const { data: profiles } = await supabase
                 .from('profiles')
+                .select('*');
+
+            // Fetch user roles
+            const { data: roles } = await supabase
+                .from('user_roles')
+                .select('*');
+
+            // Fetch kindergartens
+            const { data: kgData } = await supabase
+                .from('kindergartens')
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            // Fetch roles
-            const { data: roles } = await supabase
-                .from('user_roles')
-                .select('user_id, role');
-
-            // Load kindergartens from local data (not from DB - data is static)
-            const adaptedKindergartens = localKindergartens.map(adaptKindergarten);
+            const adaptedKindergartens: Kindergarten[] = (kgData as any[] || []).map(kg => ({
+                id: kg.id,
+                name_ar: kg.name_ar,
+                name_fr: kg.name_fr,
+                address_ar: kg.address_ar,
+                address_fr: kg.address_fr,
+                municipality: kg.municipality,
+                municipality_ar: kg.municipality_ar,
+                municipality_fr: kg.municipality_fr,
+                status: kg.status || 'pending',
+                created_at: kg.created_at,
+            }));
 
             // Fetch registration requests
             const { data: regData } = await supabase
@@ -165,12 +181,13 @@ const AdminDashboard = () => {
 
             const activeOwners = usersWithRoles.filter(u => u.role === 'owner').length;
             const activeParents = usersWithRoles.filter(u => u.role === 'parent').length;
+            const pendingKGs = adaptedKindergartens.filter(kg => kg.status === 'pending').length;
 
             // Calculate stats
             setStats({
                 totalUsers: usersWithRoles.length,
                 totalKindergartens: adaptedKindergartens.length,
-                pendingApprovals: 0,
+                pendingApprovals: pendingKGs,
                 activeParents: activeParents,
                 activeOwners: activeOwners
             });
@@ -204,7 +221,7 @@ const AdminDashboard = () => {
     const updateKGStatus = async (kgId: string, status: 'approved' | 'rejected') => {
         const { error } = await supabase
             .from('kindergartens')
-            .update({ status: status as any })
+            .update({ status: status } as any)
             .eq('id', kgId);
 
         if (error) {
@@ -218,7 +235,7 @@ const AdminDashboard = () => {
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
-        navigate('/auth');
+        navigate('/admin-auth');
     };
 
     if (isLoading) {
@@ -302,7 +319,7 @@ const AdminDashboard = () => {
                     ))}
                 </div>
 
-                <Tabs defaultValue="overview" className="space-y-6" dir={dir}>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" dir={dir}>
                     <TabsList className="bg-slate-900 border border-white/5 p-1">
                         <TabsTrigger value="overview" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
                             <LayoutDashboard className="w-4 h-4 mx-2" />
@@ -345,15 +362,24 @@ const AdminDashboard = () => {
                                                         <p className="text-xs text-slate-400">{language === 'ar' ? kg.municipality_ar : kg.municipality_fr}</p>
                                                     </div>
                                                 </div>
-                                                <Badge variant={kg.status === 'approved' ? 'default' : 'secondary'} className={kg.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' : ''}>
+                                                <Button
+                                                    size="sm"
+                                                    variant={kg.status === 'approved' ? 'default' : 'secondary'}
+                                                    className={kg.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30 border-yellow-500/20' : kg.status === 'approved' ? 'bg-red-500 text-white hover:bg-red-600' : ''}
+                                                    onClick={() => kg.status !== 'approved' && updateKGStatus(kg.id, 'approved')}
+                                                >
                                                     {kg.status === 'approved' ? (language === 'ar' ? 'موافق عليه' : 'Approved') :
                                                         kg.status === 'rejected' ? (language === 'ar' ? 'مرفوض' : 'Rejected') :
-                                                            (language === 'ar' ? 'معلق' : 'Pending')}
-                                                </Badge>
+                                                            (language === 'ar' ? 'موافقة' : 'Approve')}
+                                                </Button>
                                             </div>
                                         ))}
                                     </div>
-                                    <Button variant="ghost" className="w-full mt-4 text-slate-400 text-xs hover:text-white" onClick={() => { }}>
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full mt-4 text-slate-400 text-xs hover:text-white"
+                                        onClick={() => setActiveTab('kindergartens')}
+                                    >
                                         {language === 'ar' ? 'عرض الكل' : 'View All'}
                                         <ChevronRight className="w-3 h-3 mx-1" />
                                     </Button>
