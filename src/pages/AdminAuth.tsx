@@ -709,13 +709,6 @@ const AdminAuth = () => {
                                 <ArrowRight className="w-4 h-4" />
                                 {t('auth.backHome')}
                             </Link>
-                            <Link
-                                to="/auth"
-                                className="text-sm text-gray-400 hover:text-white transition-colors inline-flex items-center gap-1"
-                            >
-                                <User className="w-4 h-4" />
-                                {language === 'ar' ? 'الدخول الموحد (أسهل)' : 'Connexion Unifiée (Plus facile)'}
-                            </Link>
                         </div>
                     </CardContent>
                 </Card>
