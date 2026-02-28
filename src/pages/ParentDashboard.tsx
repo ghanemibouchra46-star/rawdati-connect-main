@@ -89,10 +89,11 @@ const ParentDashboard = () => {
     const handleLogout = async () => {
         try {
             await supabase.auth.signOut();
-            setTimeout(() => navigate('/auth'), 100);
+            // Using window.location.href for a hard redirect to ensure session is cleared
+            window.location.href = '/auth';
         } catch (error) {
             console.error('Logout error:', error);
-            navigate('/auth');
+            window.location.href = '/auth';
         }
     };
 

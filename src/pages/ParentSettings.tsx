@@ -153,10 +153,10 @@ const ParentSettings = () => {
     const handleLogout = async () => {
         try {
             await supabase.auth.signOut();
-            setTimeout(() => navigate('/auth'), 100);
+            window.location.href = '/auth';
         } catch (error) {
             console.error('Logout error:', error);
-            navigate('/auth');
+            window.location.href = '/auth';
         }
     };
 
