@@ -87,8 +87,13 @@ const ParentDashboard = () => {
     };
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
-        navigate('/auth');
+        try {
+            await supabase.auth.signOut();
+            setTimeout(() => navigate('/auth'), 100);
+        } catch (error) {
+            console.error('Logout error:', error);
+            navigate('/auth');
+        }
     };
 
     const getActivityIcon = (type: string) => {

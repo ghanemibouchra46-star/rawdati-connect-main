@@ -234,8 +234,14 @@ const AdminDashboard = () => {
     };
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
-        navigate('/admin-auth');
+        try {
+            await supabase.auth.signOut();
+            // Using setTimeout and navigate for a clean state transition
+            setTimeout(() => navigate('/admin-auth'), 100);
+        } catch (error) {
+            console.error('Logout error:', error);
+            navigate('/admin-auth');
+        }
     };
 
     if (isLoading) {
