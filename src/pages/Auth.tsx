@@ -108,7 +108,7 @@ const Auth = () => {
 
       // Robust Role Detection: Database -> Metadata -> Targeted Email Fix
       const userEmail = data.user.email?.toLowerCase() || '';
-      const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
+      const adminEmails = ['bouchragh1268967@gmail.com'];
       const isAdminEmail = adminEmails.includes(userEmail);
       const metadataRole = data.user.user_metadata?.role || data.user.app_metadata?.role;
       const role = roleData?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
