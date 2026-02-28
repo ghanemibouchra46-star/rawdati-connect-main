@@ -228,10 +228,14 @@ const OwnerDashboard = () => {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      setTimeout(() => navigate('/auth'), 100);
+      // Clear local storage items just in case
+      Object.keys(localStorage).forEach(key => {
+        if (key.includes('supabase-auth-token')) localStorage.removeItem(key);
+      });
+      navigate('/auth', { replace: true });
     } catch (error) {
       console.error('Logout error:', error);
-      navigate('/auth');
+      navigate('/auth', { replace: true });
     }
   };
 

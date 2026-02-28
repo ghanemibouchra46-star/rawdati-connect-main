@@ -153,10 +153,14 @@ const ParentSettings = () => {
     const handleLogout = async () => {
         try {
             await supabase.auth.signOut();
-            window.location.href = '/auth';
+            // Clear local storage items just in case
+            Object.keys(localStorage).forEach(key => {
+                if (key.includes('supabase-auth-token')) localStorage.removeItem(key);
+            });
+            navigate('/auth', { replace: true });
         } catch (error) {
             console.error('Logout error:', error);
-            window.location.href = '/auth';
+            navigate('/auth', { replace: true });
         }
     };
 

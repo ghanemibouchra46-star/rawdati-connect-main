@@ -236,11 +236,14 @@ const AdminDashboard = () => {
     const handleLogout = async () => {
         try {
             await supabase.auth.signOut();
-            // Using setTimeout and navigate for a clean state transition
-            setTimeout(() => navigate('/admin-auth'), 100);
+            // Clear local storage items just in case
+            Object.keys(localStorage).forEach(key => {
+                if (key.includes('supabase-auth-token')) localStorage.removeItem(key);
+            });
+            navigate('/admin-auth', { replace: true });
         } catch (error) {
             console.error('Logout error:', error);
-            navigate('/admin-auth');
+            navigate('/admin-auth', { replace: true });
         }
     };
 

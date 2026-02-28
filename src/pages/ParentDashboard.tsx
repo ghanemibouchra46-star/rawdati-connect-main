@@ -89,11 +89,14 @@ const ParentDashboard = () => {
     const handleLogout = async () => {
         try {
             await supabase.auth.signOut();
-            // Using window.location.href for a hard redirect to ensure session is cleared
-            window.location.href = '/auth';
+            // Clear local storage items just in case
+            Object.keys(localStorage).forEach(key => {
+                if (key.includes('supabase-auth-token')) localStorage.removeItem(key);
+            });
+            navigate('/auth', { replace: true });
         } catch (error) {
             console.error('Logout error:', error);
-            window.location.href = '/auth';
+            navigate('/auth', { replace: true });
         }
     };
 

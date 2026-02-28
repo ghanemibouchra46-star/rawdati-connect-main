@@ -54,17 +54,36 @@ const Auth = () => {
       setResetStep('new_password');
     }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        if (session.user.email_confirmed_at) {
+    const checkSessionAndRedirect = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user && session.user.email_confirmed_at) {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .single();
+
+        const userEmail = session.user.email?.toLowerCase() || '';
+        const adminEmails = ['bouchragh1268967@gmail.com'];
+        const isAdminEmail = adminEmails.includes(userEmail);
+        const metadataRole = session.user.user_metadata?.role || session.user.app_metadata?.role;
+        const role = roleData?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
+
+        if (role === 'admin') {
+          navigate('/admin');
+        } else if (role === 'owner') {
+          navigate('/owner');
+        } else {
           navigate('/parent');
         }
       }
-    });
+    };
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user && session.user.email_confirmed_at) {
-        navigate('/parent');
+    checkSessionAndRedirect();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user && session.user.email_confirmed_at) {
+        checkSessionAndRedirect();
       }
     });
 
