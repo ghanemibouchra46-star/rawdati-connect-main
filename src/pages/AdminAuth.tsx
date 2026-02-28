@@ -144,9 +144,7 @@ const AdminAuth = () => {
             });
 
             // Explicitly navigate to admin dashboard
-            setTimeout(() => {
-                navigate('/admin');
-            }, 100);
+            navigate('/admin', { replace: true });
         }
 
         setIsLoading(false);

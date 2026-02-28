@@ -146,23 +146,31 @@ const AdminDashboard = () => {
                 .select('*');
 
             // Fetch kindergartens
-            const { data: kgData } = await supabase
+            const { data: kgData, error: kgError } = await supabase
                 .from('kindergartens')
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            const adaptedKindergartens: Kindergarten[] = (kgData as any[] || []).map(kg => ({
-                id: kg.id,
-                name_ar: kg.name_ar,
-                name_fr: kg.name_fr,
-                address_ar: kg.address_ar,
-                address_fr: kg.address_fr,
-                municipality: kg.municipality,
-                municipality_ar: kg.municipality_ar,
-                municipality_fr: kg.municipality_fr,
-                status: kg.status || 'pending',
-                created_at: kg.created_at,
-            }));
+            let adaptedKindergartens: Kindergarten[] = [];
+
+            if (!kgError && kgData && kgData.length > 0) {
+                adaptedKindergartens = (kgData as any[]).map(kg => ({
+                    id: kg.id,
+                    name_ar: kg.name_ar || kg.nameAr || kg.name || 'N/A',
+                    name_fr: kg.name_fr || kg.nameFr || kg.name || 'N/A',
+                    address_ar: kg.address_ar || kg.addressAr || kg.address || 'N/A',
+                    address_fr: kg.address_fr || kg.addressFr || kg.address || 'N/A',
+                    municipality: kg.municipality || kg.city || 'N/A',
+                    municipality_ar: kg.municipality_ar || kg.city_ar || kg.municipality || 'N/A',
+                    municipality_fr: kg.municipality_fr || kg.city_fr || kg.municipality || 'N/A',
+                    status: kg.status || 'pending',
+                    created_at: kg.created_at,
+                }));
+            } else {
+                // Fallback to local data if database is empty or error
+                console.log("No Supabase kindergartens found, falling back to local data");
+                adaptedKindergartens = localKindergartens.map(adaptKindergarten);
+            }
 
             // Fetch registration requests
             const { data: regData } = await supabase
