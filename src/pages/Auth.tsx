@@ -159,6 +159,38 @@ const Auth = () => {
       toast({ title: t('common.error'), description: t('auth.error.emailInvalid'), variant: 'destructive' });
       return false;
     }
+
+    // Role-based email restrictions
+    const emailLower = signupEmail.toLowerCase().trim();
+    const adminEmails = ['bouchragh1268967@gmail.com'];
+    const isAdminEmail = adminEmails.includes(emailLower);
+
+    if (isAdminEmail && signupRole !== 'admin') {
+      toast({
+        title: t('common.error'),
+        description: language === 'ar'
+          ? 'هذا البريد الإلكتروني محجوز للمسؤولين فقط'
+          : language === 'fr'
+            ? 'Cet e-mail est réservé aux administrateurs'
+            : 'This email is reserved for administrators',
+        variant: 'destructive'
+      });
+      return false;
+    }
+
+    if (!isAdminEmail && signupRole === 'admin') {
+      toast({
+        title: t('common.error'),
+        description: language === 'ar'
+          ? 'هذا البريد الإلكتروني غير مصرح له كمسؤول'
+          : language === 'fr'
+            ? 'Cet e-mail n\'est pas autorisé pour un administrateur'
+            : 'This email is not authorized for an administrator account',
+        variant: 'destructive'
+      });
+      return false;
+    }
+
     if (signupPassword.length < 6) {
       toast({ title: t('common.error'), description: t('auth.passwordMin'), variant: 'destructive' });
       return false;

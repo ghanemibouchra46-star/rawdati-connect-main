@@ -117,7 +117,7 @@ const AdminAuth = () => {
             // Fallback: Check metadata (user_metadata and app_metadata)
             // Also include targeted fix for the main admin emails (case-insensitive)
             const userEmail = data.user.email?.toLowerCase() || '';
-            const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
+            const adminEmails = ['bouchragh1268967@gmail.com'];
             const isAdminEmail = adminEmails.includes(userEmail);
             const hasAdminMetadata =
                 data.user.user_metadata?.role === 'admin' ||
@@ -163,6 +163,21 @@ const AdminAuth = () => {
             toast({ title: t('common.error'), description: t('auth.error.phoneInvalid'), variant: 'destructive' });
             return;
         }
+        const emailLower = email.toLowerCase().trim();
+        const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
+        if (!adminEmails.includes(emailLower)) {
+            toast({
+                title: t('common.error'),
+                description: language === 'ar'
+                    ? 'هذا البريد الإلكتروني غير مصرح له كمسؤول'
+                    : language === 'fr'
+                        ? 'Cet e-mail n\'est pas autorisé pour un administrateur'
+                        : 'This email is not authorized for an administrator account',
+                variant: 'destructive'
+            });
+            return;
+        }
+
         if (password.length < 6) {
             toast({ title: t('common.error'), description: t('auth.passwordMin'), variant: 'destructive' });
             return;
@@ -389,7 +404,7 @@ const AdminAuth = () => {
                                         <Input
                                             id="email"
                                             type="email"
-                                            placeholder="ghanemifatima4@gmail.com"
+                                            placeholder="bouchragh1268967@gmail.com"
                                             className="pr-10 bg-slate-700 border-slate-600 text-white placeholder:text-gray-500"
                                             dir="ltr"
                                             required

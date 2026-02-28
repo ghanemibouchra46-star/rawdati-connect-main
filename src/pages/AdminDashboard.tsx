@@ -117,7 +117,7 @@ const AdminDashboard = () => {
 
         if (!roleData) {
             const userEmail = session.user.email?.toLowerCase() || '';
-            const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
+            const adminEmails = ['bouchragh1268967@gmail.com'];
             const isAdminEmail = adminEmails.includes(userEmail);
             const hasAdminMetadata =
                 session.user.user_metadata?.role === 'admin' ||
