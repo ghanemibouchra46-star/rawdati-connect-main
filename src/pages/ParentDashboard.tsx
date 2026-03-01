@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Baby, LogOut, Home, Bell, User, Calendar, Clock, Image, Settings, ChevronLeft } from 'lucide-react';
+import { Baby, LogOut, Home, Bell, User, Calendar, Clock, Image, Settings, ChevronLeft, CreditCard, DollarSign } from 'lucide-react';
+import PaymentProcess from '@/components/PaymentProcess';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -29,12 +30,33 @@ interface Activity {
     created_at: string;
 }
 
+interface Payment {
+    id: string;
+    child_id: string;
+    amount: number;
+    for_month: number;
+    for_year: number;
+    status: 'paid' | 'pending' | 'debt';
+    payment_date: string | null;
+    kindergarten_id: string;
+}
+
 const ParentDashboard = () => {
     const { t, dir, language } = useLanguage();
     const [children, setChildren] = useState<Child[]>([]);
     const [activities, setActivities] = useState<Activity[]>([]);
+    const [payments, setPayments] = useState<Payment[]>([]);
     const [profile, setProfile] = useState<{ full_name: string; phone: string } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [activePayment, setActivePayment] = useState<{
+        amount: number;
+        childName: string;
+        month: string;
+        childId: string;
+        kindergartenId: string;
+        monthNum: number;
+        year: number;
+    } | null>(null);
     const navigate = useNavigate();
     const { toast } = useToast();
 
@@ -77,6 +99,19 @@ const ParentDashboard = () => {
                 };
             });
             setChildren(mappedChildren);
+
+            // Fetch Payments
+            const childIds = mappedChildren.map(c => c.id);
+            if (childIds.length > 0) {
+                const { data: paymentData } = await supabase
+                    .from('payments' as any)
+                    .select('*')
+                    .in('child_id', childIds);
+
+                if (paymentData) {
+                    setPayments(paymentData as any);
+                }
+            }
         } else {
             setChildren([]);
         }
@@ -89,7 +124,6 @@ const ParentDashboard = () => {
     const handleLogout = async () => {
         try {
             await supabase.auth.signOut();
-            // Clear local storage items just in case
             Object.keys(localStorage).forEach(key => {
                 if (key.includes('supabase-auth-token')) localStorage.removeItem(key);
             });
@@ -102,37 +136,68 @@ const ParentDashboard = () => {
 
     const getActivityIcon = (type: string) => {
         switch (type) {
-            case 'learning':
-                return '📚';
-            case 'play':
-                return '🎮';
-            case 'meal':
-                return '🍽️';
-            case 'nap':
-                return '😴';
-            default:
-                return '📌';
+            case 'learning': return '📚';
+            case 'play': return '🎮';
+            case 'meal': return '🍽️';
+            case 'nap': return '😴';
+            default: return '📌';
         }
     };
 
     const getActivityLabel = (type: string) => {
         switch (type) {
-            case 'learning':
-                return t('parent.activity.learning');
-            case 'play':
-                return t('parent.activity.play');
-            case 'meal':
-                return t('parent.activity.meal');
-            case 'nap':
-                return t('parent.activity.nap');
-            default:
-                return t('parent.activity.other');
+            case 'learning': return t('parent.activity.learning');
+            case 'play': return t('parent.activity.play');
+            case 'meal': return t('parent.activity.meal');
+            case 'nap': return t('parent.activity.nap');
+            default: return t('parent.activity.other');
         }
     };
 
     const formatTime = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleTimeString(language === 'ar' ? 'ar-DZ' : 'fr-FR', { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const handlePaymentSuccess = async (txId: string) => {
+        if (!activePayment) return;
+
+        try {
+            const { error } = await (supabase.from('payments' as any)).insert({
+                child_id: activePayment.childId,
+                kindergarten_id: activePayment.kindergartenId,
+                amount: activePayment.amount,
+                for_month: activePayment.monthNum,
+                for_year: activePayment.year,
+                status: 'paid',
+                payment_method: 'card',
+                transaction_id: txId,
+                payment_date: new Date().toISOString()
+            });
+
+            if (error) throw error;
+
+            toast({
+                title: language === 'ar' ? 'تم الدفع بنجاح' : 'Paiement effectué',
+                description: language === 'ar' ? 'تم تحديث سجل المدفوعات الخاص بطفلك' : 'Le registre des paiements a été mis à jour',
+            });
+
+            setActivePayment(null);
+            checkAuth(); // Refresh data
+        } catch (error: any) {
+            console.error('Payment save error:', error);
+            toast({
+                title: 'Error',
+                description: error.message,
+                variant: 'destructive'
+            });
+        }
+    };
+
+    const getMonthName = (month: number) => {
+        const date = new Date();
+        date.setMonth(month - 1);
+        return date.toLocaleString(language === 'ar' ? 'ar-DZ' : 'fr-FR', { month: 'long' });
     };
 
     if (isLoading) {
@@ -227,6 +292,66 @@ const ParentDashboard = () => {
                     )}
                 </section>
 
+                {/* Payments Section */}
+                <section>
+                    <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                        <DollarSign className="w-5 h-5 text-primary" />
+                        {language === 'ar' ? 'متابعة المدفوعات' : 'Suivi des paiements'}
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {children.map(child => {
+                            const curMonth = new Date().getMonth() + 1;
+                            const curYear = new Date().getFullYear();
+                            const isPaid = payments.some(p =>
+                                p.child_id === child.id &&
+                                p.for_month === curMonth &&
+                                p.for_year === curYear &&
+                                p.status === 'paid'
+                            );
+                            const kg = kindergartens.find(k => (language === 'ar' ? k.nameAr === child.kindergarten_name : k.nameFr === child.kindergarten_name)) || kindergartens[0];
+                            const price = kg?.pricePerMonth || 5000;
+
+                            return (
+                                <Card key={`pay-${child.id}`} className="overflow-hidden border-l-4 border-l-primary">
+                                    <CardContent className="p-4">
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <p className="font-bold text-foreground">{child.name}</p>
+                                                <p className="text-sm text-muted-foreground">{getMonthName(curMonth)} {curYear}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="font-bold text-primary">{price.toLocaleString()} دج</p>
+                                                {isPaid ? (
+                                                    <Badge className="bg-mint/20 text-mint-foreground">
+                                                        {language === 'ar' ? 'تم الدفع' : 'Payé'}
+                                                    </Badge>
+                                                ) : (
+                                                    <Button
+                                                        size="sm"
+                                                        className="mt-1 h-8 gradient-accent"
+                                                        onClick={() => setActivePayment({
+                                                            amount: price,
+                                                            childName: child.name,
+                                                            month: getMonthName(curMonth),
+                                                            childId: child.id,
+                                                            kindergartenId: kg.id,
+                                                            monthNum: curMonth,
+                                                            year: curYear
+                                                        })}
+                                                    >
+                                                        <CreditCard className="w-3.5 h-3.5 mr-1" />
+                                                        {language === 'ar' ? 'دفع الآن' : 'Payer'}
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            );
+                        })}
+                    </div>
+                </section>
+
                 {/* Activities Feed */}
                 <section>
                     <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
@@ -314,6 +439,16 @@ const ParentDashboard = () => {
                     </div>
                 </section>
             </main>
+
+            {activePayment && (
+                <PaymentProcess
+                    amount={activePayment.amount}
+                    childName={activePayment.childName}
+                    month={activePayment.month}
+                    onSuccess={handlePaymentSuccess}
+                    onCancel={() => setActivePayment(null)}
+                />
+            )}
         </div>
     );
 };

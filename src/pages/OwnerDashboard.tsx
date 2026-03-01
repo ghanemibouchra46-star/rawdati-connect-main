@@ -55,6 +55,9 @@ interface PaymentRecord {
   amount: number;
   status: 'paid' | 'pending' | 'debt';
   for_month: number;
+  payment_method?: string;
+  transaction_id?: string;
+  payment_date?: string;
 }
 
 // Mock data for display fallback
@@ -295,6 +298,7 @@ const OwnerDashboard = () => {
         for_month: month,
         for_year: year,
         status: 'paid',
+        payment_method: 'manual',
         payment_date: format(new Date(), 'yyyy-MM-dd')
       });
 
@@ -412,12 +416,12 @@ const OwnerDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('owner.totalDebt')}</p>
+                  <p className="text-sm text-muted-foreground">{language === 'ar' ? 'مداخيل إلكترونية' : 'Revenus en ligne'}</p>
                   <p className="text-3xl font-bold text-amber-600">
-                    {payments.filter(p => p.status === 'debt').reduce((acc, curr) => acc + curr.amount, 0).toLocaleString()} دج
+                    {payments.filter(p => p.payment_method === 'card').reduce((acc, curr) => acc + curr.amount, 0).toLocaleString()} دج
                   </p>
                 </div>
-                <DollarSign className="w-10 h-10 text-amber-500/50" />
+                <CreditCard className="w-10 h-10 text-amber-500/50" />
               </div>
             </CardContent>
           </Card>
@@ -543,6 +547,7 @@ const OwnerDashboard = () => {
                     <thead className="bg-muted/50 text-xs font-bold uppercase">
                       <tr>
                         <th className="px-4 py-3">{t('registration.childName')}</th>
+                        <th className="px-4 py-3">{language === 'ar' ? 'الوسيلة' : 'Méthode'}</th>
                         <th className="px-4 py-3">{t('owner.paymentStatus')}</th>
                         <th className="px-4 py-3 text-left">{t('admin.actions')}</th>
                       </tr>
@@ -554,6 +559,25 @@ const OwnerDashboard = () => {
                           <tr key={child.id} className="hover:bg-muted/30">
                             <td className="px-4 py-4">{child.name}</td>
                             <td className="px-4 py-4">
+                              {payment?.payment_method === 'card' ? (
+                                <div className="flex flex-col">
+                                  <Badge variant="outline" className="w-fit gap-1 text-[10px] border-primary/30 text-primary">
+                                    <CreditCard className="w-2.5 h-2.5" />
+                                    {language === 'ar' ? 'بطاقة بنكية' : 'Carte'}
+                                  </Badge>
+                                  {payment.transaction_id && (
+                                    <span className="text-[10px] text-muted-foreground font-mono mt-1">
+                                      {payment.transaction_id.substring(0, 8)}...
+                                    </span>
+                                  )}
+                                </div>
+                              ) : payment?.status === 'paid' ? (
+                                <Badge variant="outline" className="w-fit text-[10px]">
+                                  {language === 'ar' ? 'يدوي' : 'Manuel'}
+                                </Badge>
+                              ) : '-'}
+                            </td>
+                            <td className="px-4 py-4">
                               {!payment || payment.status === 'debt' ? (
                                 <Badge variant="secondary" className="bg-coral/10 text-coral">{t('owner.debt')}</Badge>
                               ) : (
@@ -561,9 +585,15 @@ const OwnerDashboard = () => {
                               )}
                             </td>
                             <td className="px-4 py-4 text-left">
-                              <Button size="sm" variant="outline" onClick={() => handlePayment(child.id)}>
-                                <DollarSign className="w-4 h-4" /> {language === 'ar' ? 'دفع' : 'Régler'}
-                              </Button>
+                              {!payment || payment.status !== 'paid' ? (
+                                <Button size="sm" variant="outline" onClick={() => handlePayment(child.id)}>
+                                  <DollarSign className="w-4 h-4" /> {language === 'ar' ? 'دفع يدوي' : 'Régler'}
+                                </Button>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">
+                                  {payment.payment_date ? format(new Date(payment.payment_date), 'dd/MM/yyyy') : '-'}
+                                </span>
+                              )}
                             </td>
                           </tr>
                         );
