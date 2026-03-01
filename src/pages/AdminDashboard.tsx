@@ -226,6 +226,9 @@ const AdminDashboard = () => {
                 role: roles.find(r => r.user_id === profile.id)?.role || 'parent'
             }));
 
+            // Attempt to link emails if they exist in metadata or profiles
+            // (In a real app, you might join with auth.users if you are a superuser)
+
             // Update all states
             setUsers(usersWithRoles);
             setKindergartens(finalKGs);
@@ -421,8 +424,12 @@ const AdminDashboard = () => {
                             {language === 'ar' ? 'طلبات التسجيل' : 'Registrations'}
                         </TabsTrigger>
                         <TabsTrigger value="users" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
+                            <Shield className="w-4 h-4 mx-2" />
+                            {language === 'ar' ? 'أصحاب الروضات' : 'Owners'}
+                        </TabsTrigger>
+                        <TabsTrigger value="parents" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
                             <Users className="w-4 h-4 mx-2" />
-                            {language === 'ar' ? 'المستخدمين' : 'Users'}
+                            {language === 'ar' ? 'أولياء الأمور' : 'Parents'}
                         </TabsTrigger>
                         <TabsTrigger value="settings" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
                             <SettingsIcon className="w-4 h-4 mx-2" />
@@ -704,30 +711,54 @@ const AdminDashboard = () => {
 
                     <TabsContent value="users">
                         <Card className="bg-slate-900 border-white/5">
-                            <CardHeader>
-                                <CardTitle className="text-white">{language === 'ar' ? 'إدارة المستخدمين' : 'User Management'}</CardTitle>
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <div>
+                                    <CardTitle className="text-white">{language === 'ar' ? 'إدارة أصحاب الروضات' : 'Kindergarten Owners'}</CardTitle>
+                                    <CardDescription>{language === 'ar' ? 'إدارة حسابات أصحاب الروضات وتوثيقها' : 'Manage and verify kindergarten owner accounts'}</CardDescription>
+                                </div>
+                                <div className="flex gap-2">
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                        <Input className="bg-slate-800 border-white/5 pl-9 w-64" placeholder={language === 'ar' ? 'بحث...' : 'Search...'} />
+                                    </div>
+                                </div>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
-                                    {users.map(user => (
-                                        <div key={user.id} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:border-red-500/30 transition-all">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 font-bold border border-white/10 uppercase">
-                                                    {(user.full_name || 'U').charAt(0)}
+                                    {users.filter(u => u.role === 'owner').length === 0 ? (
+                                        <div className="text-center py-8 text-slate-500">
+                                            {language === 'ar' ? 'لا يوجد أصحاب روضات حالياً' : 'No kindergarten owners found'}
+                                        </div>
+                                    ) : (
+                                        users.filter(u => u.role === 'owner').map(user => (
+                                            <div key={user.id} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:border-red-500/30 transition-all">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 font-bold border border-red-500/10 uppercase text-lg">
+                                                        {(user.full_name || 'O').charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-white">{user.full_name || 'Anonymous Owner'}</p>
+                                                        <div className="flex flex-col sm:flex-row sm:gap-4">
+                                                            <p className="text-xs text-slate-500">{user.phone || t('common.noPhone')}</p>
+                                                            {user.email && <p className="text-xs text-slate-500 underline decoration-slate-700">{user.email}</p>}
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="text-sm font-bold text-white">{user.full_name || 'Anonymous User'}</p>
-                                                    <p className="text-xs text-slate-500">{user.phone || 'No phone provided'}</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-6">
-                                                <div className="text-right hidden sm:block">
-                                                    <p className="text-[10px] text-slate-500 uppercase tracking-wider">{language === 'ar' ? 'تاريخ الانضمام' : 'Joined Date'}</p>
-                                                    <p className="text-xs text-slate-300">{new Date(user.created_at).toLocaleDateString()}</p>
-                                                </div>
-                                                <Badge variant="outline" className="capitalize text-slate-400 border-white/10">{user.role}</Badge>
+                                                <div className="flex items-center gap-6">
+                                                    <div className="text-right hidden sm:block">
+                                                        <p className="text-[10px] text-slate-500 uppercase tracking-wider">{language === 'ar' ? 'الحالة' : 'Status'}</p>
+                                                        <Badge
+                                                            variant="outline"
+                                                            className={
+                                                                user.status === 'approved' ? 'text-green-500 border-green-500/20 bg-green-500/5' :
+                                                                    user.status === 'rejected' ? 'text-red-500 border-red-500/20 bg-red-500/5' :
+                                                                        'text-yellow-500 border-yellow-500/20 bg-yellow-500/5'
+                                                            }
+                                                        >
+                                                            {user.status || 'pending'}
+                                                        </Badge>
+                                                    </div>
 
-                                                {user.role === 'owner' && (
                                                     <div className="flex gap-1">
                                                         {user.status !== 'approved' && (
                                                             <Button
@@ -749,13 +780,71 @@ const AdminDashboard = () => {
                                                                 <UserX className="w-4 h-4" />
                                                             </Button>
                                                         )}
+                                                        <Button variant="ghost" size="icon" className="text-slate-500 hover:text-white"><ChevronRight className="w-5 h-5" /></Button>
                                                     </div>
-                                                )}
-
-                                                <Button variant="ghost" size="icon" className="text-slate-500 hover:text-white"><ChevronRight className="w-5 h-5" /></Button>
+                                                </div>
                                             </div>
+                                        ))
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="parents">
+                        <Card className="bg-slate-900 border-white/5">
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <div>
+                                    <CardTitle className="text-white">{language === 'ar' ? 'إدارة أولياء الأمور' : 'Manage Parents'}</CardTitle>
+                                    <CardDescription>{language === 'ar' ? 'عرض والبحث في قائمة أولياء الأمور المسجلين' : 'View and search registered parents'}</CardDescription>
+                                </div>
+                                <div className="flex gap-2">
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                        <Input className="bg-slate-800 border-white/5 pl-9 w-64" placeholder={language === 'ar' ? 'بحث باسم الولي...' : 'Search by parent name...'} />
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-4">
+                                    {users.filter(u => u.role === 'parent').length === 0 ? (
+                                        <div className="text-center py-12 bg-white/5 rounded-2xl border border-dashed border-white/10">
+                                            <Baby className="w-12 h-12 text-slate-700 mx-auto mb-4" />
+                                            <p className="text-slate-500">{language === 'ar' ? 'لا يوجد أولياء أمور مسجلين حالياً' : 'No registered parents yet'}</p>
                                         </div>
-                                    ))}
+                                    ) : (
+                                        users.filter(u => u.role === 'parent').map(user => (
+                                            <div key={user.id} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:border-blue-500/30 transition-all group">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 font-bold border border-blue-500/10 uppercase text-lg group-hover:scale-110 transition-transform">
+                                                        {(user.full_name || 'P').charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">{user.full_name || 'Anonymous Parent'}</p>
+                                                        <div className="flex flex-col sm:flex-row sm:gap-4">
+                                                            <p className="text-xs text-slate-500 flex items-center gap-1">
+                                                                <span className="opacity-50 text-[10px]">TEL:</span> {user.phone || t('common.noPhone')}
+                                                            </p>
+                                                            {user.email && (
+                                                                <p className="text-xs text-slate-500 flex items-center gap-1">
+                                                                    <span className="opacity-50 text-[10px]">MAIL:</span> {user.email}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-6">
+                                                    <div className="text-right hidden sm:block">
+                                                        <p className="text-[10px] text-slate-500 uppercase tracking-wider">{language === 'ar' ? 'تاريخ الانضمام' : 'Joined Date'}</p>
+                                                        <p className="text-xs text-slate-300">{new Date(user.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}</p>
+                                                    </div>
+                                                    <Button variant="ghost" size="icon" className="text-slate-500 hover:text-blue-500 hover:bg-blue-500/10 transition-all rounded-full">
+                                                        <ChevronRight className="w-5 h-5" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
                                 </div>
                             </CardContent>
                         </Card>
