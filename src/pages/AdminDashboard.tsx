@@ -44,6 +44,33 @@ interface Kindergarten {
     created_at: string;
 }
 
+const mockRegistrations: RegistrationRequest[] = [
+    {
+        id: 'reg-1',
+        kindergarten_id: '1',
+        parent_name: 'محمد الأمين',
+        phone: '0555 12 34 56',
+        email: 'mohamed@example.com',
+        child_name: 'ياسين',
+        child_age: 4,
+        message: 'أريد تسجيل ابني في فوج اللغة العربية',
+        status: 'pending',
+        created_at: new Date(Date.now() - 3600000).toISOString(),
+    },
+    {
+        id: 'reg-2',
+        kindergarten_id: '2',
+        parent_name: 'سارة بن عودة',
+        phone: '0666 98 76 54',
+        email: 'sarah@example.com',
+        child_name: 'لينا',
+        child_age: 3,
+        message: 'هل توفرون وجبات غداء؟',
+        status: 'pending',
+        created_at: new Date(Date.now() - 172800000).toISOString(),
+    }
+];
+
 // Adapter to convert local kindergarten data to admin format
 function adaptKindergarten(kg: typeof localKindergartens[0]): Kindergarten {
     return {
@@ -82,7 +109,8 @@ const AdminDashboard = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [users, setUsers] = useState<UserProfile[]>([]);
     const [kindergartens, setKindergartens] = useState<Kindergarten[]>(localKindergartens.map(adaptKindergarten));
-    const [registrationRequests, setRegistrationRequests] = useState<RegistrationRequest[]>([]);
+    const [registrationRequests, setRegistrationRequests] = useState<RegistrationRequest[]>(mockRegistrations);
+    const [localMockRegs, setLocalMockRegs] = useState<RegistrationRequest[]>(mockRegistrations);
     const [activeTab, setActiveTab] = useState('overview');
     const [stats, setStats] = useState({
         totalUsers: 0,
@@ -201,16 +229,23 @@ const AdminDashboard = () => {
             // Update all states
             setUsers(usersWithRoles);
             setKindergartens(finalKGs);
-            setRegistrationRequests(regData);
+
+            if (regData && regData.length > 0) {
+                setRegistrationRequests(regData);
+            } else {
+                setRegistrationRequests(localMockRegs);
+            }
 
             const activeOwners = usersWithRoles.filter(u => u.role === 'owner').length;
             const activeParents = usersWithRoles.filter(u => u.role === 'parent').length;
             const pendingKGs = finalKGs.filter(kg => kg.status === 'pending').length;
+            const pendingRegs = (regData && regData.length > 0 ? regData : localMockRegs)
+                .filter(reg => reg.status === 'pending').length;
 
             setStats({
                 totalUsers: usersWithRoles.length,
                 totalKindergartens: finalKGs.length,
-                pendingApprovals: pendingKGs,
+                pendingApprovals: pendingKGs + pendingRegs,
                 activeParents: activeParents,
                 activeOwners: activeOwners
             });
@@ -242,6 +277,30 @@ const AdminDashboard = () => {
             .from('kindergartens')
             .update({ status: status } as any)
             .eq('id', kgId);
+
+        if (error) {
+            toast({ title: t('common.error'), variant: 'destructive' });
+            return;
+        }
+
+        toast({ title: t('common.updated') });
+        fetchData();
+    };
+
+    const updateRegistrationStatus = async (regId: string, status: 'approved' | 'rejected') => {
+        // Handle mock data persistence
+        if (regId.startsWith('reg-')) {
+            const updated = localMockRegs.map(r => r.id === regId ? { ...r, status } : r);
+            setLocalMockRegs(updated);
+            setRegistrationRequests(updated);
+            toast({ title: t('common.updated') });
+            return;
+        }
+
+        const { error } = await supabase
+            .from('registration_requests')
+            .update({ status: status })
+            .eq('id', regId);
 
         if (error) {
             toast({ title: t('common.error'), variant: 'destructive' });
@@ -379,29 +438,53 @@ const AdminDashboard = () => {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
-                                        {kindergartens.slice(0, 5).map(kg => (
-                                            <div key={kg.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
-                                                        <Building2 className="w-5 h-5 text-red-500" />
+                                        {[...kindergartens.slice(0, 3), ...registrationRequests.slice(0, 2)]
+                                            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                                            .slice(0, 5)
+                                            .map((item: any) => {
+                                                const isKG = 'name_ar' in item;
+                                                return (
+                                                    <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`w-10 h-10 rounded-lg ${isKG ? 'bg-red-500/10' : 'bg-blue-500/10'} flex items-center justify-center`}>
+                                                                {isKG ? <Building2 className="w-5 h-5 text-red-500" /> : <Baby className="w-5 h-5 text-blue-500" />}
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-medium text-white">
+                                                                    {isKG ? (language === 'ar' ? item.name_ar : item.name_fr) : item.child_name}
+                                                                </p>
+                                                                <p className="text-xs text-slate-400">
+                                                                    {isKG ? (language === 'ar' ? item.municipality_ar : item.municipality_fr) : `${language === 'ar' ? 'طلب تسجيل من' : 'Registration from'} ${item.parent_name}`}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-1">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className={item.status === 'approved' ? 'text-green-500 bg-green-500/10' : 'text-slate-500 hover:text-green-500 hover:bg-green-500/10'}
+                                                                onClick={() => {
+                                                                    if (isKG) updateKGStatus(item.id, 'approved');
+                                                                    else updateRegistrationStatus(item.id, 'approved');
+                                                                }}
+                                                            >
+                                                                <CheckCircle2 className="w-4 h-4" />
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className={item.status === 'rejected' ? 'text-red-500 bg-red-500/10' : 'text-slate-500 hover:text-red-500 hover:bg-red-500/10'}
+                                                                onClick={() => {
+                                                                    if (isKG) updateKGStatus(item.id, 'rejected');
+                                                                    else updateRegistrationStatus(item.id, 'rejected');
+                                                                }}
+                                                            >
+                                                                <XCircle className="w-4 h-4" />
+                                                            </Button>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <p className="text-sm font-medium text-white">{language === 'ar' ? kg.name_ar : kg.name_fr}</p>
-                                                        <p className="text-xs text-slate-400">{language === 'ar' ? kg.municipality_ar : kg.municipality_fr}</p>
-                                                    </div>
-                                                </div>
-                                                <Button
-                                                    size="sm"
-                                                    variant={kg.status === 'approved' ? 'default' : 'secondary'}
-                                                    className={kg.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30 border-yellow-500/20' : kg.status === 'approved' ? 'bg-red-500 text-white hover:bg-red-600' : ''}
-                                                    onClick={() => kg.status !== 'approved' && updateKGStatus(kg.id, 'approved')}
-                                                >
-                                                    {kg.status === 'approved' ? (language === 'ar' ? 'موافق عليه' : 'Approved') :
-                                                        kg.status === 'rejected' ? (language === 'ar' ? 'مرفوض' : 'Rejected') :
-                                                            (language === 'ar' ? 'موافقة' : 'Approve')}
-                                                </Button>
-                                            </div>
-                                        ))}
+                                                );
+                                            })}
                                     </div>
                                     <Button
                                         variant="ghost"
@@ -546,6 +629,7 @@ const AdminDashboard = () => {
                                                 <TableHead className="text-slate-400">{language === 'ar' ? 'الروضة' : 'Kindergarten'}</TableHead>
                                                 <TableHead className="text-slate-400">{language === 'ar' ? 'التوجيه' : 'Status'}</TableHead>
                                                 <TableHead className="text-slate-400">{language === 'ar' ? 'التاريخ' : 'Date'}</TableHead>
+                                                <TableHead className="text-slate-400 text-left">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -584,6 +668,28 @@ const AdminDashboard = () => {
                                                             </TableCell>
                                                             <TableCell className="text-slate-400 text-sm">
                                                                 {new Date(reg.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div className="flex gap-2">
+                                                                    {reg.status !== 'approved' && (
+                                                                        <Button
+                                                                            size="sm"
+                                                                            className="bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white border-green-500/20"
+                                                                            onClick={() => updateRegistrationStatus(reg.id, 'approved')}
+                                                                        >
+                                                                            <CheckCircle2 className="w-4 h-4" />
+                                                                        </Button>
+                                                                    )}
+                                                                    {reg.status !== 'rejected' && (
+                                                                        <Button
+                                                                            size="sm"
+                                                                            className="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border-red-500/20"
+                                                                            onClick={() => updateRegistrationStatus(reg.id, 'rejected')}
+                                                                        >
+                                                                            <XCircle className="w-4 h-4" />
+                                                                        </Button>
+                                                                    )}
+                                                                </div>
                                                             </TableCell>
                                                         </TableRow>
                                                     );

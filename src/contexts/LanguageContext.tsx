@@ -13,9 +13,9 @@ const translations: Record<Language, Record<string, string>> = {
     ar: {
         // Welcome & General
         'welcome': 'مرحباً بكم',
-        'welcome.subtitle': 'منصة روضتي - معسكر',
+        'welcome.subtitle': 'منصة روضتي - Rawdati',
         'platform.name': 'روضتي',
-        'mascara': 'معسكر',
+        'mascara': 'Rawdati',
 
         // Navigation
         'nav.home': 'الرئيسية',
@@ -29,8 +29,8 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Hero Section
         'hero.title1': 'اختر الروضة المثالية',
-        'hero.title2': 'لطفلك في معسكر',
-        'hero.description': 'نساعدك في العثور على أفضل رياض الأطفال في ولاية معسكر من خلال معلومات شاملة وتقييمات حقيقية',
+        'hero.title2': 'لطفلك مع Rawdati',
+        'hero.description': 'نساعدك في العثور على أفضل رياض الأطفال من خلال معلومات شاملة وتقييمات حقيقية',
         'hero.explore': 'استكشف الروضات',
         'hero.aboutUs': 'تعرف علينا',
 
@@ -41,8 +41,8 @@ const translations: Record<Language, Record<string, string>> = {
         'features.certifiedDesc': 'جميع الروضات مرخصة وتتبع معايير الجودة التعليمية',
         'features.reviews': 'تقييمات حقيقية',
         'features.reviewsDesc': 'آراء وتجارب أولياء أمور حقيقيين لمساعدتك في الاختيار',
-        'features.nearby': 'قريبة منك',
-        'features.nearbyDesc': 'ابحث عن روضات في بلديتك أو المناطق المجاورة',
+        'features.nearby': 'سهلة الوصول',
+        'features.nearbyDesc': 'ابحث عن روضات في منطقتك أو المناطق المجاورة',
         'features.easyRegister': 'تسجيل سهل',
         'features.easyRegisterDesc': 'سجّل طفلك مباشرة عبر المنصة بخطوات بسيطة',
 
@@ -50,13 +50,13 @@ const translations: Record<Language, Record<string, string>> = {
         'services.title': 'خدماتنا',
         'services.subtitle': 'نقدم لك مجموعة من الخدمات المتكاملة لرعاية طفلك',
         'services.kindergartens': 'الروضات',
-        'services.kindergartensDesc': 'اكتشف أفضل رياض الأطفال في ولاية معسكر',
+        'services.kindergartensDesc': 'اكتشف أفضل رياض الأطفال',
         'services.doctors': 'أطباء الأطفال',
         'services.doctorsDesc': 'قائمة بأطباء الأطفال المتخصصين في المنطقة',
         'services.speechTherapy': 'أخصائيو الأرطفونيا',
         'services.speechTherapyDesc': 'أخصائيون في علاج اضطرابات النطق والتواصل',
         'services.clothing': 'محلات الملابس',
-        'services.clothingDesc': 'أفضل محلات ملابس الأطفال في ولاية معسكر',
+        'services.clothingDesc': 'أفضل محلات ملابس الأطفال',
 
         // CTA
         'cta.ownerTitle': 'هل أنت صاحب روضة؟',
@@ -70,11 +70,11 @@ const translations: Record<Language, Record<string, string>> = {
         'language.en': 'English',
 
         'footer.rights': 'جميع الحقوق محفوظة',
-        'footer.description': 'منصة رقمية لمساعدة الأولياء في إيجاد أفضل الخدمات لأطفالهم في ولاية معسكر',
+        'footer.description': 'منصة رقمية لمساعدة الأولياء في إيجاد أفضل الخدمات لأطفالهم',
 
         // Kindergartens Page
-        'kindergartens.pageTitle': 'روضات ولاية معسكر',
-        'kindergartens.pageSubtitle': 'اختر من بين أفضل الروضات في ولاية معسكر، مع معلومات شاملة عن الأسعار والخدمات والتقييمات',
+        'kindergartens.pageTitle': 'روضاتنا',
+        'kindergartens.pageSubtitle': 'اختر من بين أفضل الروضات، مع معلومات شاملة عن الأسعار والخدمات والتقييمات',
         'kindergartens.searchPlaceholder': 'ابحث عن روضة...',
         'kindergartens.count': 'عرض {count} روضة',
         'kindergartens.noResults': 'لا توجد نتائج',
@@ -139,8 +139,8 @@ const translations: Record<Language, Record<string, string>> = {
         'registration.allergyDetails': 'تفاصيل الحساسية الغذائية',
 
         // Doctors Page
-        'doctors.pageTitle': 'أطباء الأطفال في ولاية معسكر',
-        'doctors.pageSubtitle': 'قائمة شاملة لأفضل أطباء الأطفال في ولاية معسكر',
+        'doctors.pageTitle': 'أطباء الأطفال',
+        'doctors.pageSubtitle': 'قائمة شاملة لأفضل أطباء الأطفال',
         'doctors.find': 'اعثر على طبيب أطفال موثوق',
         'doctors.searchPlaceholder': 'ابحث باسم الطبيب أو التخصص...',
         'doctors.experience': 'خبرة {years} سنة',
@@ -155,14 +155,14 @@ const translations: Record<Language, Record<string, string>> = {
         'details.partnerStore': 'محلات تابعة',
 
         // Speech Therapy Page
-        'speech.pageTitle': 'أخصائيي الأرطفونيا في ولاية معسكر',
-        'speech.pageSubtitle': 'قائمة شاملة لأفضل أخصائيي الأرطفونيا في ولاية معسكر',
+        'speech.pageTitle': 'أخصائيي الأرطفونيا',
+        'speech.pageSubtitle': 'قائمة شاملة لأفضل أخصائيي الأرطفونيا',
         'speech.find': 'اعثر على أخصائي أرطفونيا خبير',
         'speech.searchPlaceholder': 'ابحث باسم الأخصائي أو التخصص...',
 
         // Clothing Stores Page
-        'clothing.pageTitle': 'محلات ملابس الأطفال في ولاية معسكر',
-        'clothing.pageSubtitle': 'اكتشف أفضل محلات ملابس الأطفال في ولاية معسكر',
+        'clothing.pageTitle': 'محلات ملابس الأطفال',
+        'clothing.pageSubtitle': 'اكتشف أفضل محلات ملابس الأطفال',
         'clothing.find': 'اكتشف أفضل محلات ملابس الأطفال',
         'clothing.searchPlaceholder': 'ابحث باسم المحل أو المدينة...',
         'clothing.priceRange': 'نطاق السعر',
@@ -240,7 +240,7 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Admin Dashboard
         'admin.title': 'لوحة تحكم الأدمين',
-        'admin.subtitle': 'روضتي - معسكر',
+        'admin.subtitle': 'روضتي - Rawdati',
         'admin.totalUsers': 'إجمالي المستخدمين',
         'admin.pending': 'في الانتظار',
         'admin.approved': 'موافق عليهم',
@@ -323,9 +323,9 @@ const translations: Record<Language, Record<string, string>> = {
     fr: {
         // Welcome & General
         'welcome': 'Bienvenue',
-        'welcome.subtitle': 'Plateforme Rawdati - Mascara',
+        'welcome.subtitle': 'Plateforme Rawdati - Rawdati',
         'platform.name': 'Rawdati',
-        'mascara': 'Mascara',
+        'mascara': 'Rawdati',
 
         // Navigation
         'nav.home': 'Accueil',
@@ -339,8 +339,8 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Hero Section
         'hero.title1': 'Choisissez le jardin d\'enfants idéal',
-        'hero.title2': 'pour votre enfant à Mascara',
-        'hero.description': 'Nous vous aidons à trouver les meilleurs jardins d\'enfants à Mascara avec des informations complètes et des avis authentiques',
+        'hero.title2': 'pour votre enfant avec Rawdati',
+        'hero.description': 'Nous vous aidons à trouver les meilleurs jardins d\'enfants avec des informations complètes et des avis authentiques',
         'hero.explore': 'Explorer les jardins',
         'hero.aboutUs': 'À propos de nous',
 
@@ -360,13 +360,13 @@ const translations: Record<Language, Record<string, string>> = {
         'services.title': 'Nos services',
         'services.subtitle': 'Nous vous offrons une gamme de services intégrés pour les soins de votre enfant',
         'services.kindergartens': 'Jardins d\'enfants',
-        'services.kindergartensDesc': 'Découvrez les meilleurs jardins d\'enfants à Mascara',
+        'services.kindergartensDesc': 'Découvrez les meilleurs jardins d\'enfants',
         'services.doctors': 'Pédiatres',
-        'services.doctorsDesc': 'Liste des pédiatres spécialisés dans la région',
+        'services.doctorsDesc': 'Liste des pédiatres spécialisés',
         'services.speechTherapy': 'Orthophonistes',
         'services.speechTherapyDesc': 'Spécialistes des troubles de la parole et de la communication',
         'services.clothing': 'Boutiques de vêtements',
-        'services.clothingDesc': 'Les meilleures boutiques de vêtements pour enfants à Mascara',
+        'services.clothingDesc': 'Les meilleures boutiques de vêtements pour enfants',
 
         // CTA
         'cta.ownerTitle': 'Êtes-vous propriétaire d\'un jardin d\'enfants?',
@@ -634,9 +634,9 @@ const translations: Record<Language, Record<string, string>> = {
     en: {
         // Welcome & General
         'welcome': 'Welcome',
-        'welcome.subtitle': 'Rawdati Platform - Mascara',
+        'welcome.subtitle': 'Rawdati Platform - Rawdati',
         'platform.name': 'Rawdati',
-        'mascara': 'Mascara',
+        'mascara': 'Rawdati',
 
         // Navigation
         'nav.home': 'Home',
@@ -650,8 +650,8 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Hero Section
         'hero.title1': 'Choose the perfect kindergarten',
-        'hero.title2': 'for your child in Mascara',
-        'hero.description': 'We help you find the best kindergartens in Mascara with comprehensive information and authentic reviews',
+        'hero.title2': 'for your child with Rawdati',
+        'hero.description': 'We help you find the best kindergartens with comprehensive information and authentic reviews',
         'hero.explore': 'Explore Kindergartens',
         'hero.aboutUs': 'About Us',
 
@@ -671,13 +671,13 @@ const translations: Record<Language, Record<string, string>> = {
         'services.title': 'Our Services',
         'services.subtitle': 'We offer you a range of integrated services for your child\'s care',
         'services.kindergartens': 'Kindergartens',
-        'services.kindergartensDesc': 'Discover the best kindergartens in Mascara',
+        'services.kindergartensDesc': 'Discover the best kindergartens',
         'services.doctors': 'Pediatricians',
-        'services.doctorsDesc': 'List of specialized pediatricians in the area',
+        'services.doctorsDesc': 'List of specialized pediatricians',
         'services.speechTherapy': 'Speech Therapists',
         'services.speechTherapyDesc': 'Specialists in speech and communication disorders',
         'services.clothing': 'Clothing Stores',
-        'services.clothingDesc': 'Best children\'s clothing stores in Mascara',
+        'services.clothingDesc': 'Best children\'s clothing stores',
 
         // CTA
         'cta.ownerTitle': 'Are you a kindergarten owner?',

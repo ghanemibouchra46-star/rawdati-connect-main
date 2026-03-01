@@ -123,7 +123,7 @@ const Welcome = () => {
         {/* Footer */}
         <div className="mt-16 text-center">
           <p className="text-gray-500 text-sm">
-            Mascara, Algeria 🇩🇿
+            Algeria 🇩🇿
           </p>
           <p className="text-gray-600 text-xs mt-2">
             © 2024 Rawdati - روضتي
