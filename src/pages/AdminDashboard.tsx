@@ -44,32 +44,7 @@ interface Kindergarten {
     created_at: string;
 }
 
-const mockRegistrations: RegistrationRequest[] = [
-    {
-        id: 'reg-1',
-        kindergarten_id: '1',
-        parent_name: 'محمد الأمين',
-        phone: '0555 12 34 56',
-        email: 'mohamed@example.com',
-        child_name: 'ياسين',
-        child_age: 4,
-        message: 'أريد تسجيل ابني في فوج اللغة العربية',
-        status: 'pending',
-        created_at: new Date(Date.now() - 3600000).toISOString(),
-    },
-    {
-        id: 'reg-2',
-        kindergarten_id: '2',
-        parent_name: 'سارة بن عودة',
-        phone: '0666 98 76 54',
-        email: 'sarah@example.com',
-        child_name: 'لينا',
-        child_age: 3,
-        message: 'هل توفرون وجبات غداء؟',
-        status: 'pending',
-        created_at: new Date(Date.now() - 172800000).toISOString(),
-    }
-];
+const mockRegistrations: RegistrationRequest[] = [];
 
 // Adapter to convert local kindergarten data to admin format
 function adaptKindergarten(kg: typeof localKindergartens[0]): Kindergarten {

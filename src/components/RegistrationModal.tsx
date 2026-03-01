@@ -133,8 +133,14 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
       });
 
       if (insertError) {
-        console.error('Supabase insertion error (handled gracefully):', insertError);
-        // We log the error but don't stop the success UI for the user
+        console.error('Supabase insertion error:', insertError);
+        toast({
+          title: t('common.error'),
+          description: language === 'ar' ? 'حدث خطأ أثناء حفظ طلب التسجيل. يرجى المحاولة مرة أخرى.' : 'Error saving registration request. Please try again.',
+          variant: 'destructive',
+        });
+        setIsSubmitting(false);
+        return;
       }
 
       setIsSuccess(true);
@@ -161,16 +167,11 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
       }, 2000);
     } catch (error) {
       console.error('Registration submission error:', error);
-      // Even if there's an outer error, we'll try to show success to satisfy the user's mock request
-      setIsSuccess(true);
       toast({
-        title: t('registration.successTitle'),
-        description: t('registration.successDesc').replace('{name}', language === 'ar' ? kindergarten.nameAr : kindergarten.nameFr),
+        title: t('common.error'),
+        description: t('registration.errorAuth'),
+        variant: 'destructive',
       });
-      setTimeout(() => {
-        setIsSuccess(false);
-        onClose();
-      }, 2000);
     } finally {
       setIsSubmitting(false);
     }
