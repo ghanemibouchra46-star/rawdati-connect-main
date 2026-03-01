@@ -29,7 +29,7 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Hero Section
         'hero.title1': 'اختر الروضة المثالية',
-        'hero.title2': 'لطفلك مع Rawdati',
+        'hero.title2': 'لطفلك',
         'hero.description': 'نساعدك في العثور على أفضل رياض الأطفال من خلال معلومات شاملة وتقييمات حقيقية',
         'hero.explore': 'استكشف الروضات',
         'hero.aboutUs': 'تعرف علينا',
@@ -57,6 +57,11 @@ const translations: Record<Language, Record<string, string>> = {
         'services.speechTherapyDesc': 'أخصائيون في علاج اضطرابات النطق والتواصل',
         'services.clothing': 'محلات الملابس',
         'services.clothingDesc': 'أفضل محلات ملابس الأطفال',
+        'hero.badge': 'أفضل الروضات لطفلك',
+        'hero.searchPlaceholder': 'ابحث باسم الروضة...',
+        'hero.searchButton': 'بحث',
+        'hero.municipalitiesLabel': 'البلديات الرئيسية:',
+        'hero.otherServices': 'خدمات أخرى:',
 
         // CTA
         'cta.ownerTitle': 'هل أنت صاحب روضة؟',
@@ -339,7 +344,7 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Hero Section
         'hero.title1': 'Choisissez le jardin d\'enfants idéal',
-        'hero.title2': 'pour votre enfant avec Rawdati',
+        'hero.title2': 'pour votre enfant',
         'hero.description': 'Nous vous aidons à trouver les meilleurs jardins d\'enfants avec des informations complètes et des avis authentiques',
         'hero.explore': 'Explorer les jardins',
         'hero.aboutUs': 'À propos de nous',
@@ -367,6 +372,11 @@ const translations: Record<Language, Record<string, string>> = {
         'services.speechTherapyDesc': 'Spécialistes des troubles de la parole et de la communication',
         'services.clothing': 'Boutiques de vêtements',
         'services.clothingDesc': 'Les meilleures boutiques de vêtements pour enfants',
+        'hero.badge': 'Les meilleurs jardins d\'enfants',
+        'hero.searchPlaceholder': 'Rechercher par nom...',
+        'hero.searchButton': 'Rechercher',
+        'hero.municipalitiesLabel': 'Principales communes:',
+        'hero.otherServices': 'Autres services:',
 
         // CTA
         'cta.ownerTitle': 'Êtes-vous propriétaire d\'un jardin d\'enfants?',
@@ -650,7 +660,7 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Hero Section
         'hero.title1': 'Choose the perfect kindergarten',
-        'hero.title2': 'for your child with Rawdati',
+        'hero.title2': 'for your child',
         'hero.description': 'We help you find the best kindergartens with comprehensive information and authentic reviews',
         'hero.explore': 'Explore Kindergartens',
         'hero.aboutUs': 'About Us',
@@ -678,6 +688,11 @@ const translations: Record<Language, Record<string, string>> = {
         'services.speechTherapyDesc': 'Specialists in speech and communication disorders',
         'services.clothing': 'Clothing Stores',
         'services.clothingDesc': 'Best children\'s clothing stores',
+        'hero.badge': 'Best Kindergartens for Your Child',
+        'hero.searchPlaceholder': 'Search by name...',
+        'hero.searchButton': 'Search',
+        'hero.municipalitiesLabel': 'Main Municipalities:',
+        'hero.otherServices': 'Other Services:',
 
         // CTA
         'cta.ownerTitle': 'Are you a kindergarten owner?',

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { municipalities } from '@/data/kindergartens';
+import { useLanguage } from '@/contexts/LanguageContext';
 import logoIcon from '@/assets/logo-icon.png';
 import childrenPlaying from '@/assets/children-playing.png';
 import childrenLearning from '@/assets/children-learning.png';
@@ -13,6 +14,7 @@ interface HeroSectionProps {
 }
 
 const HeroSection = ({ onSearch, onMunicipalitySelect }: HeroSectionProps) => {
+  const { t, language } = useLanguage();
   return (
     <section className="relative min-h-[90vh] gradient-hero overflow-hidden">
       {/* Playful Decorative Elements */}
@@ -33,25 +35,21 @@ const HeroSection = ({ onSearch, onMunicipalitySelect }: HeroSectionProps) => {
           {/* Playful Badge */}
           <div className="inline-flex items-center gap-3 px-6 py-3 bg-card rounded-full shadow-soft mb-8 animate-fade-in border-2 border-primary/20">
             <Sparkles className="w-5 h-5 text-accent animate-pulse-soft" />
-            <span className="text-base font-bold text-foreground">🌟 أفضل الروضات لطفلك 🌟</span>
+            <span className="text-base font-bold text-foreground">🌟 {t('hero.badge')} 🌟</span>
             <Heart className="w-5 h-5 text-primary animate-pulse-soft" />
           </div>
 
           {/* Main Heading with Playful Style */}
           <h1 className="text-4xl md:text-6xl font-extrabold text-foreground mb-6 leading-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            اكتشف أفضل{' '}
-            <span className="text-gradient-rainbow">روضات الأطفال</span>
+            {t('hero.title1')}{' '}
+            <span className="text-gradient-rainbow">{t('nav.kindergartens')}</span>
             <br />
-            <span className="inline-flex items-center gap-3">
-              الخيار الأمثل
-              <span className="text-3xl md:text-5xl">🎈</span>
-            </span>
+            {t('hero.title2')}
           </h1>
 
           {/* Subheading */}
           <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            منصتك الموثوقة للعثور على الروضة المثالية لطفلك. قارن الأسعار، الخدمات،
-            واطلع على تقييمات الأولياء.
+            {t('hero.description')}
           </p>
 
           {/* Playful Search Box */}
@@ -61,7 +59,7 @@ const HeroSection = ({ onSearch, onMunicipalitySelect }: HeroSectionProps) => {
                 <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 text-primary" />
                 <Input
                   type="text"
-                  placeholder="🔍 ابحث باسم الروضة..."
+                  placeholder={t('hero.searchPlaceholder')}
                   className="pr-12 h-14 bg-muted/50 border-2 border-primary/20 rounded-2xl text-lg text-foreground placeholder:text-muted-foreground focus:border-primary transition-all"
                   onChange={(e) => onSearch(e.target.value)}
                 />
@@ -70,14 +68,14 @@ const HeroSection = ({ onSearch, onMunicipalitySelect }: HeroSectionProps) => {
                 size="lg"
                 className="h-14 px-10 gradient-accent border-0 rounded-2xl shadow-soft hover:shadow-hover transition-all duration-300 text-primary-foreground font-bold text-lg hover:scale-105"
               >
-                🎯 بحث
+                {t('hero.searchButton')}
               </Button>
             </div>
           </div>
 
           {/* Municipality Quick Links */}
           <div className="mt-10 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            <p className="text-base font-bold text-muted-foreground mb-5">📍 البلديات الرئيسية:</p>
+            <p className="text-base font-bold text-muted-foreground mb-5">📍 {t('hero.municipalitiesLabel')}</p>
             <div className="flex flex-wrap justify-center gap-3">
               {municipalities.map((muni) => (
                 <button
@@ -86,7 +84,7 @@ const HeroSection = ({ onSearch, onMunicipalitySelect }: HeroSectionProps) => {
                   className="inline-flex items-center gap-2 px-5 py-3 bg-card hover:bg-primary/10 rounded-full text-base font-bold text-foreground shadow-soft hover:shadow-hover border-2 border-primary/20 hover:border-primary transition-all duration-300 hover:scale-105"
                 >
                   <MapPin className="w-4 h-4 text-primary" />
-                  {muni.nameAr}
+                  {language === 'ar' ? muni.nameAr : (language === 'fr' ? muni.nameFr : muni.nameAr)}
                 </button>
               ))}
             </div>
@@ -94,7 +92,7 @@ const HeroSection = ({ onSearch, onMunicipalitySelect }: HeroSectionProps) => {
 
           {/* Quick Services Links */}
           <div className="mt-10 animate-fade-in" style={{ animationDelay: '0.5s' }}>
-            <p className="text-base font-bold text-muted-foreground mb-5">✨ خدمات أخرى:</p>
+            <p className="text-base font-bold text-muted-foreground mb-5">✨ {t('hero.otherServices')}</p>
             <div className="flex flex-wrap justify-center gap-5">
               <Link
                 to="/doctors"
@@ -103,7 +101,7 @@ const HeroSection = ({ onSearch, onMunicipalitySelect }: HeroSectionProps) => {
                 <div className="w-16 h-16 gradient-accent rounded-2xl flex items-center justify-center shadow-soft">
                   <Stethoscope className="w-8 h-8 text-primary-foreground" />
                 </div>
-                <span className="text-base font-bold text-foreground">🩺 أطباء الأطفال</span>
+                <span className="text-base font-bold text-foreground">🩺 {t('services.doctors')}</span>
               </Link>
               <Link
                 to="/speech-therapy"
@@ -112,7 +110,7 @@ const HeroSection = ({ onSearch, onMunicipalitySelect }: HeroSectionProps) => {
                 <div className="w-16 h-16 gradient-playful rounded-2xl flex items-center justify-center shadow-soft">
                   <MessageCircle className="w-8 h-8 text-primary-foreground" />
                 </div>
-                <span className="text-base font-bold text-foreground">🗣️ أخصائيو الأرطفونيا</span>
+                <span className="text-base font-bold text-foreground">🗣️ {t('services.speechTherapy')}</span>
               </Link>
               <Link
                 to="/clothing-stores"
@@ -121,7 +119,7 @@ const HeroSection = ({ onSearch, onMunicipalitySelect }: HeroSectionProps) => {
                 <div className="w-16 h-16 bg-gradient-to-br from-secondary to-mint rounded-2xl flex items-center justify-center shadow-soft">
                   <Shirt className="w-8 h-8 text-secondary-foreground" />
                 </div>
-                <span className="text-base font-bold text-foreground">👕 محلات ملابس الأطفال</span>
+                <span className="text-base font-bold text-foreground">👕 {t('services.clothing')}</span>
               </Link>
             </div>
           </div>
