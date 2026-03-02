@@ -64,8 +64,8 @@ interface PaymentRecord {
 const mockKindergarten = {
   id: '1',
   name: 'روضة النور',
-  municipality: 'معسكر',
-  address: 'حي 500 مسكن، معسكر',
+  municipality: 'Rawdati',
+  address: 'حي 500 مسكن، Rawdati',
   phone: '0555 12 34 56',
   pricePerMonth: 5000,
   workingHours: '07:00 - 17:00',

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+﻿import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export type Language = 'ar' | 'fr' | 'en';
 
@@ -15,7 +15,7 @@ const translations: Record<Language, Record<string, string>> = {
         'welcome': 'مرحباً بكم',
         'welcome.subtitle': 'منصة روضتي - Rawdati',
         'platform.name': 'روضتي',
-        'mascara': 'معسكر',
+        'Rawdati': 'Rawdati',
 
         // Navigation
         'nav.home': 'الرئيسية',
@@ -330,7 +330,7 @@ const translations: Record<Language, Record<string, string>> = {
         'welcome': 'Bienvenue',
         'welcome.subtitle': 'Plateforme Rawdati - Rawdati',
         'platform.name': 'Rawdati',
-        'mascara': 'Mascara',
+        'Rawdati': 'Rawdati',
 
         // Navigation
         'nav.home': 'Accueil',
@@ -391,11 +391,11 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Footer
         'footer.rights': 'Tous droits réservés',
-        'footer.description': 'Plateforme numérique pour aider les parents à trouver les meilleurs services pour leurs enfants à Mascara',
+        'footer.description': 'Plateforme numérique pour aider les parents à trouver les meilleurs services pour leurs enfants à Rawdati',
 
         // Kindergartens Page
-        'kindergartens.pageTitle': 'Jardins d\'enfants à Mascara',
-        'kindergartens.pageSubtitle': 'Choisissez parmi les meilleurs jardins d\'enfants à Mascara, avec des informations sur les prix, services et avis',
+        'kindergartens.pageTitle': 'Jardins d\'enfants à Rawdati',
+        'kindergartens.pageSubtitle': 'Choisissez parmi les meilleurs jardins d\'enfants à Rawdati, avec des informations sur les prix, services et avis',
         'kindergartens.searchPlaceholder': 'Chercher un jardin...',
         'kindergartens.count': 'Affichage de {count} jardin(s)',
         'kindergartens.noResults': 'Aucun résultat',
@@ -460,8 +460,8 @@ const translations: Record<Language, Record<string, string>> = {
         'registration.allergyDetails': 'Détails des allergies alimentaires',
 
         // Doctors Page
-        'doctors.pageTitle': 'Pédiatres à Mascara',
-        'doctors.pageSubtitle': 'Une liste complète des meilleurs pédiatres de la wilaya de Mascara',
+        'doctors.pageTitle': 'Pédiatres à Rawdati',
+        'doctors.pageSubtitle': 'Une liste complète des meilleurs pédiatres de la wilaya de Rawdati',
         'doctors.find': 'Trouvez un pédiatre de confiance',
         'doctors.searchPlaceholder': 'Rechercher par nom ou spécialité...',
         'doctors.experience': '{years} ans d\'expérience',
@@ -476,14 +476,14 @@ const translations: Record<Language, Record<string, string>> = {
         'details.partnerStore': 'Magasins partenaires',
 
         // Speech Therapy Page
-        'speech.pageTitle': 'Orthophonistes à Mascara',
-        'speech.pageSubtitle': 'Une liste complète des meilleurs orthophonistes de la wilaya de Mascara',
+        'speech.pageTitle': 'Orthophonistes à Rawdati',
+        'speech.pageSubtitle': 'Une liste complète des meilleurs orthophonistes de la wilaya de Rawdati',
         'speech.find': 'Trouvez un orthophoniste expert',
         'speech.searchPlaceholder': 'Rechercher par nom ou spécialité...',
 
         // Clothing Stores Page
-        'clothing.pageTitle': 'Magasins de vêtements pour enfants à Mascara',
-        'clothing.pageSubtitle': 'Découvrez les meilleurs magasins de vêtements pour enfants à Mascara',
+        'clothing.pageTitle': 'Magasins de vêtements pour enfants à Rawdati',
+        'clothing.pageSubtitle': 'Découvrez les meilleurs magasins de vêtements pour enfants à Rawdati',
         'clothing.find': 'Découvrez les meilleurs magasins de vêtements',
         'clothing.searchPlaceholder': 'Rechercher par nom ou ville...',
         'clothing.priceRange': 'Tranche de prix',
@@ -564,7 +564,7 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Admin Dashboard
         'admin.title': 'Tableau de bord Admin',
-        'admin.subtitle': 'Rawdati - Mascara',
+        'admin.subtitle': 'Rawdati - Rawdati',
         'admin.totalUsers': 'Total Utilisateurs',
         'admin.pending': 'En attente',
         'admin.approved': 'Approuvés',
@@ -646,7 +646,7 @@ const translations: Record<Language, Record<string, string>> = {
         'welcome': 'Welcome',
         'welcome.subtitle': 'Rawdati Platform - Rawdati',
         'platform.name': 'Rawdati',
-        'mascara': 'Mascara',
+        'Rawdati': 'Rawdati',
 
         // Navigation
         'nav.home': 'Home',
@@ -707,11 +707,11 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Footer
         'footer.rights': 'All rights reserved',
-        'footer.description': 'Digital platform to help parents find the best services for their children in Mascara',
+        'footer.description': 'Digital platform to help parents find the best services for their children in Rawdati',
 
         // Kindergartens Page
-        'kindergartens.pageTitle': 'Kindergartens in Mascara',
-        'kindergartens.pageSubtitle': 'Choose from the best kindergartens in Mascara, with info on prices, services, and reviews',
+        'kindergartens.pageTitle': 'Kindergartens in Rawdati',
+        'kindergartens.pageSubtitle': 'Choose from the best kindergartens in Rawdati, with info on prices, services, and reviews',
         'kindergartens.searchPlaceholder': 'Search kindergarten...',
         'kindergartens.count': 'Showing {count} kindergarten(s)',
         'kindergartens.noResults': 'No results found',
@@ -799,8 +799,8 @@ const translations: Record<Language, Record<string, string>> = {
         'owner.markAbsence': 'Mark Absent',
 
         // Doctors Page
-        'doctors.pageTitle': 'Pediatricians in Mascara',
-        'doctors.pageSubtitle': 'A comprehensive list of the best pediatricians in Mascara province',
+        'doctors.pageTitle': 'Pediatricians in Rawdati',
+        'doctors.pageSubtitle': 'A comprehensive list of the best pediatricians in Rawdati province',
         'doctors.find': 'Find a Trusted Pediatrician',
         'doctors.searchPlaceholder': 'Search by name or specialty...',
         'doctors.experience': '{years} years experience',
@@ -815,14 +815,14 @@ const translations: Record<Language, Record<string, string>> = {
         'details.partnerStore': 'Partner Stores',
 
         // Speech Therapy Page
-        'speech.pageTitle': 'Speech Therapists in Mascara',
-        'speech.pageSubtitle': 'A comprehensive list of the best speech therapists in Mascara',
+        'speech.pageTitle': 'Speech Therapists in Rawdati',
+        'speech.pageSubtitle': 'A comprehensive list of the best speech therapists in Rawdati',
         'speech.find': 'Find an Expert Speech Therapist',
         'speech.searchPlaceholder': 'Search by name or specialty...',
 
         // Clothing Stores Page
-        'clothing.pageTitle': 'Children\'s Clothing Stores in Mascara',
-        'clothing.pageSubtitle': 'Discover the best children\'s clothing stores in Mascara',
+        'clothing.pageTitle': 'Children\'s Clothing Stores in Rawdati',
+        'clothing.pageSubtitle': 'Discover the best children\'s clothing stores in Rawdati',
         'clothing.find': 'Discover the best clothing stores',
         'clothing.searchPlaceholder': 'Search by store name or city...',
         'clothing.priceRange': 'Price Range',
@@ -897,7 +897,7 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Admin Dashboard
         'admin.title': 'Admin Dashboard',
-        'admin.subtitle': 'Rawdati - Mascara',
+        'admin.subtitle': 'Rawdati - Rawdati',
         'admin.totalUsers': 'Total Users',
         'admin.pending': 'Pending',
         'admin.approved': 'Approved',

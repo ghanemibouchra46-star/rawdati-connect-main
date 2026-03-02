@@ -235,7 +235,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
               <span className="text-foreground">{municipality}</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-xl">
-              <span className="font-bold text-primary">{kindergarten.pricePerMonth.toLocaleString()} {t('mascara') === 'معسكر' ? 'دج' : 'DA'}</span>
+              <span className="font-bold text-primary">{kindergarten.pricePerMonth.toLocaleString()} {language === 'ar' ? 'دج' : 'DA'}</span>
               <span className="text-muted-foreground">/{language === 'ar' ? 'شهر' : 'mois'}</span>
             </div>
             {kindergarten.hasAutismWing && (
@@ -265,14 +265,14 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                     </span>
                   </div>
                   <span className="font-bold text-primary">
-                    {item.price.toLocaleString()} {t('mascara') === 'معسكر' ? 'دج' : 'DA'}
+                    {item.price.toLocaleString()} {language === 'ar' ? 'دج' : 'DA'}
                   </span>
                 </div>
               ))}
               <div className="pt-2 mt-2 border-t border-border flex justify-between items-center bg-primary/5 p-3 rounded-lg">
                 <span className="font-bold">{language === 'ar' ? 'المجموع الشهري التقديري' : 'Total mensuel estimé'}</span>
                 <span className="font-bold text-lg text-primary">
-                  {kindergarten.pricePerMonth.toLocaleString()} {t('mascara') === 'معسكر' ? 'دج' : 'DA'}
+                  {kindergarten.pricePerMonth.toLocaleString()} {language === 'ar' ? 'دج' : 'DA'}
                 </span>
               </div>
             </div>

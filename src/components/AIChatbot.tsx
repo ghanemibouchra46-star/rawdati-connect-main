@@ -116,33 +116,33 @@ const AIChatbot = () => {
 
         if (text.includes('سعر') || text.includes('ثمن') || text.includes('prix') || text.includes('price')) {
             return language === 'ar'
-                ? 'تختلف الأسعار حسب الروضة والخدمات المختارة. تتراوح أسعار الروضات في معسكر بين 4500 و 9000 دج شهرياً. أي روضة تهمك لأعطيك سعرها بالتحديد؟'
-                : 'Les prix varient selon le jardin d\'enfants et les services choisis. Ils se situent généralement entre 4500 et 9000 DA par mois à Mascara. Quel jardin vous intéresse pour un prix précis ?';
+                ? 'تختلف الأسعار حسب الروضة والخدمات المختارة. تتراوح أسعار الروضات في Rawdati بين 4500 و 9000 دج شهرياً. أي روضة تهمك لأعطيك سعرها بالتحديد؟'
+                : 'Les prix varient selon le jardin d\'enfants et les services choisis. Ils se situent généralement entre 4500 et 9000 DA par mois à Rawdati. Quel jardin vous intéresse pour un prix précis ?';
         }
 
         // Default response context-aware
         if (text.includes('روضة') || text.includes('jardin') || text.includes('kindergarten')) {
             const topKgs = kindergartens.slice(0, 5).map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
             return language === 'ar'
-                ? `لدينا العديد من الروضات المميزة في معسكر، مثل: ${topKgs}. يمكنك إخباري باسم البلدية أو اسم الروضة التي تبحث عنها.`
-                : `Nous avons plusieurs jardins d'enfants excellents à Mascara, tels que : ${topKgs}. Vous pouvez me dire le nom de la commune ou du jardin que vous recherchez.`;
+                ? `لدينا العديد من الروضات المميزة في Rawdati، مثل: ${topKgs}. يمكنك إخباري باسم البلدية أو اسم الروضة التي تبحث عنها.`
+                : `Nous avons plusieurs jardins d'enfants excellents à Rawdati, tels que : ${topKgs}. Vous pouvez me dire le nom de la commune ou du jardin que vous recherchez.`;
         }
 
         if (text.includes('طبيب') || text.includes('médecin') || text.includes('doctor')) {
             return language === 'ar'
-                ? 'يمكنني مساعدتك في العثور على أطباء الأطفال المتخصصين في ولاية معسكر من خلال قسم الأطباء المتوفر في القائمة الرئيسية.'
-                : 'Je peux vous aider à trouver des pédiatres spécialisés dans la wilaya de Mascara via la section Médecins disponible dans le menu principal.';
+                ? 'يمكنني مساعدتك في العثور على أطباء الأطفال المتخصصين في Rawdati من خلال قسم الأطباء المتوفر في القائمة الرئيسية.'
+                : 'Je peux vous aider à trouver des pédiatres spécialisés à Rawdati via la section Médecins disponible dans le menu principal.';
         }
 
         if (text.includes('ملابس') || text.includes('vêtements') || text.includes('clothing')) {
             return language === 'ar'
-                ? 'لدينا قائمة بأفضل محلات ملابس الأطفال في معسكر. يمكنك العثور عليها في قسم المحلات في التطبيق.'
-                : 'Nous avons une liste des meilleures boutiques de vêtements pour enfants à Mascara. Vous pouvez les trouver dans la section Boutiques de l\'application.';
+                ? 'لدينا قائمة بأفضل محلات ملابس الأطفال في Rawdati. يمكنك العثور عليها في قسم المحلات في التطبيق.'
+                : 'Nous avons une liste des meilleures boutiques de vêtements pour enfants à Rawdati. Vous pouvez les trouver dans la section Boutiques de l\'application.';
         }
 
         return language === 'ar'
-            ? 'أنا هنا لمساعدتك في العثور على أفضل الخدمات لأطفالك في معسكر. يمكنك سؤالي عن روضة معينة، أو خدمات مثل النقل، أو الروضات في بلدية معينة.'
-            : 'Je suis là pour vous aider à trouver les meilleurs services pour vos enfants à Mascara. Vous pouvez me poser des questions sur un jardin spécifique, des services comme le transport, ou les jardins d\'enfants dans une commune précise.';
+            ? 'أنا هنا لمساعدتك في العثور على أفضل الخدمات لأطفالك في Rawdati. يمكنك سؤالي عن روضة معينة، أو خدمات مثل النقل، أو الروضات في بلدية معينة.'
+            : 'Je suis là pour vous aider à trouver les meilleurs services pour vos enfants à Rawdati. Vous pouvez me poser des questions sur un jardin spécifique, des services comme le transport, ou les jardins d\'enfants dans une commune précise.';
     };
 
     const handleSend = () => {

@@ -57,7 +57,7 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
 
         {/* Price Badge */}
         <div className={`absolute bottom-3 ${dir === 'rtl' ? 'left-3' : 'right-3'} px-3 py-1.5 bg-primary/90 backdrop-blur-sm rounded-lg`}>
-          <span className="text-sm font-bold text-primary-foreground">{kindergarten.pricePerMonth.toLocaleString()} {t('mascara') === 'معسكر' ? 'دج' : 'DA'}</span>
+          <span className="text-sm font-bold text-primary-foreground">{kindergarten.pricePerMonth.toLocaleString()} {language === 'ar' ? 'دج' : 'DA'}</span>
           <span className="text-xs text-primary-foreground/80">/{language === 'ar' ? 'شهر' : 'mois'}</span>
         </div>
 

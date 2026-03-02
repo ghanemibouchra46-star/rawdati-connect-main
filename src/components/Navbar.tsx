@@ -21,7 +21,7 @@ const Navbar = () => {
             </div>
             <div className="flex flex-col">
               <span className="font-extrabold text-xl text-primary leading-tight">{t('platform.name')}</span>
-              <span className="text-sm font-semibold text-secondary leading-tight">{t('mascara')}</span>
+              <span className="text-sm font-semibold text-secondary leading-tight">Rawdati</span>
             </div>
           </Link>
 

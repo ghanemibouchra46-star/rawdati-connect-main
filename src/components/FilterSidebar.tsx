@@ -122,8 +122,8 @@ const FilterSidebar = ({
             className="my-4"
           />
           <div className="flex justify-between text-sm text-muted-foreground">
-            <span>{priceRange[0].toLocaleString()} {t('mascara') === 'معسكر' ? 'دج' : 'DA'}</span>
-            <span>{priceRange[1].toLocaleString()} {t('mascara') === 'معسكر' ? 'دج' : 'DA'}</span>
+            <span>{priceRange[0].toLocaleString()} {language === 'ar' ? 'دج' : 'DA'}</span>
+            <span>{priceRange[1].toLocaleString()} {language === 'ar' ? 'دج' : 'DA'}</span>
           </div>
         </div>
       </div>

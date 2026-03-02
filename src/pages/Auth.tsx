@@ -473,7 +473,7 @@ const Auth = () => {
             </div>
             <div className="flex flex-col text-right">
               <span className="font-bold text-2xl text-foreground">{t('platform.name')}</span>
-              <span className="text-sm text-muted-foreground">{t('mascara')}</span>
+              <span className="text-sm text-muted-foreground">Rawdati</span>
             </div>
           </Link>
         </div>
