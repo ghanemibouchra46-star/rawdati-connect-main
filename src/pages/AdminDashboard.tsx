@@ -138,22 +138,26 @@ const AdminDashboard = () => {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            // 1. Fetch Kindergartens first
             let rawKgData: any[] = [];
             try {
                 const { data, error } = await supabase
                     .from('kindergartens')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                if (error) throw error;
+                    .select('*');
+                if (error) {
+                    toast({ title: "KG fetch error", description: error.message, variant: "destructive" });
+                    throw error;
+                }
                 rawKgData = data || [];
-            } catch (e) {
+            } catch (e: any) {
                 console.error("KG fetch error:", e);
+                toast({ title: t('common.error'), description: e.message || "Failed to load kindergartens", variant: 'destructive' });
             }
 
             let finalKGs: Kindergarten[] = [];
+            finalKGs = localKindergartens.map(adaptKindergarten);
+
             if (rawKgData && rawKgData.length > 0) {
-                finalKGs = rawKgData.map(kg => ({
+                const dbKGs = rawKgData.map(kg => ({
                     id: kg.id,
                     name_ar: kg.name_ar || kg.nameAr || kg.name || 'N/A',
                     name_fr: kg.name_fr || kg.nameFr || kg.name || 'N/A',
@@ -165,9 +169,11 @@ const AdminDashboard = () => {
                     status: kg.status || 'pending',
                     created_at: kg.created_at || new Date().toISOString(),
                 }));
+                // Use only Database Kindergartens if there's any, else fallback OR combine?
+                // Let's replace the local data if we found DB items:
+                finalKGs = dbKGs;
             } else {
                 console.log("No DB kindergartens, using local data");
-                finalKGs = localKindergartens.map(adaptKindergarten);
             }
 
             // 2. Fetch Profiles and Roles
