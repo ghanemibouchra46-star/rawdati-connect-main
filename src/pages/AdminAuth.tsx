@@ -62,7 +62,7 @@ const AdminAuth = () => {
                 .single();
 
             const userEmail = session.user.email?.toLowerCase() || '';
-            const adminEmails = ['bouchragh1268967@gmail.com'];
+            const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
             const isAdminEmail = adminEmails.includes(userEmail);
             const hasAdminMetadata =
                 session.user.user_metadata?.role === 'admin' ||
@@ -117,7 +117,7 @@ const AdminAuth = () => {
             // Fallback: Check metadata (user_metadata and app_metadata)
             // Also include targeted fix for the main admin emails (case-insensitive)
             const userEmail = data.user.email?.toLowerCase() || '';
-            const adminEmails = ['bouchragh1268967@gmail.com'];
+            const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
             const isAdminEmail = adminEmails.includes(userEmail);
             const hasAdminMetadata =
                 data.user.user_metadata?.role === 'admin' ||
