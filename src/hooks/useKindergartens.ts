@@ -39,30 +39,30 @@ function mapRowToKindergarten(row: {
     : { lat: 0, lng: 0 };
 
   return {
-    id: row.id,
-    name: row.name_ar,
-    nameAr: row.name_ar,
-    nameFr: row.name_fr,
-    municipality: row.municipality,
-    municipalityAr: row.municipality_ar,
-    municipalityFr: row.municipality_fr,
-    address: row.address_ar,
-    addressAr: row.address_ar,
-    addressFr: row.address_fr,
-    phone: row.phone,
-    pricePerMonth: row.price_per_month,
-    ageRange: { min: row.age_min, max: row.age_max },
-    workingHours: { open: row.working_hours_open, close: row.working_hours_close },
-    rating: Number(row.rating),
+    id: row.id || '',
+    name: row.name_ar || '',
+    nameAr: row.name_ar || '',
+    nameFr: row.name_fr || '',
+    municipality: row.municipality || '',
+    municipalityAr: row.municipality_ar || '',
+    municipalityFr: row.municipality_fr || '',
+    address: row.address_ar || '',
+    addressAr: row.address_ar || '',
+    addressFr: row.address_fr || '',
+    phone: row.phone || '',
+    pricePerMonth: row.price_per_month || 0,
+    ageRange: { min: row.age_min || 3, max: row.age_max || 6 },
+    workingHours: { open: row.working_hours_open || '07:30', close: row.working_hours_close || '17:00' },
+    rating: Number(row.rating) || 0,
     reviewCount: row.review_count ?? 0,
     images: images.length ? images : ['/placeholder.svg'],
     facilities,
     services: row.services ?? [],
     activities,
     hasAutismWing: row.has_autism_wing ?? false,
-    description: row.description_ar ?? '',
-    descriptionAr: row.description_ar ?? '',
-    descriptionFr: row.description_fr ?? '',
+    description: row.description_ar || '',
+    descriptionAr: row.description_ar || '',
+    descriptionFr: row.description_fr || '',
     coordinates: coords,
     priceBreakdown,
   };
@@ -75,9 +75,13 @@ export function useKindergartens() {
       const { data, error } = await supabase
         .from('kindergartens')
         .select('*')
+        .eq('status', 'approved')
         .order('rating', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching kindergartens:", error);
+        throw error;
+      }
       return (data ?? []).map(mapRowToKindergarten);
     },
     staleTime: 60 * 1000,
