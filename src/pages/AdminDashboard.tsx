@@ -248,7 +248,12 @@ const AdminDashboard = () => {
             .eq('id', userId);
 
         if (error) {
-            toast({ title: t('common.error'), variant: 'destructive' });
+            console.error('Update user status error:', error);
+            toast({
+                title: t('common.error'),
+                description: error.message,
+                variant: 'destructive'
+            });
             return;
         }
 
@@ -263,7 +268,12 @@ const AdminDashboard = () => {
             .eq('id', kgId);
 
         if (error) {
-            toast({ title: t('common.error'), variant: 'destructive' });
+            console.error('Update KG status error:', error);
+            toast({
+                title: t('common.error'),
+                description: error.message,
+                variant: 'destructive'
+            });
             return;
         }
 
@@ -287,7 +297,12 @@ const AdminDashboard = () => {
             .eq('id', regId);
 
         if (error) {
-            toast({ title: t('common.error'), variant: 'destructive' });
+            console.error('Update registration status error:', error);
+            toast({
+                title: t('common.error'),
+                description: error.message,
+                variant: 'destructive'
+            });
             return;
         }
 
