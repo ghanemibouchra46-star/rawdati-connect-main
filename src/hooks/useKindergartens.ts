@@ -4,9 +4,13 @@ import type { Kindergarten, Activity, Facility, PriceItem } from '@/data/kinderg
 
 const mapRowToKindergarten = (row: any): Kindergarten => {
   const parsePostgresArray = (val: any): string[] => {
+    if (!val) return [];
     if (Array.isArray(val)) return val;
-    if (typeof val === 'string' && val.startsWith('{') && val.endsWith('}')) {
-      return val.substring(1, val.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+    if (typeof val === 'string') {
+      if (val.startsWith('{') && val.endsWith('}')) {
+        return val.substring(1, val.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+      }
+      return val.split(',').map(s => s.trim()).filter(Boolean);
     }
     return [];
   };
