@@ -80,7 +80,7 @@ export function useKindergartens() {
 
       if (error) {
         console.error("Error fetching kindergartens:", error);
-        throw error;
+        return [];
       }
       return (data ?? []).map(mapRowToKindergarten);
     },
