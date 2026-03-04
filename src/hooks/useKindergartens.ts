@@ -3,8 +3,29 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Kindergarten, Activity, Facility, PriceItem } from '@/data/kindergartens';
 
 const mapRowToKindergarten = (row: any): Kindergarten => {
-  const images = Array.isArray(row?.images) ? row.images as string[] : [];
-  const activities = (Array.isArray(row?.activities) ? row.activities : []) as Activity[];
+  const parsePostgresArray = (val: any): string[] => {
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string' && val.startsWith('{') && val.endsWith('}')) {
+      return val.substring(1, val.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+    }
+    return [];
+  };
+
+  const images = parsePostgresArray(row?.images);
+  const rawActivities = parsePostgresArray(row?.activities);
+  const activities = rawActivities.map((act: any, i: number) => {
+    if (typeof act === 'string') {
+      return {
+        id: `act-${row.id}-${i}`,
+        nameAr: act,
+        nameFr: act,
+        description: '',
+        schedule: '',
+        icon: '📚'
+      };
+    }
+    return act;
+  }) as Activity[];
   const facilities = (Array.isArray(row?.facilities) ? row.facilities : []) as Facility[];
   const priceBreakdown = (Array.isArray(row?.price_breakdown) ? row.price_breakdown : []) as PriceItem[];
 
@@ -32,7 +53,7 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     reviewCount: row?.review_count ?? 0,
     images: images.length ? images : ['/placeholder.svg'],
     facilities,
-    services: Array.isArray(row?.services) ? row.services : [],
+    services: parsePostgresArray(row?.services),
     activities,
     hasAutismWing: row.has_autism_wing ?? false,
     instagram: row.instagram,
@@ -60,6 +81,8 @@ export function useKindergartens() {
         console.error("Error fetching kindergartens:", error);
         return [];
       }
+
+      console.log("Raw Supabase data:", data);
 
       try {
         return (data ?? []).map((row: any) => {
