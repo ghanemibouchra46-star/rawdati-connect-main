@@ -250,8 +250,7 @@ const AdminDashboard = () => {
         if (error) {
             console.error('Update user status error:', error);
             toast({
-                title: t('common.error'),
-                description: error.message,
+                title: `${t('common.error')}: ${error.message}`,
                 variant: 'destructive'
             });
             return;
@@ -270,8 +269,7 @@ const AdminDashboard = () => {
         if (error) {
             console.error('Update KG status error:', error);
             toast({
-                title: t('common.error'),
-                description: error.message,
+                title: `${t('common.error')}: ${error.message}`,
                 variant: 'destructive'
             });
             return;
