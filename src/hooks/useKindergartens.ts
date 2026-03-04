@@ -59,6 +59,10 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     instagram: row.instagram,
     videos: (row.videos as any) || [],
     programs: (row.programs as any) || [],
+    partners: {
+      doctors: parsePostgresArray(row.doctors || row.doctor_info),
+      stores: []
+    },
     description: row?.description_ar || '',
     descriptionAr: row?.description_ar || '',
     descriptionFr: row?.description_fr || '',
