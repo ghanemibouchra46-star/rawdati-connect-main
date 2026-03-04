@@ -1,4 +1,4 @@
-import { Star, MapPin, Clock, Users, Bus, Utensils, Calculator, Globe, BookOpen, Dumbbell } from 'lucide-react';
+import { Star, MapPin, Clock, Users, Bus, Utensils, Calculator, Globe, BookOpen, Dumbbell, Stethoscope } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -80,7 +80,7 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
         </p>
 
         {/* Info Row */}
-        <div className={`flex items-center gap-4 mb-4 text-sm text-muted-foreground ${dir === 'rtl' ? 'flex-row' : 'flex-row-reverse'}`}>
+        <div className={`flex items-center gap-4 mb-3 text-sm text-muted-foreground ${dir === 'rtl' ? 'flex-row' : 'flex-row-reverse'}`}>
           <div className="flex items-center gap-1.5">
             <Clock className="w-4 h-4 text-primary" />
             <span>{kindergarten.workingHours.open} - {kindergarten.workingHours.close}</span>
@@ -90,6 +90,13 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
             <span>{kindergarten.ageRange.min}-{kindergarten.ageRange.max} {t('parent.age')}</span>
           </div>
         </div>
+
+        {kindergarten.partners?.doctors && kindergarten.partners.doctors.length > 0 && (
+          <div className={`flex items-center gap-1.5 mb-4 text-xs font-semibold text-blue-700 bg-blue-50 w-fit px-2.5 py-1 rounded-md border border-blue-100 ${dir === 'rtl' ? 'flex-row' : 'flex-row-reverse'}`}>
+            <Stethoscope className="w-4 h-4" />
+            <span className="line-clamp-1">{language === 'ar' ? 'أطباء مختصين:' : 'Médecins:'} {kindergarten.partners.doctors.join(', ')}</span>
+          </div>
+        )}
 
         {/* Services */}
         <div className={`flex flex-wrap gap-1.5 mb-5 ${dir === 'rtl' ? 'flex-row' : 'flex-row-reverse'}`}>
