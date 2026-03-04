@@ -97,8 +97,10 @@ export type Database = {
           description_fr: string | null
           coordinates: Json | null
           status: string | null
-          created_at: string
           updated_at: string
+          instagram: string | null
+          videos: Json | null
+          programs: Json | null
         }
         Insert: {
           id: string

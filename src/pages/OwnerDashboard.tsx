@@ -1,33 +1,55 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  ArrowRight,
-  Building2,
-  Users,
-  Edit,
-  Plus,
-  Clock,
-  Phone,
-  MapPin,
-  DollarSign,
+  BarChart,
+  Settings,
+  Bell,
+  Search,
+  Filter,
+  ChevronRight,
+  Calendar,
+  User as UserIcon,
   LogOut,
+  Check,
+  X,
+  Clock,
+  MapPin,
+  Star,
+  PlusCircle,
+  FileText,
+  CreditCard,
+  Briefcase,
+  Users,
+  GraduationCap,
+  MessageSquare,
+  TrendingUp,
+  Award,
+  BookOpen,
+  PieChart,
+  Layout,
+  Plus,
   Loader2,
+  XCircle,
+  Edit,
+  Building2,
+  ArrowRight,
   Heart,
   Activity,
   Wallet,
-  CheckCircle2,
-  XCircle,
-  Filter,
   Baby,
-  CreditCard
+  CheckCircle2,
+  DollarSign,
+  Instagram
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { User } from '@supabase/supabase-js';
+import { User as AuthUser } from '@supabase/supabase-js';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
@@ -79,7 +101,7 @@ const OwnerDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [kindergartenId, setKindergartenId] = useState<string | null>(null);
@@ -89,6 +111,10 @@ const OwnerDashboard = () => {
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [attendance, setAttendance] = useState<Record<string, 'present' | 'absent' | 'late'>>({});
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editData, setEditData] = useState<any>({});
 
   const fetchDashboardData = async (uid: string) => {
     try {
@@ -151,6 +177,17 @@ const OwnerDashboard = () => {
         .select('*')
         .eq('kindergarten_id', kgId);
       if (payData) setPayments(payData as any);
+
+      // 7. Fetch Kindergarten Details for Editing
+      const { data: kgDetails } = await supabase
+        .from('kindergartens')
+        .select('*')
+        .eq('id', kgId)
+        .single();
+
+      if (kgDetails) {
+        setEditData(kgDetails);
+      }
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
     }
@@ -228,6 +265,40 @@ const OwnerDashboard = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const handleSaveDetails = async () => {
+    try {
+      if (!kindergartenId) return;
+      setIsSaving(true);
+
+      const { error } = await supabase
+        .from('kindergartens')
+        .update({
+          phone: editData.phone,
+          instagram: editData.instagram, // Added instagram
+          description_ar: editData.description_ar,
+          programs: editData.programs,
+          videos: editData.videos,
+          updated_at: new Date().toISOString()
+        } as any)
+        .eq('id', kindergartenId);
+
+      if (error) throw error;
+
+      toast({ title: language === 'ar' ? 'تم حفظ التحديثات' : 'Sauvegardé avec succès' });
+      setIsEditing(false);
+      if (user) fetchDashboardData(user.id);
+    } catch (error) {
+      console.error('Save error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save changes',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -360,7 +431,7 @@ const OwnerDashboard = () => {
               <Link to="/">
                 <Button variant="ghost" className="gap-2">
                   <span>الرئيسية</span>
-                  <ArrowRight className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-0' : 'rotate-180'}`} />
+                  <ArrowRight className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-0' : 'rotate-180'} `} />
                 </Button>
               </Link>
               <Button variant="outline" onClick={handleLogout} className="gap-2 text-destructive hover:text-destructive">
@@ -371,6 +442,107 @@ const OwnerDashboard = () => {
           </div>
         </div>
       </header>
+
+      {/* Edit Form Modal */}
+      {isEditing && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-card w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl p-6 shadow-2xl">
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <Edit className="w-6 h-6 text-primary" />
+              {language === 'ar' ? 'تعديل معلومات الروضة' : 'Modifier les informations'}
+            </h2>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">{language === 'ar' ? 'رقم الهاتف' : 'Téléphone'}</label>
+                  <Input
+                    value={editData.phone || ''}
+                    onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Instagram className="w-4 h-4 text-pink-600" />
+                    <span>انسقرام (Instagram)</span>
+                  </label>
+                  <Input
+                    placeholder="@username"
+                    value={editData.instagram || ''}
+                    onChange={(e) => setEditData({ ...editData, instagram: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium">{language === 'ar' ? 'وصف الروضة (بالعربية)' : 'Description (Ar)'}</label>
+                <Textarea
+                  value={editData.description_ar || ''}
+                  onChange={(e) => setEditData({ ...editData, description_ar: e.target.value })}
+                  rows={4}
+                />
+              </div>
+
+              <div className="space-y-4 mt-6 border-t pt-6">
+                <h3 className="font-bold">{language === 'ar' ? 'البرامج والأنشطة' : 'Programmes et Activités'}</h3>
+                <p className="text-xs text-muted-foreground mb-2">إضافة برامج تعليمية خاصة بالروضة</p>
+                {/* Simplified program editor for now */}
+                <Button variant="outline" size="sm" onClick={() => {
+                  const newProgs = [...(editData.programs as any || [])];
+                  newProgs.push({ id: Date.now().toString(), nameAr: '', nameFr: '', icon: '🌟' });
+                  setEditData({ ...editData, programs: newProgs });
+                }}>
+                  <Plus className="w-4 h-4 ml-1" /> {language === 'ar' ? 'إضافة برنامج' : 'Ajouter un programme'}
+                </Button>
+
+                <div className="space-y-3">
+                  {(editData.programs as any[])?.map((prog, index) => (
+                    <div key={prog.id} className="p-3 border rounded-xl bg-muted/30">
+                      <div className="flex justify-between mb-2">
+                        <Input
+                          size={1}
+                          className="w-16 h-8 text-center"
+                          value={prog.icon}
+                          onChange={(e) => {
+                            const newProgs = [...(editData.programs as any || [])];
+                            newProgs[index].icon = e.target.value;
+                            setEditData({ ...editData, programs: newProgs });
+                          }}
+                        />
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          const newProgs = (editData.programs as any[]).filter((_, i) => i !== index);
+                          setEditData({ ...editData, programs: newProgs });
+                        }}>
+                          <XCircle className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
+                      <Input
+                        className="mb-2"
+                        placeholder={language === 'ar' ? 'اسم البرنامج بالعربية' : 'Nom du programme (Ar)'}
+                        value={prog.nameAr}
+                        onChange={(e) => {
+                          const newProgs = [...(editData.programs as any || [])];
+                          newProgs[index].nameAr = e.target.value;
+                          setEditData({ ...editData, programs: newProgs });
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4 mt-8 pt-6 border-t">
+              <Button className="flex-1 gradient-accent border-0" onClick={handleSaveDetails}>
+                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : (language === 'ar' ? 'حفظ التغييرات' : 'Sauvegarder')}
+              </Button>
+              <Button variant="outline" className="flex-1" onClick={() => setIsEditing(false)}>
+                {language === 'ar' ? 'إلغاء' : 'Annuler'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main className="container mx-auto px-4 py-8">
         {/* Stats Section */}
@@ -504,8 +676,8 @@ const OwnerDashboard = () => {
                         <div key={child.id} className="flex items-center justify-between p-3 rounded-xl border bg-card">
                           <span className="font-medium text-sm">{child.name}</span>
                           <div className="flex gap-2">
-                            <button className={`p-1.5 rounded-lg transition-all ${attendance[child.id] === 'present' ? 'bg-mint text-white' : 'bg-muted hover:bg-muted/80'}`} onClick={() => handleAttendance(child.id, 'child', 'present')}><CheckCircle2 className="w-4 h-4" /></button>
-                            <button className={`p-1.5 rounded-lg transition-all ${attendance[child.id] === 'absent' ? 'bg-destructive text-white' : 'bg-muted hover:bg-muted/80'}`} onClick={() => handleAttendance(child.id, 'child', 'absent')}><XCircle className="w-4 h-4" /></button>
+                            <button className={`p - 1.5 rounded - lg transition - all ${attendance[child.id] === 'present' ? 'bg-mint text-white' : 'bg-muted hover:bg-muted/80'} `} onClick={() => handleAttendance(child.id, 'child', 'present')}><CheckCircle2 className="w-4 h-4" /></button>
+                            <button className={`p - 1.5 rounded - lg transition - all ${attendance[child.id] === 'absent' ? 'bg-destructive text-white' : 'bg-muted hover:bg-muted/80'} `} onClick={() => handleAttendance(child.id, 'child', 'absent')}><XCircle className="w-4 h-4" /></button>
                           </div>
                         </div>
                       ))}
@@ -523,8 +695,8 @@ const OwnerDashboard = () => {
                             <p className="text-[10px] text-muted-foreground">{member.role}</p>
                           </div>
                           <div className="flex gap-2">
-                            <button className={`p-1.5 rounded-lg transition-all ${attendance[member.id] === 'present' ? 'bg-mint text-white' : 'bg-muted hover:bg-muted/80'}`} onClick={() => handleAttendance(member.id, 'staff', 'present')}><CheckCircle2 className="w-4 h-4" /></button>
-                            <button className={`p-1.5 rounded-lg transition-all ${attendance[member.id] === 'absent' ? 'bg-destructive text-white' : 'bg-muted hover:bg-muted/80'}`} onClick={() => handleAttendance(member.id, 'staff', 'absent')}><XCircle className="w-4 h-4" /></button>
+                            <button className={`p - 1.5 rounded - lg transition - all ${attendance[member.id] === 'present' ? 'bg-mint text-white' : 'bg-muted hover:bg-muted/80'} `} onClick={() => handleAttendance(member.id, 'staff', 'present')}><CheckCircle2 className="w-4 h-4" /></button>
+                            <button className={`p - 1.5 rounded - lg transition - all ${attendance[member.id] === 'absent' ? 'bg-destructive text-white' : 'bg-muted hover:bg-muted/80'} `} onClick={() => handleAttendance(member.id, 'staff', 'absent')}><XCircle className="w-4 h-4" /></button>
                           </div>
                         </div>
                       ))}
@@ -646,14 +818,16 @@ const OwnerDashboard = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div><CardTitle>{t('modal.details')}</CardTitle><CardDescription>{mockKindergarten.address}</CardDescription></div>
-                <Button variant="outline"><Edit className="w-4 h-4 ml-1" />{language === 'ar' ? 'تعديل' : 'Modifier'}</Button>
+                <Button variant="outline" onClick={() => setIsEditing(true)}><Edit className="w-4 h-4 ml-1" />{language === 'ar' ? 'تعديل' : 'Modifier'}</Button>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1"><label className="text-xs text-muted-foreground">اسم الروضة</label><p className="font-medium">{mockKindergarten.name}</p></div>
                   <div className="space-y-1"><label className="text-xs text-muted-foreground">البلدية</label><p className="font-medium">{mockKindergarten.municipality}</p></div>
-                  <div className="space-y-1"><label className="text-xs text-muted-foreground">رقم الهاتف</label><p className="font-medium">{mockKindergarten.phone}</p></div>
+                  <div className="space-y-1"><label className="text-xs text-muted-foreground">رقم الهاتف</label><p className="font-medium">{editData.phone || mockKindergarten.phone}</p></div>
                   <div className="space-y-1"><label className="text-xs text-muted-foreground">السعر الشهري</label><p className="font-medium">{mockKindergarten.pricePerMonth} دج</p></div>
+                  <div className="space-y-1"><label className="text-xs text-muted-foreground">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</label><p className="font-medium">{editData.email || '-'}</p></div>
+                  <div className="space-y-1"><label className="text-xs text-muted-foreground">{language === 'ar' ? 'آخر تحديث' : 'Dernière mise à jour'}</label><p className="font-medium">{editData.updated_at ? format(new Date(editData.updated_at), 'dd/MM/yyyy HH:mm') : '-'}</p></div>
                 </div>
               </CardContent>
             </Card>

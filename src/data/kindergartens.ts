@@ -54,6 +54,9 @@ export interface Kindergarten {
   services: string[];
   activities: Activity[];
   hasAutismWing: boolean;
+  instagram?: string;
+  videos?: { id: string; url: string; titleAr: string; titleFr: string }[];
+  programs?: { id: string; nameAr: string; nameFr: string; descriptionAr: string; descriptionFr: string; icon: string }[];
   partners?: {
     doctors: string[];
     stores: string[];

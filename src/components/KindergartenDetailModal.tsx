@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   X, Star, MapPin, Clock, Users, Phone, ChevronLeft, ChevronRight,
-  Bus, Utensils, Calculator, Globe, BookOpen, Dumbbell, MessageSquare, Send, Coins, Layout, Puzzle, Stethoscope, ShoppingBag
+  Bus, Utensils, Calculator, Globe, BookOpen, Dumbbell, MessageSquare, Send, Coins, Layout, Puzzle, Stethoscope, ShoppingBag, Instagram
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -206,8 +206,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`w-2 h-2 rounded-full transition-all ${index === currentImageIndex ? 'bg-primary-foreground w-6' : 'bg-primary-foreground/50'
-                      }`}
+                    className={`w-2 h-2 rounded-full transition-all ${index === currentImageIndex ? 'bg-primary-foreground w-6' : 'bg-primary-foreground/50'}`}
                   />
                 ))}
               </div>
@@ -234,6 +233,12 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
               <MapPin className="w-5 h-5 text-coral" />
               <span className="text-foreground">{municipality}</span>
             </div>
+            {kindergarten.instagram && (
+              <a href={`https://instagram.com/${kindergarten.instagram}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-muted rounded-xl hover:bg-muted/80 transition-colors">
+                <Instagram className="w-5 h-5 text-pink-600" />
+                <span className="text-foreground">@{kindergarten.instagram}</span>
+              </a>
+            )}
             <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-xl">
               <span className="font-bold text-primary">{kindergarten.pricePerMonth.toLocaleString()} {language === 'ar' ? 'دج' : 'DA'}</span>
               <span className="text-muted-foreground">/{language === 'ar' ? 'شهر' : 'mois'}</span>
@@ -299,7 +304,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
             <div className="bg-muted rounded-xl p-4 text-center">
               <Phone className="w-6 h-6 text-accent mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">{t('auth.phone')}</p>
-              <p className="font-semibold text-foreground" dir="ltr">{kindergarten.phone}</p>
+              <p className="font-semibold text-foreground text-xs" dir="ltr">{kindergarten.phone}</p>
             </div>
             <div className="bg-muted rounded-xl p-4 text-center">
               <MapPin className="w-6 h-6 text-coral mx-auto mb-2" />
@@ -325,16 +330,51 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
             </div>
           </div>
 
-          {/* Activities */}
-          {kindergarten.activities && kindergarten.activities.length > 0 && (
+          {/* Activities and Programs */}
+          {((kindergarten.activities && kindergarten.activities.length > 0) || (kindergarten.programs && kindergarten.programs.length > 0)) && (
             <div className="mb-6">
-              <h3 className={`text-lg font-bold text-foreground mb-3 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{language === 'ar' ? 'الأنشطة والبرامج' : 'Activités et Programmes'}</h3>
+              <h3 className={`text-lg font-bold text-foreground mb-3 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{language === 'ar' ? 'البرامج والأنشطة' : 'Activités et Programmes'}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {kindergarten.activities.slice(0, 6).map((activity) => (
+                {/* Traditional Activities */}
+                {kindergarten.activities?.slice(0, 6).map((activity) => (
                   <ActivityCard key={activity.id} activity={{
                     ...activity,
                     nameAr: language === 'ar' ? activity.nameAr : activity.nameFr
                   }} />
+                ))}
+
+                {/* Custom Programs */}
+                {kindergarten.programs?.map((prog) => (
+                  <div key={prog.id} className="p-4 rounded-xl border bg-card flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-xl">
+                      {prog.icon}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm">{language === 'ar' ? prog.nameAr : prog.nameFr}</h4>
+                      <p className="text-xs text-muted-foreground">{language === 'ar' ? prog.descriptionAr : prog.descriptionFr}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Videos Section */}
+          {kindergarten.videos && kindergarten.videos.length > 0 && (
+            <div className="mb-6">
+              <h3 className={`text-lg font-bold text-foreground mb-3 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{language === 'ar' ? 'فيديوهات الروضة' : 'Vidéos de la crèche'}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {kindergarten.videos.map((video) => (
+                  <div key={video.id} className="aspect-video rounded-xl overflow-hidden border bg-black shadow-soft">
+                    <iframe
+                      className="w-full h-full"
+                      src={video.url.replace('watch?v=', 'embed/')}
+                      title={language === 'ar' ? video.titleAr : video.titleFr}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
                 ))}
               </div>
             </div>
@@ -365,8 +405,6 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
               </div>
             </div>
           )}
-
-
 
           {/* Partners Section */}
           {(kindergarten.partners?.doctors?.length > 0 || kindergarten.partners?.stores?.length > 0) && (
@@ -447,10 +485,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                           className="p-1"
                         >
                           <Star
-                            className={`w-6 h-6 transition-colors ${star <= reviewForm.rating
-                              ? 'text-accent fill-accent'
-                              : 'text-muted-foreground/30'
-                              }`}
+                            className={`w-6 h-6 transition-colors ${star <= reviewForm.rating ? 'text-accent fill-accent' : 'text-muted-foreground/30'}`}
                           />
                         </button>
                       ))}
@@ -521,7 +556,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 
