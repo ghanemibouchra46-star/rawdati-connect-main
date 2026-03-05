@@ -46,6 +46,14 @@ const AdminAuth = () => {
         if (isRecovery) {
             setMode('new_password');
         }
+        const notAdmin = searchParams.get('error') === 'not_admin';
+        if (notAdmin) {
+            toast({
+                title: t('common.error'),
+                description: t('auth.error.notAdmin'),
+                variant: 'destructive',
+            });
+        }
         checkAdminSession();
     }, [searchParams]);
 
@@ -125,7 +133,14 @@ const AdminAuth = () => {
 
             if (roleError || !roleData) {
                 if (hasAdminMetadata || isAdminEmail) {
-                    console.log('Authorized via metadata fallback or targeted email fix');
+                    // تسجيل دور الأدمن في قاعدة البيانات إن لم يكن موجوداً (حتى يمر التحقق في لوحة الأدمن)
+                    const { error: upsertError } = await supabase.from('user_roles').upsert(
+                        { user_id: data.user.id, role: 'admin' },
+                        { onConflict: 'user_id,role' }
+                    );
+                    if (upsertError) {
+                        console.warn('Admin role upsert (optional):', upsertError.message);
+                    }
                 } else {
                     await supabase.auth.signOut();
                     toast({
@@ -143,7 +158,8 @@ const AdminAuth = () => {
                 description: t('auth.success'),
             });
 
-            // Explicitly navigate to admin dashboard
+            // انتظار قصير لضمان حفظ الجلسة قبل التوجيه
+            await new Promise((r) => setTimeout(r, 100));
             navigate('/admin', { replace: true });
         }
 

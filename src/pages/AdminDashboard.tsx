@@ -106,9 +106,15 @@ const AdminDashboard = () => {
     }, []);
 
     const checkAdminAccess = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
+        let { data: { session } } = await supabase.auth.getSession();
         if (!session?.user) {
-            navigate('/admin-auth');
+            // إعادة محاولة مرة واحدة (قد تكون الجلسة لم تُحفظ بعد بعد تسجيل الدخول)
+            await new Promise((r) => setTimeout(r, 200));
+            const retry = await supabase.auth.getSession();
+            session = retry.data.session;
+        }
+        if (!session?.user) {
+            navigate('/admin-auth', { replace: true });
             return false;
         }
 
@@ -128,7 +134,7 @@ const AdminDashboard = () => {
                 session.user.app_metadata?.role === 'admin';
 
             if (!isAdminEmail && !hasAdminMetadata) {
-                navigate('/');
+                navigate('/admin-auth?error=not_admin', { replace: true });
                 return false;
             }
         }
