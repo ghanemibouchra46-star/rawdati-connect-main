@@ -76,7 +76,7 @@ const BookingModal = ({ kindergarten, isOpen, onClose }: BookingModalProps) => {
             }
 
             // Attempt to save to Supabase
-            const { error: insertError } = await (supabase.from('bookings') as any).insert({
+            const { error: insertError } = await (supabase as any).from('bookings').insert({
                 kindergarten_id: kindergarten.id,
                 user_id: user.id,
                 parent_name: parentName,
