@@ -188,23 +188,36 @@ const AdminDashboard = () => {
                 console.log("No DB kindergartens, using local data");
             }
 
-            // 2. Fetch Profiles and Roles (يجب أن يكون للأدمن سطر في user_roles حتى تسمح RLS برؤية الكل)
-            let profiles: any[] = [];
-            let roles: any[] = [];
+            // 2. Fetch Profiles and Roles: نفضل RPC (تعمل حتى بدون سياسات RLS)، وإلا الطريقة العادية
+            let usersWithRoles: any[] = [];
             try {
-                const [pRes, rRes] = await Promise.all([
-                    supabase.from('profiles').select('*'),
-                    supabase.from('user_roles').select('*')
-                ]);
-                if (pRes.error) {
-                    console.error("Profiles fetch error:", pRes.error);
-                    toast({ title: t('common.error'), description: language === 'ar' ? 'تعذر تحميل قائمة المستخدمين' : 'Could not load users', variant: 'destructive' });
+                const { data: rpcData, error: rpcError } = await supabase.rpc('get_profiles_with_roles_for_admin');
+                if (!rpcError && rpcData && Array.isArray(rpcData)) {
+                    usersWithRoles = rpcData.map((row: any) => ({
+                        id: row.id,
+                        full_name: row.full_name,
+                        phone: row.phone,
+                        status: row.status,
+                        created_at: row.created_at,
+                        updated_at: row.updated_at,
+                        role: row.role || 'parent'
+                    }));
+                } else {
+                    const [pRes, rRes] = await Promise.all([
+                        supabase.from('profiles').select('*'),
+                        supabase.from('user_roles').select('*')
+                    ]);
+                    if (pRes.error) {
+                        console.error("Profiles fetch error:", pRes.error);
+                        toast({ title: t('common.error'), description: language === 'ar' ? 'تعذر تحميل قائمة المستخدمين' : 'Could not load users', variant: 'destructive' });
+                    }
+                    const profiles = pRes.data || [];
+                    const roles = rRes.data || [];
+                    usersWithRoles = profiles.map((profile: any) => ({
+                        ...profile,
+                        role: roles.find((r: any) => r.user_id === profile.id)?.role || 'parent'
+                    }));
                 }
-                if (rRes.error) {
-                    console.error("Roles fetch error:", rRes.error);
-                }
-                profiles = pRes.data || [];
-                roles = rRes.data || [];
             } catch (e) {
                 console.error("Profiles/Roles fetch error:", e);
             }
@@ -220,11 +233,6 @@ const AdminDashboard = () => {
             } catch (e) {
                 console.error("Registration fetch error:", e);
             }
-
-            const usersWithRoles = profiles.map(profile => ({
-                ...profile,
-                role: roles.find(r => r.user_id === profile.id)?.role || 'parent'
-            }));
 
             // Attempt to link emails if they exist in metadata or profiles
             // (In a real app, you might join with auth.users if you are a superuser)

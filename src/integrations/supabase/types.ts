@@ -294,6 +294,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_profiles_with_roles_for_admin: {
+        Args: Record<string, never>
+        Returns: {
+          id: string
+          full_name: string | null
+          phone: string | null
+          status: string | null
+          created_at: string
+          updated_at: string
+          role: string
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
