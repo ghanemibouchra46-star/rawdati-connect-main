@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { Kindergarten, Activity, Facility, PriceItem } from '@/data/kindergartens';
+import { kindergartens, type Kindergarten, type Activity, type Facility, type PriceItem } from '@/data/kindergartens';
 
 const mapRowToKindergarten = (row: any): Kindergarten => {
   const parsePostgresArray = (val: any): string[] => {
@@ -46,9 +46,16 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
       }
     }
   }
-  const coords = rawCoords && typeof rawCoords === 'object' && 'lat' in rawCoords && 'lng' in rawCoords
+
+  let coords = rawCoords && typeof rawCoords === 'object' && 'lat' in rawCoords && 'lng' in rawCoords
     ? rawCoords as { lat: number; lng: number }
-    : { lat: 35.3975, lng: 0.1397 }; // Default to Mascara
+    : null;
+
+  // Fallback to static mock data if coordinates are missing in DB
+  if (!coords) {
+    const mockK = kindergartens.find(k => k.nameAr === row?.name_ar || k.nameFr === row?.name_fr);
+    coords = mockK ? mockK.coordinates : { lat: 35.3975, lng: 0.1397 }; // Default to Mascara
+  }
 
   return {
     id: row?.id || '',
