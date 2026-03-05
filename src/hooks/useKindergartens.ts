@@ -33,10 +33,22 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
   const facilities = (Array.isArray(row?.facilities) ? row.facilities : []) as Facility[];
   const priceBreakdown = (Array.isArray(row?.price_breakdown) ? row.price_breakdown : []) as PriceItem[];
 
-  const rawCoords = row?.coordinates;
+  let rawCoords = row?.coordinates;
+  if (typeof rawCoords === 'string') {
+    try {
+      // Sometimes it might come as a string like '{"lat": 35.4, "lng": 0.1}'
+      rawCoords = JSON.parse(rawCoords);
+    } catch (e) {
+      // Or maybe '35.4, 0.1'
+      const parts = rawCoords.split(',').map(s => parseFloat(s.trim()));
+      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        rawCoords = { lat: parts[0], lng: parts[1] };
+      }
+    }
+  }
   const coords = rawCoords && typeof rawCoords === 'object' && 'lat' in rawCoords && 'lng' in rawCoords
     ? rawCoords as { lat: number; lng: number }
-    : { lat: 0, lng: 0 };
+    : { lat: 35.3975, lng: 0.1397 }; // Default to Mascara
 
   return {
     id: row?.id || '',
