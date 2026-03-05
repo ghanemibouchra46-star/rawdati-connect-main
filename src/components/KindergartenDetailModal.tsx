@@ -104,6 +104,13 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
         .addTo(mapInstanceRef.current)
         .bindPopup(language === 'ar' ? kindergarten.nameAr : kindergarten.nameFr)
         .openPopup();
+
+      // Fix for Leaflet in a modal not loading tiles properly
+      setTimeout(() => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize();
+        }
+      }, 100);
     }
 
     return () => {
