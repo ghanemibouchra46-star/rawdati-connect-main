@@ -17,6 +17,22 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
 
   const images = parsePostgresArray(row?.images);
   const rawActivities = parsePostgresArray(row?.activities);
+
+  const getActivityIcon = (name: string): string => {
+    if (!name) return '📚';
+    const lowerName = name.toLowerCase();
+    if (lowerName.includes('قرآن') || lowerName.includes('تجويد') || lowerName.includes('quran')) return '📖';
+    if (lowerName.includes('رياضيات') || lowerName.includes('حساب') || lowerName.includes('سوروبان') || lowerName.includes('math')) return '🧮';
+    if (lowerName.includes('رسم') || lowerName.includes('فنون') || lowerName.includes('أشغال') || lowerName.includes('dessin') || lowerName.includes('art')) return '🎨';
+    if (lowerName.includes('لغة') || lowerName.includes('عربية') || lowerName.includes('فرنسية') || lowerName.includes('إنجليزية') || lowerName.includes('langue')) return '🌍';
+    if (lowerName.includes('رياضة') || lowerName.includes('سباحة') || lowerName.includes('بدنية') || lowerName.includes('sport')) return '⚽';
+    if (lowerName.includes('لعب') || lowerName.includes('ألعاب') || lowerName.includes('jeu')) return '🎯';
+    if (lowerName.includes('موسيقى') || lowerName.includes('أناشيد') || lowerName.includes('music')) return '🎵';
+    if (lowerName.includes('روبوتيك') || lowerName.includes('برمجة') || lowerName.includes('robot')) return '🤖';
+    if (lowerName.includes('مسرح') || lowerName.includes('تمثيل')) return '🎭';
+    return '✨'; // default fallback icon
+  };
+
   const activities = rawActivities.map((act: any, i: number) => {
     if (typeof act === 'string') {
       return {
@@ -25,9 +41,15 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
         nameFr: act,
         description: '',
         schedule: '',
-        icon: '📚'
+        icon: getActivityIcon(act)
       };
     }
+
+    // Also assign icon if act is an object but has no icon
+    if (act && typeof act === 'object' && !act.icon) {
+      act.icon = getActivityIcon(act.nameAr || act.nameFr || '');
+    }
+
     return act;
   }) as Activity[];
   const facilities = (Array.isArray(row?.facilities) ? row.facilities : []) as Facility[];
