@@ -53,8 +53,16 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
 
   // Fallback to static mock data if coordinates are missing in DB
   if (!coords) {
-    const mockK = kindergartens.find(k => k.nameAr === row?.name_ar || k.nameFr === row?.name_fr);
-    coords = mockK ? mockK.coordinates : { lat: 35.3975, lng: 0.1397 }; // Default to Mascara
+    if (row?.name_ar?.includes('الفيانس')) {
+      coords = { lat: 35.3950, lng: 0.1450 }; // المنطقة 8
+    } else if (row?.name_ar?.includes('براعم الوفاء')) {
+      coords = { lat: 35.3880, lng: 0.1500 }; // القسم 77
+    } else if (row?.name_ar?.includes('اليسر اكاديمي')) {
+      coords = { lat: 35.4050, lng: 0.1300 }; // القسم 94
+    } else {
+      const mockK = kindergartens.find(k => k.nameAr === row?.name_ar || k.nameFr === row?.name_fr);
+      coords = mockK ? mockK.coordinates : { lat: 35.3975, lng: 0.1397 }; // Default to Mascara
+    }
   }
 
   return {
