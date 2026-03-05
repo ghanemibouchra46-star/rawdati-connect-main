@@ -192,8 +192,9 @@ const AdminDashboard = () => {
             let usersWithRoles: any[] = [];
             try {
                 const { data: rpcData, error: rpcError } = await supabase.rpc('get_profiles_with_roles_for_admin');
-                if (!rpcError && rpcData && Array.isArray(rpcData)) {
-                    usersWithRoles = rpcData.map((row: any) => ({
+                const rpcList = Array.isArray(rpcData) ? rpcData : (rpcData ? [rpcData] : []);
+                if (!rpcError) {
+                    usersWithRoles = rpcList.map((row: any) => ({
                         id: row.id,
                         full_name: row.full_name,
                         phone: row.phone,
@@ -202,7 +203,8 @@ const AdminDashboard = () => {
                         updated_at: row.updated_at,
                         role: row.role || 'parent'
                     }));
-                } else {
+                }
+                if (usersWithRoles.length === 0 && (rpcError || !rpcData)) {
                     const [pRes, rRes] = await Promise.all([
                         supabase.from('profiles').select('*'),
                         supabase.from('user_roles').select('*')
