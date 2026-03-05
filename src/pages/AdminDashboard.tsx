@@ -125,18 +125,24 @@ const AdminDashboard = () => {
             .eq('role', 'admin')
             .single();
 
-        if (!roleData) {
-            const userEmail = session.user.email?.toLowerCase() || '';
-            const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
-            const isAdminEmail = adminEmails.includes(userEmail);
-            const hasAdminMetadata =
-                session.user.user_metadata?.role === 'admin' ||
-                session.user.app_metadata?.role === 'admin';
+        const userEmail = session.user.email?.toLowerCase() || '';
+        const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
+        const isAdminEmail = adminEmails.includes(userEmail);
+        const hasAdminMetadata =
+            session.user.user_metadata?.role === 'admin' ||
+            session.user.app_metadata?.role === 'admin';
 
-            if (!isAdminEmail && !hasAdminMetadata) {
-                navigate('/admin-auth?error=not_admin', { replace: true });
-                return false;
-            }
+        if (!roleData && !isAdminEmail && !hasAdminMetadata) {
+            navigate('/admin-auth?error=not_admin', { replace: true });
+            return false;
+        }
+
+        // التأكد من وجود سطر الأدمن في user_roles حتى تسمح RLS برؤية كل المستخدمين (أولياء الأمور، إلخ)
+        if (!roleData && (isAdminEmail || hasAdminMetadata)) {
+            await supabase.from('user_roles').upsert(
+                { user_id: session.user.id, role: 'admin' },
+                { onConflict: 'user_id,role' }
+            );
         }
         return true;
     };
@@ -182,7 +188,7 @@ const AdminDashboard = () => {
                 console.log("No DB kindergartens, using local data");
             }
 
-            // 2. Fetch Profiles and Roles
+            // 2. Fetch Profiles and Roles (يجب أن يكون للأدمن سطر في user_roles حتى تسمح RLS برؤية الكل)
             let profiles: any[] = [];
             let roles: any[] = [];
             try {
@@ -190,6 +196,13 @@ const AdminDashboard = () => {
                     supabase.from('profiles').select('*'),
                     supabase.from('user_roles').select('*')
                 ]);
+                if (pRes.error) {
+                    console.error("Profiles fetch error:", pRes.error);
+                    toast({ title: t('common.error'), description: language === 'ar' ? 'تعذر تحميل قائمة المستخدمين' : 'Could not load users', variant: 'destructive' });
+                }
+                if (rRes.error) {
+                    console.error("Roles fetch error:", rRes.error);
+                }
                 profiles = pRes.data || [];
                 roles = rRes.data || [];
             } catch (e) {

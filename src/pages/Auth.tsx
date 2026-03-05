@@ -148,6 +148,11 @@ const Auth = () => {
 
         // Role-based navigation
         if (role === 'admin') {
+          // التأكد من وجود دور الأدمن في قاعدة البيانات (حتى تعمل سياسات RLS في لوحة الأدمن)
+          await supabase.from('user_roles').upsert(
+            { user_id: data.user.id, role: 'admin' },
+            { onConflict: 'user_id,role' }
+          );
           navigate('/admin');
         } else if (role === 'owner') {
           navigate('/owner');
