@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
-import { kindergartens } from '@/data/kindergartens';
+import { useKindergartens } from '@/hooks/useKindergartens';
 
 interface Child {
     id: string;
@@ -43,6 +43,7 @@ interface Payment {
 
 const ParentDashboard = () => {
     const { t, dir, language } = useLanguage();
+    const { data: kindergartens = [] } = useKindergartens();
     const [children, setChildren] = useState<Child[]>([]);
     const [activities, setActivities] = useState<Activity[]>([]);
     const [payments, setPayments] = useState<Payment[]>([]);
@@ -308,7 +309,7 @@ const ParentDashboard = () => {
                                 p.for_year === curYear &&
                                 p.status === 'paid'
                             );
-                            const kg = kindergartens.find(k => (language === 'ar' ? k.nameAr === child.kindergarten_name : k.nameFr === child.kindergarten_name)) || kindergartens[0];
+                            const kg = kindergartens.find(k => (language === 'ar' ? k.nameAr === child.kindergarten_name : k.nameFr === child.kindergarten_name));
                             const price = kg?.pricePerMonth || 5000;
 
                             return (

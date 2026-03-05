@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { kindergartens, municipalities } from '@/data/kindergartens';
+import { useKindergartens } from '@/hooks/useKindergartens';
+import { municipalities } from '@/data/kindergartens';
 import { cn } from '@/lib/utils';
 
 interface Message {
@@ -16,6 +17,7 @@ interface Message {
 
 const AIChatbot = () => {
     const { t, language, dir } = useLanguage();
+    const { data: kindergartens = [] } = useKindergartens();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState('');
@@ -56,11 +58,7 @@ const AIChatbot = () => {
             const address = language === 'ar' ? specificKg.addressAr : specificKg.addressFr;
             const price = specificKg.pricePerMonth;
             const phone = specificKg.phone;
-            const servicesList = specificKg.services.map(s => {
-                const service = kindergartens[0].services; // This is wrong in the original data structure, services are just IDs
-                // Better approach: filter services array from data/kindergartens
-                return s;
-            }).join('، ');
+            const servicesList = (specificKg.services || []).join('، ');
 
             if (language === 'ar') {
                 return `${name} تقع في ${address}. سعرها شهرياً حوالي ${price} دج. يمكنك التواصل معهم عبر الهاتف: ${phone}. هل تريد معرفة المزيد عن خدماتهم؟`;
@@ -94,14 +92,20 @@ const AIChatbot = () => {
 
         // Check for specific services/features
         if (text.includes('حافلة') || text.includes('نقل') || text.includes('bus') || text.includes('transport')) {
-            const busKgs = kindergartens.filter(k => k.services.includes('bus')).map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
+            const busKgs = kindergartens.filter(k => (k.services || []).includes('bus')).map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
+            if (!busKgs) {
+                return language === 'ar' ? 'حالياً لا توجد روضات مسجلة توفر خدمة النقل.' : 'Aucun jardin d\'enfants avec transport enregistré pour le moment.';
+            }
             return language === 'ar'
                 ? `الروضات التي توفر خدمة النقل هي: ${busKgs}.`
                 : `Les jardins d'enfants qui proposent un service de transport sont : ${busKgs}.`;
         }
 
         if (text.includes('وجبات') || text.includes('أكل') || text.includes('meals') || text.includes('repas') || text.includes('restauration')) {
-            const mealsKgs = kindergartens.filter(k => k.services.includes('meals')).map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
+            const mealsKgs = kindergartens.filter(k => (k.services || []).includes('meals')).map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
+            if (!mealsKgs) {
+                return language === 'ar' ? 'حالياً لا توجد روضات مسجلة توفر الوجبات.' : 'Aucun jardin d\'enfants avec repas enregistré pour le moment.';
+            }
             return language === 'ar'
                 ? `الروضات التي توفر الوجبات الغذائية هي: ${mealsKgs}.`
                 : `Les jardins d'enfants qui proposent des repas sont : ${mealsKgs}.`;
@@ -109,6 +113,9 @@ const AIChatbot = () => {
 
         if (text.includes('توحد') || text.includes('autisme') || text.includes('autism')) {
             const autismKgs = kindergartens.filter(k => k.hasAutismWing).map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
+            if (!autismKgs) {
+                return language === 'ar' ? 'حالياً لا توجد روضات مسجلة بجناح توحد.' : 'Aucun jardin d\'enfants avec aile autisme enregistré pour le moment.';
+            }
             return language === 'ar'
                 ? `الروضات التي لديها جناح خاص لأطفال التوحد هي: ${autismKgs}.`
                 : `Les jardins d'enfants ayant une aile spéciale pour l'autisme sont : ${autismKgs}.`;
@@ -123,6 +130,11 @@ const AIChatbot = () => {
         // Default response context-aware
         if (text.includes('روضة') || text.includes('jardin') || text.includes('kindergarten')) {
             const topKgs = kindergartens.slice(0, 5).map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
+            if (kindergartens.length === 0) {
+                return language === 'ar'
+                    ? 'حالياً لا توجد روضات مسجلة في المنصة. يمكنك متابعة التحديثات لاحقاً.'
+                    : 'Il n\'y a pas de jardins d\'enfants enregistrés pour le moment. Revenez plus tard.';
+            }
             return language === 'ar'
                 ? `لدينا العديد من الروضات المميزة في Rawdati، مثل: ${topKgs}. يمكنك إخباري باسم البلدية أو اسم الروضة التي تبحث عنها.`
                 : `Nous avons plusieurs jardins d'enfants excellents à Rawdati, tels que : ${topKgs}. Vous pouvez me dire le nom de la commune ou du jardin que vous recherchez.`;
