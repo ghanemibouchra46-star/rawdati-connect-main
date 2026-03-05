@@ -106,15 +106,32 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
         .openPopup();
 
       // Fix for Leaflet in a modal not loading tiles properly
-      setTimeout(() => {
+      const invalidateMap = () => {
         if (mapInstanceRef.current) {
           mapInstanceRef.current.invalidateSize();
         }
-      }, 100);
+      };
+
+      // Try invalidating at different intervals to catch the end of the modal animation
+      setTimeout(invalidateMap, 100);
+      setTimeout(invalidateMap, 300);
+      setTimeout(invalidateMap, 500);
+
+      // Add a resize observer for robustness
+      const resizeObserver = new ResizeObserver(() => {
+        invalidateMap();
+      });
+      resizeObserver.observe(mapRef.current);
+
+      // Store observer to disconnect later
+      (mapInstanceRef.current as any).__resizeObserver = resizeObserver;
     }
 
     return () => {
       if (mapInstanceRef.current) {
+        if ((mapInstanceRef.current as any).__resizeObserver) {
+          (mapInstanceRef.current as any).__resizeObserver.disconnect();
+        }
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
