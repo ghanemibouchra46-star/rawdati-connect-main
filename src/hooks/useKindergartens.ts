@@ -2,6 +2,43 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { kindergartens, type Kindergarten, type Activity, type Facility, type PriceItem, type KindergartenGallery } from '@/data/kindergartens';
 
+const normalizeMunicipality = (val: string): string => {
+  if (!val) return '';
+  const lower = val.toLowerCase().trim();
+  // Direct match if already an ID
+  const validIds = ['mascara', 'sig', 'tighennif', 'mohammadia', 'ghriss'];
+  if (validIds.includes(lower)) return lower;
+  // Map Arabic names to IDs
+  if (val.includes('معسكر')) return 'mascara';
+  if (val.includes('سيق')) return 'sig';
+  if (val.includes('تيغنيف')) return 'tighennif';
+  if (val.includes('المحمدية') || val.includes('محمدية')) return 'mohammadia';
+  if (val.includes('غريس')) return 'ghriss';
+  // Map French names to IDs
+  if (lower.includes('mascara')) return 'mascara';
+  if (lower.includes('sig')) return 'sig';
+  if (lower.includes('tighennif')) return 'tighennif';
+  if (lower.includes('mohammadia')) return 'mohammadia';
+  if (lower.includes('ghriss')) return 'ghriss';
+  return val;
+};
+
+const normalizeServiceId = (serviceName: string): string => {
+  if (!serviceName) return '';
+  const lower = serviceName.toLowerCase().trim();
+  // If already an ID, return as-is
+  const validIds = ['bus', 'meals', 'mental-math', 'languages', 'quran', 'sports'];
+  if (validIds.includes(lower)) return lower;
+  // Map Arabic service names to IDs
+  if (serviceName.includes('نقل') || lower.includes('transport')) return 'bus';
+  if (serviceName.includes('وجبات') || serviceName.includes('غذائية') || lower.includes('repas')) return 'meals';
+  if (serviceName.includes('حساب') || serviceName.includes('ذهني') || lower.includes('calcul') || lower.includes('mental')) return 'mental-math';
+  if (serviceName.includes('لغات') || serviceName.includes('أجنبية') || lower.includes('langue')) return 'languages';
+  if (serviceName.includes('قرآن') || serviceName.includes('تحفيظ') || lower.includes('coran') || lower.includes('quran')) return 'quran';
+  if (serviceName.includes('رياضي') || lower.includes('sport')) return 'sports';
+  return serviceName;
+};
+
 const mapRowToKindergarten = (row: any): Kindergarten => {
   const parsePostgresArray = (val: any): string[] => {
     if (!val) return [];
@@ -92,7 +129,7 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     name: row?.name_ar || '',
     nameAr: row?.name_ar || '',
     nameFr: row?.name_fr || '',
-    municipality: row?.municipality || '',
+    municipality: normalizeMunicipality(row?.municipality || row?.municipality_ar || ''),
     municipalityAr: row?.municipality_ar || '',
     municipalityFr: row?.municipality_fr || '',
     address: row?.address_ar || '',
@@ -106,7 +143,7 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     reviewCount: row?.review_count ?? 0,
     images: images.length ? images : ['/placeholder.svg'],
     facilities,
-    services: parsePostgresArray(row?.services),
+    services: parsePostgresArray(row?.services).map(normalizeServiceId),
     activities,
     hasAutismWing: row.has_autism_wing ?? false,
     instagram: row.instagram,
@@ -189,7 +226,7 @@ export function useKindergartens() {
             return null;
           }
         }).filter(Boolean) as Kindergarten[];
-        
+
         console.log(`✓ Loaded ${mappedData.length} kindergartens successfully`);
         return mappedData;
       } catch (e) {

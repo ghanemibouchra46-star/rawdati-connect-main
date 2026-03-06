@@ -6,13 +6,32 @@ import KindergartenDetailModal from '@/components/KindergartenDetailModal';
 import RegistrationModal from '@/components/RegistrationModal';
 import Footer from '@/components/Footer';
 import BookingModal from '@/components/BookingModal';
-import { kindergartens as localKindergartens, Kindergarten } from '@/data/kindergartens';
+import { kindergartens as localKindergartens, Kindergarten, filterableActivities } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { GraduationCap, Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import SearchAutocomplete from '@/components/SearchAutocomplete';
 import { useSearchParams } from 'react-router-dom';
+
+// Map activity filter IDs to keywords for fuzzy matching against activity names
+const activityKeywords: Record<string, string[]> = {
+  drawing: ['رسم', 'تلوين', 'فنون', 'dessin', 'art', 'drawing'],
+  music: ['أناشيد', 'موسيقى', 'chant', 'music'],
+  robotics: ['روبوتيك', 'برمجة', 'robot', 'robotique'],
+  swimming: ['سباحة', 'natation', 'swimming'],
+  games: ['ألعاب', 'تعليمية', 'jeux', 'games'],
+  quran: ['قرآن', 'تحفيظ', 'تجويد', 'coran', 'quran'],
+};
+
+const kindergartenMatchesActivity = (k: Kindergarten, activityFilterId: string): boolean => {
+  const keywords = activityKeywords[activityFilterId];
+  if (!keywords) return false;
+  return k.activities.some(act => {
+    const name = (act.nameAr + ' ' + act.nameFr).toLowerCase();
+    return keywords.some(kw => name.includes(kw.toLowerCase()));
+  });
+};
 
 const Kindergartens = () => {
   const { t, language } = useLanguage();
@@ -52,7 +71,7 @@ const Kindergartens = () => {
       if (selectedServices.length > 0 && !selectedServices.every((s) => k.services.includes(s))) {
         return false;
       }
-      if (selectedActivities.length > 0 && !selectedActivities.every((a) => k.activities.some(act => act.id === a))) {
+      if (selectedActivities.length > 0 && !selectedActivities.every((a) => kindergartenMatchesActivity(k, a))) {
         return false;
       }
       if (hasAutismWing && !k.hasAutismWing) {
