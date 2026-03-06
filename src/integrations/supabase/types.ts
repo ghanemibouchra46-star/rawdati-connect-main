@@ -307,6 +307,54 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          plan_type: 'monthly' | 'yearly'
+          price: number
+          status: 'active' | 'cancelled' | 'expired'
+          start_date: string
+          end_date: string
+          payment_method: string
+          card_last_four: string | null
+          auto_renew: boolean
+          cancelled_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          plan_type: 'monthly' | 'yearly'
+          price: number
+          status?: 'active' | 'cancelled' | 'expired'
+          start_date: string
+          end_date: string
+          payment_method?: string
+          card_last_four?: string | null
+          auto_renew?: boolean
+          cancelled_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          plan_type?: 'monthly' | 'yearly'
+          price?: number
+          status?: 'active' | 'cancelled' | 'expired'
+          start_date?: string
+          end_date?: string
+          payment_method?: string
+          card_last_four?: string | null
+          auto_renew?: boolean
+          cancelled_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comment: string | null
