@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { kindergartens, type Kindergarten, type Activity, type Facility, type PriceItem } from '@/data/kindergartens';
+import { kindergartens, type Kindergarten, type Activity, type Facility, type PriceItem, type KindergartenGallery } from '@/data/kindergartens';
 
 const mapRowToKindergarten = (row: any): Kindergarten => {
   const parsePostgresArray = (val: any): string[] => {
@@ -125,10 +125,34 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
       try {
         const gallery = row?.kindergarten_gallery;
         if (!gallery) return [];
-        if (Array.isArray(gallery)) return gallery;
-        if (typeof gallery === 'string') return JSON.parse(gallery);
+        if (Array.isArray(gallery)) {
+          return gallery.map((item: any) => ({
+            id: item.id || `gallery-${Math.random()}`,
+            titleAr: item.titleAr || '',
+            titleFr: item.titleFr || '',
+            descriptionAr: item.descriptionAr || '',
+            descriptionFr: item.descriptionFr || '',
+            image: item.image || '/placeholder.svg',
+            category: item.category || 'activity'
+          })) as KindergartenGallery[];
+        }
+        if (typeof gallery === 'string') {
+          const parsed = JSON.parse(gallery);
+          if (Array.isArray(parsed)) {
+            return parsed.map((item: any) => ({
+              id: item.id || `gallery-${Math.random()}`,
+              titleAr: item.titleAr || '',
+              titleFr: item.titleFr || '',
+              descriptionAr: item.descriptionAr || '',
+              descriptionFr: item.descriptionFr || '',
+              image: item.image || '/placeholder.svg',
+              category: item.category || 'activity'
+            })) as KindergartenGallery[];
+          }
+        }
         return [];
-      } catch {
+      } catch (e) {
+        console.error("Error parsing kindergartenGallery for", row?.name_ar, ":", e);
         return [];
       }
     })(),
@@ -153,15 +177,21 @@ export function useKindergartens() {
       console.log("Raw Supabase data:", data);
 
       try {
-        return (data ?? []).map((row: any) => {
+        const mappedData = (data ?? []).map((row: any) => {
           try {
-            console.log("Processing row:", row?.name_ar, "gallery:", row?.kindergarten_gallery);
-            return mapRowToKindergarten(row);
+            const mapped = mapRowToKindergarten(row);
+            if (mapped.kindergartenGallery && mapped.kindergartenGallery.length > 0) {
+              console.log(`✓ ${mapped.nameAr}: ${mapped.kindergartenGallery.length} gallery items`);
+            }
+            return mapped;
           } catch (e) {
             console.error("Error mapping single row:", e, row);
             return null;
           }
         }).filter(Boolean) as Kindergarten[];
+        
+        console.log(`✓ Loaded ${mappedData.length} kindergartens successfully`);
+        return mappedData;
       } catch (e) {
         console.error("Error mapping kindergartens:", e);
         return [];
