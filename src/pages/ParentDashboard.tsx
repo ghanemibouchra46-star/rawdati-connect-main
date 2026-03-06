@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import { useKindergartens } from '@/hooks/useKindergartens';
+import { useMySubscriptionRequests } from '@/hooks/useSubscriptionRequests';
 
 interface Child {
     id: string;
@@ -44,6 +45,7 @@ interface Payment {
 const ParentDashboard = () => {
     const { t, dir, language } = useLanguage();
     const { data: kindergartens = [] } = useKindergartens();
+    const { data: subscriptionRequests, isLoading: loadingSubscriptions } = useMySubscriptionRequests();
     const [children, setChildren] = useState<Child[]>([]);
     const [activities, setActivities] = useState<Activity[]>([]);
     const [payments, setPayments] = useState<Payment[]>([]);
@@ -285,6 +287,98 @@ const ParentDashboard = () => {
                                                 </div>
                                             </div>
                                             <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
+                </section>
+
+                {/* Subscription Requests Section */}
+                <section>
+                    <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                        <CreditCard className="w-5 h-5 text-primary" />
+                        {language === 'ar' ? 'طلبات الاشتراك' : 'Demandes d\'abonnement'}
+                    </h2>
+
+                    {loadingSubscriptions ? (
+                        <Card className="border-dashed">
+                            <CardContent className="py-8 text-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                                <p className="text-muted-foreground">{language === 'ar' ? 'جاري التحميل...' : 'Chargement...'}</p>
+                            </CardContent>
+                        </Card>
+                    ) : !subscriptionRequests || subscriptionRequests.length === 0 ? (
+                        <Card className="border-dashed">
+                            <CardContent className="py-8 text-center">
+                                <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                                <p className="text-muted-foreground">{language === 'ar' ? 'لا توجد طلبات اشتراك حالياً' : 'Aucune demande d\'abonnement pour le moment'}</p>
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <div className="space-y-4">
+                            {subscriptionRequests.map((request) => (
+                                <Card key={request.id} className="hover:shadow-lg transition-shadow">
+                                    <CardContent className="p-4">
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                                                        {language === 'ar' ? request.kindergartens?.name_ar?.charAt(0) : request.kindergartens?.name_fr?.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-bold text-foreground">
+                                                            {language === 'ar' ? request.kindergartens?.name_ar : request.kindergartens?.name_fr}
+                                                        </h3>
+                                                        <p className="text-sm text-muted-foreground">
+                                                            {language === 'ar' ? request.kindergartens?.municipality_ar : request.kindergartens?.municipality_fr}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Badge 
+                                                        variant={request.status === 'approved' ? 'default' : request.status === 'rejected' ? 'destructive' : 'secondary'}
+                                                        className={
+                                                            request.status === 'approved' ? 'bg-green-500 text-white' :
+                                                            request.status === 'rejected' ? 'bg-red-500 text-white' :
+                                                            'bg-yellow-500 text-white'
+                                                        }
+                                                    >
+                                                        {request.status === 'approved' ? (language === 'ar' ? 'مقبول' : 'Approuvé') :
+                                                         request.status === 'rejected' ? (language === 'ar' ? 'مرفوض' : 'Rejeté') :
+                                                         (language === 'ar' ? 'في الانتظار' : 'En attente')}
+                                                    </Badge>
+                                                    <span className="text-sm text-muted-foreground">
+                                                        {new Date(request.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4 pt-4 border-t border-border">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                <div>
+                                                    <span className="text-muted-foreground">{language === 'ar' ? 'الطفل:' : 'Enfant:'}</span>
+                                                    <p className="font-medium">{request.child_name}</p>
+                                                    <p className="text-muted-foreground">{request.child_age} {language === 'ar' ? 'سنوات' : 'ans'}</p>
+                                                </div>
+                                                <div>
+                                                    <span className="text-muted-foreground">{language === 'ar' ? 'ولي الأمر:' : 'Parent:'}</span>
+                                                    <p className="font-medium">{request.first_name} {request.last_name}</p>
+                                                    <p className="text-muted-foreground">{request.email}</p>
+                                                    <p className="text-muted-foreground">{request.phone}</p>
+                                                </div>
+                                                <div>
+                                                    <span className="text-muted-foreground">{language === 'ar' ? 'CCP:' : 'CCP:'}</span>
+                                                    <p className="font-mono">{request.ccp}</p>
+                                                </div>
+                                                {request.address && (
+                                                    <div className="md:col-span-2">
+                                                        <span className="text-muted-foreground">{language === 'ar' ? 'العنوان:' : 'Adresse:'}</span>
+                                                        <p className="font-medium">{request.address}</p>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </CardContent>
                                 </Card>

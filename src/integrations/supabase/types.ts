@@ -247,6 +247,66 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_requests: {
+        Row: {
+          id: string
+          kindergarten_id: string
+          parent_id: string | null
+          first_name: string
+          last_name: string
+          email: string
+          phone: string
+          child_name: string
+          child_age: string
+          ccp: string
+          address: string | null
+          message: string | null
+          status: string
+          payment_confirmed: boolean
+          payment_date: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          kindergarten_id: string
+          parent_id?: string | null
+          first_name: string
+          last_name: string
+          email: string
+          phone: string
+          child_name: string
+          child_age: string
+          ccp: string
+          address?: string | null
+          message?: string | null
+          status?: string
+          payment_confirmed?: boolean
+          payment_date?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          kindergarten_id?: string
+          parent_id?: string | null
+          first_name?: string
+          last_name?: string
+          email?: string
+          phone?: string
+          child_name?: string
+          child_age?: string
+          ccp?: string
+          address?: string | null
+          message?: string | null
+          status?: string
+          payment_confirmed?: boolean
+          payment_date?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comment: string | null

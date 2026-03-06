@@ -4,7 +4,7 @@ import {
     Shield, Users, UserCheck, UserX, Clock, LogOut, Home,
     Building2, LayoutDashboard, Settings as SettingsIcon,
     Search, Filter, CheckCircle2, XCircle, Info, ChevronRight,
-    TrendingUp, Baby, Star
+    TrendingUp, Baby, Star, CreditCard, Calendar
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -19,6 +19,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import { Separator } from '@/components/ui/separator';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
+import { useAllSubscriptionRequests, useUpdateSubscriptionRequest } from '@/hooks/useSubscriptionRequests';
 
 interface UserProfile {
     id: string;
@@ -80,6 +81,10 @@ const AdminDashboard = () => {
     const { t, dir, language } = useLanguage();
     const navigate = useNavigate();
     const { toast } = useToast();
+
+    // Use subscription requests hooks
+    const { data: subscriptionRequests, isLoading: loadingSubscriptions } = useAllSubscriptionRequests();
+    const updateSubscriptionRequest = useUpdateSubscriptionRequest();
 
     const [isLoading, setIsLoading] = useState(true);
     const [users, setUsers] = useState<UserProfile[]>([]);
@@ -442,17 +447,13 @@ const AdminDashboard = () => {
                             <Building2 className="w-4 h-4 mx-2" />
                             {language === 'ar' ? 'الروضات' : 'Kindergartens'}
                         </TabsTrigger>
-                        <TabsTrigger value="registrations" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
-                            <Baby className="w-4 h-4 mx-2" />
-                            {language === 'ar' ? 'طلبات التسجيل' : 'Registrations'}
-                        </TabsTrigger>
                         <TabsTrigger value="users" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
-                            <Shield className="w-4 h-4 mx-2" />
-                            {language === 'ar' ? 'أصحاب الروضات' : 'Owners'}
-                        </TabsTrigger>
-                        <TabsTrigger value="parents" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
                             <Users className="w-4 h-4 mx-2" />
-                            {language === 'ar' ? 'أولياء الأمور' : 'Parents'}
+                            {language === 'ar' ? 'المستخدمون' : 'Users'}
+                        </TabsTrigger>
+                        <TabsTrigger value="subscriptions" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
+                            <CreditCard className="w-4 h-4 mx-2" />
+                            {language === 'ar' ? 'طلبات الاشتراك' : 'Subscription Requests'}
                         </TabsTrigger>
                         <TabsTrigger value="settings" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
                             <SettingsIcon className="w-4 h-4 mx-2" />
@@ -869,6 +870,145 @@ const AdminDashboard = () => {
                                         ))
                                     )}
                                 </div>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="subscriptions">
+                        <Card className="bg-slate-900 border-white/5">
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <div>
+                                    <CardTitle className="text-white">{language === 'ar' ? 'طلبات الاشتراك' : 'Subscription Requests'}</CardTitle>
+                                    <CardDescription>{language === 'ar' ? 'إدارة طلبات الاشتراك في الروضات' : 'Manage kindergarten subscription requests'}</CardDescription>
+                                </div>
+                                <div className="flex gap-2">
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                        <Input 
+                                            className="bg-slate-800 border-white/5 pl-9 w-64" 
+                                            placeholder={language === 'ar' ? 'بحث في الطلبات...' : 'Search requests...'} 
+                                        />
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                {loadingSubscriptions ? (
+                                    <div className="text-center py-12">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto mb-4"></div>
+                                        <p className="text-slate-500">{language === 'ar' ? 'جاري التحميل...' : 'Loading...'}</p>
+                                    </div>
+                                ) : !subscriptionRequests || subscriptionRequests.length === 0 ? (
+                                    <div className="text-center py-12 bg-white/5 rounded-2xl border border-dashed border-white/10">
+                                        <CreditCard className="w-12 h-12 text-slate-700 mx-auto mb-4" />
+                                        <p className="text-slate-500">{language === 'ar' ? 'لا توجد طلبات اشتراك حالياً' : 'No subscription requests yet'}</p>
+                                    </div>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow className="border-white/10">
+                                                    <TableHead className="text-white">{language === 'ar' ? 'التاريخ' : 'Date'}</TableHead>
+                                                    <TableHead className="text-white">{language === 'ar' ? 'الروضة' : 'Kindergarten'}</TableHead>
+                                                    <TableHead className="text-white">{language === 'ar' ? 'ولي الأمر' : 'Parent'}</TableHead>
+                                                    <TableHead className="text-white">{language === 'ar' ? 'الطفل' : 'Child'}</TableHead>
+                                                    <TableHead className="text-white">{language === 'ar' ? 'الهاتف' : 'Phone'}</TableHead>
+                                                    <TableHead className="text-white">{language === 'ar' ? 'CCP' : 'CCP'}</TableHead>
+                                                    <TableHead className="text-white">{language === 'ar' ? 'الحالة' : 'Status'}</TableHead>
+                                                    <TableHead className="text-white">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {subscriptionRequests.map((request) => (
+                                                    <TableRow key={request.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                                                        <TableCell className="text-white">
+                                                            <div className="flex items-center gap-2">
+                                                                <Calendar className="w-4 h-4 text-slate-400" />
+                                                                <span className="text-sm">
+                                                                    {new Date(request.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-white">
+                                                            <div>
+                                                                <p className="text-sm font-medium">
+                                                                    {language === 'ar' ? request.kindergartens?.name_ar : request.kindergartens?.name_fr}
+                                                                </p>
+                                                                <p className="text-xs text-slate-400">
+                                                                    {language === 'ar' ? request.kindergartens?.municipality_ar : request.kindergartens?.municipality_fr}
+                                                                </p>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-white">
+                                                            <div>
+                                                                <p className="text-sm font-medium">
+                                                                    {request.profiles?.full_name || `${request.first_name} ${request.last_name}`}
+                                                                </p>
+                                                                <p className="text-xs text-slate-400">{request.email}</p>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-white">
+                                                            <div>
+                                                                <p className="text-sm font-medium">{request.child_name}</p>
+                                                                <p className="text-xs text-slate-400">{request.child_age} {language === 'ar' ? 'سنوات' : 'ans'}</p>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-white text-sm">{request.phone}</TableCell>
+                                                        <TableCell className="text-white text-sm font-mono">{request.ccp}</TableCell>
+                                                        <TableCell className="text-white">
+                                                            <Badge 
+                                                                variant={request.status === 'approved' ? 'default' : request.status === 'rejected' ? 'destructive' : 'secondary'}
+                                                                className={
+                                                                    request.status === 'approved' ? 'bg-green-500 text-white' :
+                                                                    request.status === 'rejected' ? 'bg-red-500 text-white' :
+                                                                    'bg-yellow-500 text-white'
+                                                                }
+                                                            >
+                                                                {request.status === 'approved' ? (language === 'ar' ? 'مقبول' : 'Approved') :
+                                                                 request.status === 'rejected' ? (language === 'ar' ? 'مرفوض' : 'Rejected') :
+                                                                 (language === 'ar' ? 'في الانتظار' : 'Pending')}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell className="text-white">
+                                                            <div className="flex items-center gap-2">
+                                                                {request.status === 'pending' && (
+                                                                    <>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            className="text-green-500 hover:text-green-400 hover:bg-green-500/10"
+                                                                            onClick={() => updateSubscriptionRequest.mutate({ 
+                                                                                id: request.id, 
+                                                                                status: 'approved' 
+                                                                            })}
+                                                                            disabled={updateSubscriptionRequest.isPending}
+                                                                        >
+                                                                            <UserCheck className="w-4 h-4" />
+                                                                        </Button>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                                                                            onClick={() => updateSubscriptionRequest.mutate({ 
+                                                                                id: request.id, 
+                                                                                status: 'rejected' 
+                                                                            })}
+                                                                            disabled={updateSubscriptionRequest.isPending}
+                                                                        >
+                                                                            <UserX className="w-4 h-4" />
+                                                                        </Button>
+                                                                    </>
+                                                                )}
+                                                                <Button variant="ghost" size="sm" className="text-slate-500 hover:text-white">
+                                                                    <ChevronRight className="w-5 h-5" />
+                                                                </Button>
+                                                            </div>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </TabsContent>

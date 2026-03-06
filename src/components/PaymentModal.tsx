@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Kindergarten } from '@/data/kindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface PaymentModalProps {
@@ -35,9 +36,32 @@ const PaymentModal = ({ kindergarten, isOpen, onClose }: PaymentModalProps) => {
     setLoading(true);
 
     try {
-      // Here you would integrate with your payment processor
-      // For now, we'll just show a success message
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Insert subscription request into database
+      const { error } = await supabase
+        .from('subscription_requests')
+        .insert({
+          id: crypto.randomUUID(),
+          kindergarten_id: kindergarten!.id,
+          parent_id: user?.id || null,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          child_name: formData.childName,
+          child_age: formData.childAge,
+          ccp: formData.ccp,
+          address: formData.address || null,
+          message: formData.message || null,
+          status: 'pending',
+          payment_confirmed: false
+        });
+
+      if (error) {
+        throw error;
+      }
       
       toast.success(language === 'ar' 
         ? 'تم إرسال طلب الاشتراك بنجاح! سنتواصل معك قريباً.' 
@@ -58,6 +82,7 @@ const PaymentModal = ({ kindergarten, isOpen, onClose }: PaymentModalProps) => {
       
       onClose();
     } catch (error) {
+      console.error('Error submitting subscription request:', error);
       toast.error(language === 'ar' 
         ? 'حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.' 
         : 'Une erreur est survenue lors de l\'envoi. Veuillez réessayer.');

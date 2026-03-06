@@ -39,7 +39,9 @@ import {
   Baby,
   CheckCircle2,
   DollarSign,
-  Instagram
+  Instagram,
+  UserCheck,
+  UserX
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,6 +49,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { User as AuthUser } from '@supabase/supabase-js';
@@ -54,6 +57,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import { arDZ, fr } from 'date-fns/locale';
+import { useOwnerSubscriptionRequests, useUpdateSubscriptionRequest } from '@/hooks/useSubscriptionRequests';
 
 // Types
 interface Child {
@@ -100,6 +104,10 @@ const OwnerDashboard = () => {
   const { t, language, dir } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Use subscription requests hooks
+  const { data: subscriptionRequests, isLoading: loadingSubscriptions } = useOwnerSubscriptionRequests();
+  const updateSubscriptionRequest = useUpdateSubscriptionRequest();
 
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -606,21 +614,29 @@ const OwnerDashboard = () => {
               <Users className="w-4 h-4 ml-2" />
               {language === 'ar' ? 'الطلبات' : 'Demandes'}
             </TabsTrigger>
+            <TabsTrigger value="subscriptions" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border rounded-xl px-6 py-2">
+              <CreditCard className="w-4 h-4 ml-2" />
+              {language === 'ar' ? 'طلبات الاشتراك' : 'Subscription Requests'}
+            </TabsTrigger>
+            <TabsTrigger value="children" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border rounded-xl px-6 py-2">
+              <Baby className="w-4 h-4 ml-2" />
+              {language === 'ar' ? 'الأطفال' : 'Enfants'}
+            </TabsTrigger>
+            <TabsTrigger value="staff" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border rounded-xl px-6 py-2">
+              <GraduationCap className="w-4 h-4 ml-2" />
+              {language === 'ar' ? 'الموظفين' : 'Personnel'}
+            </TabsTrigger>
+            <TabsTrigger value="payments" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border rounded-xl px-6 py-2">
+              <DollarSign className="w-4 h-4 ml-2" />
+              {language === 'ar' ? 'المدفوعات' : 'Paiements'}
+            </TabsTrigger>
             <TabsTrigger value="attendance" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border rounded-xl px-6 py-2">
-              <Activity className="w-4 h-4 ml-2" />
-              {t('owner.attendance')}
+              <CheckCircle2 className="w-4 h-4 ml-2" />
+              {language === 'ar' ? 'الحضور' : 'Présence'}
             </TabsTrigger>
-            <TabsTrigger value="finance" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border rounded-xl px-6 py-2">
-              <Wallet className="w-4 h-4 ml-2" />
-              {t('owner.finance')}
-            </TabsTrigger>
-            <TabsTrigger value="stats" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border rounded-xl px-6 py-2">
-              <Filter className="w-4 h-4 ml-2" />
-              {t('owner.stats')}
-            </TabsTrigger>
-            <TabsTrigger value="info" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border rounded-xl px-6 py-2">
-              <Building2 className="w-4 h-4 ml-2" />
-              {t('modal.details')}
+            <TabsTrigger value="settings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border rounded-xl px-6 py-2">
+              <Settings className="w-4 h-4 ml-2" />
+              {language === 'ar' ? 'الإعدادات' : 'Paramètres'}
             </TabsTrigger>
           </TabsList>
 
@@ -655,6 +671,126 @@ const OwnerDashboard = () => {
                   ))}
                   {requests.length === 0 && <div className="text-center py-10 text-muted-foreground">{t('admin.noUsers')}</div>}
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Subscription Requests Tab */}
+          <TabsContent value="subscriptions" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>{language === 'ar' ? 'طلبات الاشتراك' : 'Demandes d\'abonnement'}</CardTitle>
+                <CardDescription>{language === 'ar' ? 'إدارة طلبات الاشتراك في روضتك' : 'Gérer les demandes d\'abonnement pour votre crèche'}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingSubscriptions ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">{language === 'ar' ? 'جاري التحميل...' : 'Chargement...'}</p>
+                  </div>
+                ) : !subscriptionRequests || subscriptionRequests.length === 0 ? (
+                  <div className="text-center py-12 bg-muted/50 rounded-2xl border border-dashed border-border">
+                    <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">{language === 'ar' ? 'لا توجد طلبات اشتراك حالياً' : 'Aucune demande d\'abonnement pour le moment'}</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>{language === 'ar' ? 'التاريخ' : 'Date'}</TableHead>
+                          <TableHead>{language === 'ar' ? 'ولي الأمر' : 'Parent'}</TableHead>
+                          <TableHead>{language === 'ar' ? 'الطفل' : 'Enfant'}</TableHead>
+                          <TableHead>{language === 'ar' ? 'العمر' : 'Âge'}</TableHead>
+                          <TableHead>{language === 'ar' ? 'الهاتف' : 'Téléphone'}</TableHead>
+                          <TableHead>{language === 'ar' ? 'CCP' : 'CCP'}</TableHead>
+                          <TableHead>{language === 'ar' ? 'الحالة' : 'Statut'}</TableHead>
+                          <TableHead>{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {subscriptionRequests.map((request) => (
+                          <TableRow key={request.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-muted-foreground" />
+                                <span className="text-sm">
+                                  {new Date(request.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <p className="text-sm font-medium">
+                                  {request.profiles?.full_name || request.first_name + ' ' + request.last_name}
+                                </p>
+                                <p className="text-xs text-muted-foreground">{request.email}</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <p className="text-sm font-medium">{request.child_name}</p>
+                                <p className="text-xs text-muted-foreground">{request.child_age} {language === 'ar' ? 'سنوات' : 'ans'}</p>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-sm">{request.child_age}</TableCell>
+                            <TableCell className="text-sm">{request.phone}</TableCell>
+                            <TableCell className="text-sm font-mono">{request.ccp}</TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant={request.status === 'approved' ? 'default' : request.status === 'rejected' ? 'destructive' : 'secondary'}
+                                className={
+                                  request.status === 'approved' ? 'bg-green-500 text-white' :
+                                  request.status === 'rejected' ? 'bg-red-500 text-white' :
+                                  'bg-yellow-500 text-white'
+                                }
+                              >
+                                {request.status === 'approved' ? (language === 'ar' ? 'مقبول' : 'Approuvé') :
+                                 request.status === 'rejected' ? (language === 'ar' ? 'مرفوض' : 'Rejeté') :
+                                 (language === 'ar' ? 'في الانتظار' : 'En attente')}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                {request.status === 'pending' && (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                      onClick={() => updateSubscriptionRequest.mutate({ 
+                                        id: request.id, 
+                                        status: 'approved' 
+                                      })}
+                                      disabled={updateSubscriptionRequest.isPending}
+                                    >
+                                      <UserCheck className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                      onClick={() => updateSubscriptionRequest.mutate({ 
+                                        id: request.id, 
+                                        status: 'rejected' 
+                                      })}
+                                      disabled={updateSubscriptionRequest.isPending}
+                                    >
+                                      <UserX className="w-4 h-4" />
+                                    </Button>
+                                  </>
+                                )}
+                                <Button variant="ghost" size="sm">
+                                  <ChevronRight className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
