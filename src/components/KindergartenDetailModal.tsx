@@ -394,6 +394,9 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                       src={item.image}
                       alt={language === 'ar' ? item.titleAr : item.titleFr}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder.svg';
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-3">
                       <div className="text-white">

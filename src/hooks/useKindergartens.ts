@@ -121,7 +121,17 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     descriptionFr: row?.description_fr || '',
     coordinates: coords,
     priceBreakdown,
-    kindergartenGallery: row?.kindergarten_gallery || [],
+    kindergartenGallery: (() => {
+      try {
+        const gallery = row?.kindergarten_gallery;
+        if (!gallery) return [];
+        if (Array.isArray(gallery)) return gallery;
+        if (typeof gallery === 'string') return JSON.parse(gallery);
+        return [];
+      } catch {
+        return [];
+      }
+    })(),
   };
 };
 
@@ -145,6 +155,7 @@ export function useKindergartens() {
       try {
         return (data ?? []).map((row: any) => {
           try {
+            console.log("Processing row:", row?.name_ar, "gallery:", row?.kindergarten_gallery);
             return mapRowToKindergarten(row);
           } catch (e) {
             console.error("Error mapping single row:", e, row);
