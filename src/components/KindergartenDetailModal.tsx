@@ -383,6 +383,48 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
             </div>
           )}
 
+          {/* Kindergarten Gallery */}
+          {kindergarten.kindergartenGallery && kindergarten.kindergartenGallery.length > 0 && (
+            <div className="mb-6">
+              <h3 className={`text-lg font-bold text-foreground mb-3 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{language === 'ar' ? 'معرض صور الروضة' : 'Galerie de la crèche'}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {kindergarten.kindergartenGallery.map((item) => (
+                  <div key={item.id} className="group relative aspect-video rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+                    <img
+                      src={item.image}
+                      alt={language === 'ar' ? item.titleAr : item.titleFr}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-3">
+                      <div className="text-white">
+                        <h4 className="font-bold text-sm mb-1">
+                          {language === 'ar' ? item.titleAr : item.titleFr}
+                        </h4>
+                        {(item.descriptionAr || item.descriptionFr) && (
+                          <p className="text-xs opacity-90">
+                            {language === 'ar' ? item.descriptionAr : item.descriptionFr}
+                          </p>
+                        )}
+                        <div className="mt-1">
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            item.category === 'activity' 
+                              ? 'bg-blue-500/30 text-blue-200' 
+                              : 'bg-green-500/30 text-green-200'
+                          }`}>
+                            {item.category === 'activity' 
+                              ? (language === 'ar' ? 'نشاط' : 'Activité') 
+                              : (language === 'ar' ? 'برنامج' : 'Programme')
+                            }
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Videos Section */}
           {kindergarten.videos && kindergarten.videos.length > 0 && (
             <div className="mb-6">

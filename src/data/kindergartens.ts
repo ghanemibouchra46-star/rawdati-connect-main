@@ -22,6 +22,16 @@ export interface Facility {
   image: string;
 }
 
+export interface KindergartenGallery {
+  id: string;
+  titleAr: string;
+  titleFr: string;
+  descriptionAr?: string;
+  descriptionFr?: string;
+  image: string;
+  category: 'activity' | 'program';
+}
+
 export interface Kindergarten {
   id: string;
   name: string;
@@ -48,6 +58,7 @@ export interface Kindergarten {
   instagram?: string;
   videos?: { id: string; url: string; titleAr: string; titleFr: string }[];
   programs?: { id: string; nameAr: string; nameFr: string; descriptionAr: string; descriptionFr: string; icon: string }[];
+  kindergartenGallery?: KindergartenGallery[];
   partners?: {
     doctors: string[];
     stores: string[];

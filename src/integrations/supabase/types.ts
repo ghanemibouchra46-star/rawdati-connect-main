@@ -101,6 +101,7 @@ export type Database = {
           instagram: string | null
           videos: Json | null
           programs: Json | null
+          kindergarten_gallery: Json | null
         }
         Insert: {
           id: string
@@ -132,6 +133,7 @@ export type Database = {
           status?: string | null
           created_at?: string
           updated_at?: string
+          kindergarten_gallery?: Json | null
         }
         Update: {
           id?: string
@@ -163,6 +165,7 @@ export type Database = {
           status?: string | null
           created_at?: string
           updated_at?: string
+          kindergarten_gallery?: Json | null
         }
         Relationships: []
       }
