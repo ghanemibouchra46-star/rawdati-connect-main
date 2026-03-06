@@ -2,6 +2,38 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { kindergartens, type Kindergarten, type Activity, type Facility, type PriceItem, type KindergartenGallery } from '@/data/kindergartens';
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
+/**
+ * Resolve an image path to a full public URL.
+ * Handles:
+ * - Full URLs (https://...) → returned as-is
+ * - Supabase storage paths (bucket/path or /storage/v1/...) → converted to public URL
+ * - Just filenames (image.jpg) → assumed to be in 'kindergarten-images' bucket
+ */
+const resolveImageUrl = (imagePath: string): string => {
+  if (!imagePath || imagePath.trim() === '') return '/placeholder.svg';
+  
+  const trimmed = imagePath.trim();
+  
+  // Already a full URL
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed;
+  }
+  
+  // Already a relative path starting with /storage/
+  if (trimmed.startsWith('/storage/')) {
+    return `${SUPABASE_URL}${trimmed}`;
+  }
+
+  // Path like "kindergarten-images/filename.jpg" (bucket/path format)
+  // or just "filename.jpg" (assume kindergarten-images bucket)
+  const hasSlash = trimmed.includes('/');
+  const storagePath = hasSlash ? trimmed : `kindergarten-images/${trimmed}`;
+  
+  return `${SUPABASE_URL}/storage/v1/object/public/${storagePath}`;
+};
+
 const normalizeMunicipality = (val: string): string => {
   if (!val) return '';
   const lower = val.toLowerCase().trim();
