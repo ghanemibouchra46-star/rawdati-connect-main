@@ -121,6 +121,7 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     descriptionFr: row?.description_fr || '',
     coordinates: coords,
     priceBreakdown,
+    kindergartenGallery: row?.kindergarten_gallery || [],
   };
 };
 

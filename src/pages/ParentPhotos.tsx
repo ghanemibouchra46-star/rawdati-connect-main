@@ -41,92 +41,68 @@ const ParentPhotos = () => {
         loadPhotos();
     };
 
-    const loadPhotos = () => {
-        // Demo photos data with placeholder images
-        const demoPhotos: Photo[] = [
-            {
-                id: '1',
-                url: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80',
-                thumbnail: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80',
-                title: language === 'ar' ? 'وقت التعلم' : language === 'fr' ? 'Temps d\'apprentissage' : 'Learning Time',
-                date: '2026-02-04',
-                childName: language === 'ar' ? 'أحمد' : 'Ahmed',
-                activity: language === 'ar' ? 'تعلم الحروف' : language === 'fr' ? 'Apprentissage des lettres' : 'Learning Letters',
-                liked: true
-            },
-            {
-                id: '2',
-                url: 'https://images.unsplash.com/photo-1587616211892-f743fcca64f9?w=800&q=80',
-                thumbnail: 'https://images.unsplash.com/photo-1587616211892-f743fcca64f9?w=400&q=80',
-                title: language === 'ar' ? 'وقت اللعب' : language === 'fr' ? 'Temps de jeu' : 'Playtime',
-                date: '2026-02-04',
-                childName: language === 'ar' ? 'سارة' : 'Sara',
-                activity: language === 'ar' ? 'اللعب في الحديقة' : language === 'fr' ? 'Jeux au jardin' : 'Playing in Garden',
-                liked: false
-            },
-            {
-                id: '3',
-                url: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800&q=80',
-                thumbnail: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80',
-                title: language === 'ar' ? 'الأعمال الفنية' : language === 'fr' ? 'Travaux artistiques' : 'Art Work',
-                date: '2026-02-03',
-                childName: language === 'ar' ? 'أحمد' : 'Ahmed',
-                activity: language === 'ar' ? 'الرسم والتلوين' : language === 'fr' ? 'Dessin et coloriage' : 'Drawing & Coloring',
-                liked: true
-            },
-            {
-                id: '4',
-                url: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=800&q=80',
-                thumbnail: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=400&q=80',
-                title: language === 'ar' ? 'وجبة الغداء' : language === 'fr' ? 'Déjeuner' : 'Lunch Time',
-                date: '2026-02-03',
-                childName: language === 'ar' ? 'سارة' : 'Sara',
-                activity: language === 'ar' ? 'تناول الطعام' : language === 'fr' ? 'Repas' : 'Eating',
-                liked: false
-            },
-            {
-                id: '5',
-                url: 'https://images.unsplash.com/photo-1540479859555-17af45c78602?w=800&q=80',
-                thumbnail: 'https://images.unsplash.com/photo-1540479859555-17af45c78602?w=400&q=80',
-                title: language === 'ar' ? 'الأنشطة الحركية' : language === 'fr' ? 'Activités sportives' : 'Physical Activities',
-                date: '2026-02-02',
-                childName: language === 'ar' ? 'أحمد' : 'Ahmed',
-                activity: language === 'ar' ? 'التمارين الرياضية' : language === 'fr' ? 'Exercices physiques' : 'Exercises',
-                liked: false
-            },
-            {
-                id: '6',
-                url: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=800&q=80',
-                thumbnail: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=400&q=80',
-                title: language === 'ar' ? 'الأصدقاء' : language === 'fr' ? 'Entre amis' : 'With Friends',
-                date: '2026-02-02',
-                childName: language === 'ar' ? 'سارة' : 'Sara',
-                activity: language === 'ar' ? 'اللعب الجماعي' : language === 'fr' ? 'Jeux de groupe' : 'Group Play',
-                liked: true
-            },
-            {
-                id: '7',
-                url: 'https://images.unsplash.com/photo-1544776193-352d25ca82cd?w=800&q=80',
-                thumbnail: 'https://images.unsplash.com/photo-1544776193-352d25ca82cd?w=400&q=80',
-                title: language === 'ar' ? 'القراءة' : language === 'fr' ? 'Lecture' : 'Reading',
-                date: '2026-02-01',
-                childName: language === 'ar' ? 'أحمد' : 'Ahmed',
-                activity: language === 'ar' ? 'وقت القصة' : language === 'fr' ? 'Temps du conte' : 'Story Time',
-                liked: false
-            },
-            {
-                id: '8',
-                url: 'https://images.unsplash.com/photo-1485546246426-74dc88dec4d9?w=800&q=80',
-                thumbnail: 'https://images.unsplash.com/photo-1485546246426-74dc88dec4d9?w=400&q=80',
-                title: language === 'ar' ? 'الموسيقى' : language === 'fr' ? 'Musique' : 'Music',
-                date: '2026-02-01',
-                childName: language === 'ar' ? 'سارة' : 'Sara',
-                activity: language === 'ar' ? 'الغناء والإيقاع' : language === 'fr' ? 'Chant et rythme' : 'Singing & Rhythm',
-                liked: true
+    const loadPhotos = async () => {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.user) return;
+
+            // Get children of the parent
+            const { data: children, error: childrenError } = await supabase
+                .from('children')
+                .select('id, name')
+                .eq('parent_id', session.user.id);
+
+            if (childrenError) {
+                console.error('Error fetching children:', childrenError);
+                setIsLoading(false);
+                return;
             }
-        ];
-        setPhotos(demoPhotos);
-        setIsLoading(false);
+
+            if (!children || children.length === 0) {
+                setPhotos([]);
+                setIsLoading(false);
+                return;
+            }
+
+            const childIds = children.map(c => c.id);
+
+            // Get activities with photos
+            const { data: activities, error: activitiesError } = await supabase
+                .from('child_activities')
+                .select('*')
+                .in('child_id', childIds)
+                .not('photo_url', 'is', null)
+                .order('created_at', { ascending: false });
+
+            if (activitiesError) {
+                console.error('Error fetching activities:', activitiesError);
+                setIsLoading(false);
+                return;
+            }
+
+            // Map to Photo interface
+            const photosData: Photo[] = (activities || []).map((activity, index) => {
+                const child = children.find(c => c.id === activity.child_id);
+                const date = new Date(activity.created_at).toISOString().split('T')[0];
+                
+                return {
+                    id: activity.id,
+                    url: activity.photo_url,
+                    thumbnail: activity.photo_url, // For now, same as url
+                    title: activity.description || (language === 'ar' ? 'نشاط' : language === 'fr' ? 'Activité' : 'Activity'),
+                    date,
+                    childName: child?.name || (language === 'ar' ? 'الطفل' : 'Child'),
+                    activity: activity.activity_type || (language === 'ar' ? 'نشاط' : 'Activity'),
+                    liked: false // Could add a likes system later
+                };
+            });
+
+            setPhotos(photosData);
+        } catch (error) {
+            console.error('Error loading photos:', error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const toggleLike = (id: string) => {
