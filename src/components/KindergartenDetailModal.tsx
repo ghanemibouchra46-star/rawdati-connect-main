@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   X, Star, MapPin, Clock, Users, Phone, ChevronLeft, ChevronRight,
-  Bus, Utensils, Calculator, Globe, BookOpen, Dumbbell, MessageSquare, Send, Coins, Layout, Puzzle, Stethoscope, ShoppingBag, Instagram
+  Bus, Utensils, Calculator, Globe, BookOpen, Dumbbell, MessageSquare, Send, Coins, Layout, Puzzle, Stethoscope, ShoppingBag, Instagram, CreditCard
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,7 @@ import { Kindergarten } from '@/data/kindergartens';
 import { supabase } from '@/integrations/supabase/client';
 import ReviewCard from '@/components/ReviewCard';
 import ActivityCard from '@/components/ActivityCard';
+import PaymentModal from '@/components/PaymentModal';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { toast } from 'sonner';
@@ -51,6 +52,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({ name: '', rating: 5, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const serviceNames: Record<string, string> = {
     bus: t('filter.transport'),
@@ -642,9 +644,25 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
             >
               {t('card.register')}
             </Button>
+            {kindergarten.isPremium && (
+              <Button
+                onClick={() => setShowPaymentModal(true)}
+                className="flex-1 h-14 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 border-0 rounded-xl shadow-soft hover:shadow-hover transition-all duration-300 text-white font-bold text-lg flex items-center gap-2"
+              >
+                <CreditCard className="w-5 h-5" />
+                {language === 'ar' ? 'اشتراك' : 'S\'abonner'}
+              </Button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        kindergarten={kindergarten}
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+      />
     </div>
   );
 };
