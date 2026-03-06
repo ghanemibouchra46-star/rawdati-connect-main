@@ -190,6 +190,8 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     descriptionFr: row?.description_fr || '',
     coordinates: coords,
     priceBreakdown,
+    isPremium: row?.is_premium || false,
+    paymentInfo: row?.payment_info || null,
     kindergartenGallery: (() => {
       try {
         const gallery = row?.kindergarten_gallery;

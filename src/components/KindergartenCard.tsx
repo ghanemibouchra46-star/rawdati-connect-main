@@ -49,10 +49,17 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-transparent" />
 
         {/* Rating Badge */}
-        <div className={`absolute top-3 ${dir === 'rtl' ? 'left-3' : 'right-3'} flex items-center gap-1 px-2.5 py-1 bg-card/90 backdrop-blur-sm rounded-full`}>
-          <Star className="w-3.5 h-3.5 text-accent fill-accent" />
-          <span className="text-sm font-semibold text-foreground">{kindergarten.rating}</span>
-          <span className="text-xs text-muted-foreground">({kindergarten.reviewCount})</span>
+        <div className={`absolute top-3 ${dir === 'rtl' ? 'left-3' : 'right-3'} flex items-center gap-2`}>
+          <div className="flex items-center gap-1 px-2.5 py-1 bg-card/90 backdrop-blur-sm rounded-full">
+            <Star className="w-3.5 h-3.5 text-accent fill-accent" />
+            <span className="text-sm font-semibold text-foreground">{kindergarten.rating}</span>
+            <span className="text-xs text-muted-foreground">({kindergarten.reviewCount})</span>
+          </div>
+          {kindergarten.isPremium && (
+            <div className="px-2 py-1 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-full">
+              <span className="text-xs font-bold">⭐ PREMIUM</span>
+            </div>
+          )}
         </div>
 
         {/* Price Badge */}

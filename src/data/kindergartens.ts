@@ -59,6 +59,8 @@ export interface Kindergarten {
   videos?: { id: string; url: string; titleAr: string; titleFr: string }[];
   programs?: { id: string; nameAr: string; nameFr: string; descriptionAr: string; descriptionFr: string; icon: string }[];
   kindergartenGallery?: KindergartenGallery[];
+  isPremium?: boolean;
+  paymentInfo?: string | null;
   partners?: {
     doctors: string[];
     stores: string[];

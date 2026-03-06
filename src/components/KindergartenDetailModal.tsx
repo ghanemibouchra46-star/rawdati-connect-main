@@ -257,6 +257,11 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
               <MapPin className="w-5 h-5 text-coral" />
               <span className="text-foreground">{municipality}</span>
             </div>
+            {kindergarten.isPremium && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl">
+                <span className="text-xs font-bold">⭐ PREMIUM</span>
+              </div>
+            )}
             {kindergarten.instagram && (
               <a href={`https://instagram.com/${kindergarten.instagram}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-muted rounded-xl hover:bg-muted/80 transition-colors">
                 <Instagram className="w-5 h-5 text-pink-600" />
@@ -306,6 +311,21 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
               </div>
             </div>
           </div>
+
+          {/* Premium Payment Info */}
+          {kindergarten.isPremium && kindergarten.paymentInfo && (
+            <div className="mb-6 bg-gradient-to-r from-amber-50 to-amber-100 rounded-xl p-4 border border-amber-200">
+              <h3 className={`text-lg font-bold text-foreground mb-3 ${dir === 'rtl' ? 'text-right' : 'text-left'} flex items-center gap-2`}>
+                <Coins className="w-5 h-5 text-amber-600" />
+                {language === 'ar' ? 'معلومات الدفع' : 'Informations de paiement'}
+              </h3>
+              <div className="bg-white/70 rounded-lg p-3">
+                <p className={`text-sm text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
+                  {kindergarten.paymentInfo}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Description */}
           <div className="mb-6">

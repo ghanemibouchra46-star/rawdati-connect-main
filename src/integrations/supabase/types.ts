@@ -102,6 +102,8 @@ export type Database = {
           videos: Json | null
           programs: Json | null
           kindergarten_gallery: Json | null
+          is_premium: boolean
+          payment_info: string | null
         }
         Insert: {
           id: string
@@ -134,6 +136,8 @@ export type Database = {
           created_at?: string
           updated_at?: string
           kindergarten_gallery?: Json | null
+          is_premium?: boolean
+          payment_info?: string | null
         }
         Update: {
           id?: string
@@ -166,6 +170,8 @@ export type Database = {
           created_at?: string
           updated_at?: string
           kindergarten_gallery?: Json | null
+          is_premium?: boolean
+          payment_info?: string | null
         }
         Relationships: []
       }
