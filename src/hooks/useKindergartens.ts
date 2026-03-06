@@ -194,31 +194,66 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
       try {
         const gallery = row?.kindergarten_gallery;
         if (!gallery) return [];
+        
+        // Handle array of URLs (simple case)
         if (Array.isArray(gallery)) {
-          return gallery.map((item: any) => ({
-            id: item.id || `gallery-${Math.random()}`,
-            titleAr: item.titleAr || '',
-            titleFr: item.titleFr || '',
-            descriptionAr: item.descriptionAr || '',
-            descriptionFr: item.descriptionFr || '',
-            image: item.image || '/placeholder.svg',
-            category: item.category || 'activity'
-          })) as KindergartenGallery[];
-        }
-        if (typeof gallery === 'string') {
-          const parsed = JSON.parse(gallery);
-          if (Array.isArray(parsed)) {
-            return parsed.map((item: any) => ({
-              id: item.id || `gallery-${Math.random()}`,
-              titleAr: item.titleAr || '',
-              titleFr: item.titleFr || '',
+          return gallery.map((item: any, index: number) => {
+            // If it's a string (URL), create a basic object
+            if (typeof item === 'string') {
+              return {
+                id: `gallery-${row.id}-${index}`,
+                titleAr: `صورة ${index + 1}`,
+                titleFr: `Image ${index + 1}`,
+                descriptionAr: '',
+                descriptionFr: '',
+                image: item.startsWith('http') ? item : resolveImageUrl(item),
+                category: 'activity' as const
+              };
+            }
+            // If it's already an object, use it as-is
+            return {
+              id: item.id || `gallery-${row.id}-${index}`,
+              titleAr: item.titleAr || `صورة ${index + 1}`,
+              titleFr: item.titleFr || `Image ${index + 1}`,
               descriptionAr: item.descriptionAr || '',
               descriptionFr: item.descriptionFr || '',
               image: item.image || '/placeholder.svg',
               category: item.category || 'activity'
-            })) as KindergartenGallery[];
+            };
+          }) as KindergartenGallery[];
+        }
+        
+        // Handle string that might be JSON array
+        if (typeof gallery === 'string') {
+          const parsed = JSON.parse(gallery);
+          if (Array.isArray(parsed)) {
+            return parsed.map((item: any, index: number) => {
+              // If it's a string (URL), create a basic object
+              if (typeof item === 'string') {
+                return {
+                  id: `gallery-${row.id}-${index}`,
+                  titleAr: `صورة ${index + 1}`,
+                  titleFr: `Image ${index + 1}`,
+                  descriptionAr: '',
+                  descriptionFr: '',
+                  image: item.startsWith('http') ? item : resolveImageUrl(item),
+                  category: 'activity' as const
+                };
+              }
+              // If it's already an object, use it as-is
+              return {
+                id: item.id || `gallery-${row.id}-${index}`,
+                titleAr: item.titleAr || `صورة ${index + 1}`,
+                titleFr: item.titleFr || `Image ${index + 1}`,
+                descriptionAr: item.descriptionAr || '',
+                descriptionFr: item.descriptionFr || '',
+                image: item.image || '/placeholder.svg',
+                category: item.category || 'activity'
+              };
+            }) as KindergartenGallery[];
           }
         }
+        
         return [];
       } catch (e) {
         console.error("Error parsing kindergartenGallery for", row?.name_ar, ":", e);
