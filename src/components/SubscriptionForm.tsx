@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { CreditCard, Calendar, Check, X, Info, Crown, Star, Zap } from 'lucide-react';
+import { CreditCard, Calendar, Check, X, Info, Crown, Star, Zap, Upload, FileText, AlertCircle, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,13 +40,13 @@ const SubscriptionForm = ({ isOpen, onClose, userId, userEmail, userName }: Subs
   const { language, dir } = useLanguage();
   const [selectedPlan, setSelectedPlan] = useState<string>('monthly');
   const [loading, setLoading] = useState(false);
+  const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const [formData, setFormData] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    cardholderName: userName || '',
+    firstName: userName?.split(' ')[0] || '',
+    lastName: userName?.split(' ')[1] || '',
     email: userEmail || '',
-    agreeTerms: false
+    phone: '',
+    notes: ''
   });
 
   const plans: SubscriptionPlan[] = [
@@ -117,13 +118,43 @@ const SubscriptionForm = ({ isOpen, onClose, userId, userEmail, userName }: Subs
 
   if (!isOpen) return null;
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(language === 'ar' 
+          ? 'حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت' 
+          : 'Fichier trop volumineux. Taille maximale 5MB');
+        return;
+      }
+      
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        toast.error(language === 'ar' 
+          ? 'يرجى رفع صورة فقط' 
+          : 'Veuillez télécharger une image uniquement');
+        return;
+      }
+      
+      setPaymentProof(file);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.agreeTerms) {
+    if (!paymentProof) {
       toast.error(language === 'ar' 
-        ? 'يجب الموافقة على الشروط والأحكام' 
-        : 'Vous devez accepter les conditions générales');
+        ? 'يرجى رفع وصل الدفع' 
+        : 'Veuillez télécharger le reçu de paiement');
+      return;
+    }
+
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
+      toast.error(language === 'ar' 
+        ? 'يرجى ملء جميع الحقول المطلوبة' 
+        : 'Veuillez remplir tous les champs obligatoires');
       return;
     }
 
@@ -138,6 +169,27 @@ const SubscriptionForm = ({ isOpen, onClose, userId, userEmail, userName }: Subs
         throw new Error('User not authenticated');
       }
 
+      // Upload payment proof
+      let proofUrl = '';
+      if (paymentProof) {
+        const fileExt = paymentProof.name.split('.').pop();
+        const fileName = `${currentUserId}/${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('payment_proofs')
+          .upload(fileName, paymentProof);
+        
+        if (uploadError) {
+          throw uploadError;
+        }
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('payment_proofs')
+          .getPublicUrl(fileName);
+        
+        proofUrl = publicUrl;
+      }
+
       // Create subscription record
       const { error } = await supabase
         .from('platform_subscriptions')
@@ -146,13 +198,13 @@ const SubscriptionForm = ({ isOpen, onClose, userId, userEmail, userName }: Subs
           user_id: currentUserId,
           plan_type: selectedPlan as 'monthly' | 'yearly',
           price: plans.find(p => p.id === selectedPlan)?.price || 0,
-          status: 'active' as const,
+          status: 'pending' as const,
           start_date: new Date().toISOString(),
           end_date: selectedPlan === 'yearly' 
             ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
             : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          payment_method: 'card',
-          card_last_four: formData.cardNumber.slice(-4),
+          payment_method: 'ccp',
+          payment_proof_url: proofUrl,
           created_at: new Date().toISOString()
         });
 
@@ -161,31 +213,32 @@ const SubscriptionForm = ({ isOpen, onClose, userId, userEmail, userName }: Subs
       }
 
       toast.success(language === 'ar' 
-        ? 'تم تفعيل الاشتراك بنجاح! شكراً لثقتك بمنصتنا.' 
-        : 'Abonnement activé avec succès! Merci de votre confiance.');
+        ? 'تم إرسال طلب الاشتراك بنجاح! سيتم مراجعة وصل الدفع وتفعيل اشتراكك قريباً.' 
+        : 'Demande d\'abonnement envoyée avec succès! Le reçu sera vérifié et votre abonnement sera activé prochainement.');
 
       // Reset form
       setFormData({
-        cardNumber: '',
-        expiryDate: '',
-        cvv: '',
-        cardholderName: userName || '',
-        email: userEmail || '',
-        agreeTerms: false
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        notes: ''
       });
+      setPaymentProof(null);
+      setSelectedPlan('monthly');
 
       onClose();
     } catch (error) {
       console.error('Subscription error:', error);
       toast.error(language === 'ar' 
-        ? 'حدث خطأ أثناء تفعيل الاشتراك. يرجى المحاولة مرة أخرى.' 
-        : 'Une erreur est survenue lors de l\'activation. Veuillez réessayer.');
+        ? 'حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.' 
+        : 'Une erreur est survenue lors de l\'envoi. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -215,7 +268,7 @@ const SubscriptionForm = ({ isOpen, onClose, userId, userEmail, userName }: Subs
                 {language === 'ar' ? 'اشتراك المنصة المميز' : 'Abonnement Premium'}
               </h2>
               <p className="text-primary-foreground/80">
-                {language === 'ar' ? 'احصل على أفضل تجربة لبحث وتسجيل أطفالك في الروضات' : 'Obtenez la meilleure expérience pour trouver et inscrire vos enfants'}
+                {language === 'ar' ? 'احصل على أفضل تجربة للبحث وتسجيل أطفالك في الروضات' : 'Obtenez la meilleure expérience pour trouver et inscrire vos enfants'}
               </p>
             </div>
           </div>
@@ -283,71 +336,67 @@ const SubscriptionForm = ({ isOpen, onClose, userId, userEmail, userName }: Subs
 
           <Separator />
 
-          {/* Payment Form */}
+          {/* Payment Instructions */}
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-bold text-amber-900 mb-2">
+                  {language === 'ar' ? 'تعليمات الدفع' : 'Instructions de paiement'}
+                </h4>
+                <div className="space-y-1 text-sm text-amber-800">
+                  <p><strong>{language === 'ar' ? 'رقم الحساب CCP:' : 'Numéro de compte CCP:'}</strong> 007 99999 99 000000 00</p>
+                  <p><strong>{language === 'ar' ? 'الاسم:' : 'Nom:'}</strong> {language === 'ar' ? 'روضتي للخدمات الرقمية' : 'Rawdati Services Numériques'}</p>
+                  <p><strong>{language === 'ar' ? 'المبلغ:' : 'Montant:'}</strong> {selectedPlanData?.price.toLocaleString()} {language === 'ar' ? 'دج' : 'DA'}</p>
+                  <p className="mt-2 text-xs">
+                    {language === 'ar' 
+                      ? 'بعد إتمام الدفع، يرجى رفع صورة وصل الدفع أدناه' 
+                      : 'Après avoir effectué le paiement, veuillez télécharger une photo du reçu ci-dessous'
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* User Information Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <h3 className={`text-lg font-bold text-foreground mb-4 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
-                {language === 'ar' ? 'معلومات الدفع' : 'Informations de paiement'}
+                {language === 'ar' ? 'معلوماتك الشخصية' : 'Vos informations personnelles'}
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <Label htmlFor="cardNumber">{language === 'ar' ? 'رقم البطاقة' : 'Numéro de carte'}</Label>
+                <div>
+                  <Label htmlFor="firstName">{language === 'ar' ? 'الاسم الأول' : 'Prénom'} *</Label>
                   <Input
-                    id="cardNumber"
+                    id="firstName"
                     type="text"
-                    placeholder="1234 5678 9012 3456"
-                    value={formData.cardNumber}
-                    onChange={(e) => handleInputChange('cardNumber', e.target.value)}
-                    maxLength={19}
+                    placeholder={language === 'ar' ? 'أحمد' : 'Ahmed'}
+                    value={formData.firstName}
+                    onChange={(e) => handleInputChange('firstName', e.target.value)}
                     className={dir === 'rtl' ? 'text-right' : 'text-left'}
                     required
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="expiryDate">{language === 'ar' ? 'تاريخ الانتهاء' : "Date d'expiration"}</Label>
+                  <Label htmlFor="lastName">{language === 'ar' ? 'الاسم الأخير' : 'Nom'} *</Label>
                   <Input
-                    id="expiryDate"
+                    id="lastName"
                     type="text"
-                    placeholder="MM/YY"
-                    value={formData.expiryDate}
-                    onChange={(e) => handleInputChange('expiryDate', e.target.value)}
-                    maxLength={5}
+                    placeholder={language === 'ar' ? 'محمد' : 'Mohamed'}
+                    value={formData.lastName}
+                    onChange={(e) => handleInputChange('lastName', e.target.value)}
                     className={dir === 'rtl' ? 'text-right' : 'text-left'}
                     required
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="cvv">CVV</Label>
-                  <Input
-                    id="cvv"
-                    type="text"
-                    placeholder="123"
-                    value={formData.cvv}
-                    onChange={(e) => handleInputChange('cvv', e.target.value)}
-                    maxLength={3}
-                    className={dir === 'rtl' ? 'text-right' : 'text-left'}
-                    required
-                  />
-                </div>
-                
-                <div className="md:col-span-2">
-                  <Label htmlFor="cardholderName">{language === 'ar' ? 'اسم حامل البطاقة' : 'Nom du titulaire'}</Label>
-                  <Input
-                    id="cardholderName"
-                    type="text"
-                    placeholder={language === 'ar' ? 'أحمد محمد' : 'Ahmed Mohamed'}
-                    value={formData.cardholderName}
-                    onChange={(e) => handleInputChange('cardholderName', e.target.value)}
-                    className={dir === 'rtl' ? 'text-right' : 'text-left'}
-                    required
-                  />
-                </div>
-                
-                <div className="md:col-span-2">
-                  <Label htmlFor="email">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</Label>
+                  <Label htmlFor="email">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'} *</Label>
                   <Input
                     id="email"
                     type="email"
@@ -358,25 +407,84 @@ const SubscriptionForm = ({ isOpen, onClose, userId, userEmail, userName }: Subs
                     required
                   />
                 </div>
+                
+                <div>
+                  <Label htmlFor="phone">{language === 'ar' ? 'رقم الهاتف' : 'Téléphone'} *</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder={language === 'ar' ? '+213 555 123 456' : '+213 555 123 456'}
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    className={dir === 'rtl' ? 'text-right' : 'text-left'}
+                    required
+                  />
+                </div>
+                
+                <div className="md:col-span-2">
+                  <Label htmlFor="notes">{language === 'ar' ? 'ملاحظات (اختياري)' : 'Notes (optionnel)'}</Label>
+                  <Textarea
+                    id="notes"
+                    placeholder={language === 'ar' ? 'أي ملاحظات إضافية...' : 'Toutes notes supplémentaires...'}
+                    value={formData.notes}
+                    onChange={(e) => handleInputChange('notes', e.target.value)}
+                    className={dir === 'rtl' ? 'text-right' : 'text-left'}
+                    rows={3}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Terms */}
-            <div className="flex items-start gap-2">
-              <input
-                type="checkbox"
-                id="agreeTerms"
-                checked={formData.agreeTerms}
-                onChange={(e) => handleInputChange('agreeTerms', e.target.checked)}
-                className="mt-1"
-                required
-              />
-              <Label htmlFor="agreeTerms" className="text-sm text-muted-foreground cursor-pointer">
-                {language === 'ar' 
-                  ? 'أوافق على الشروط والأحكام وسياسة الخصوصية الخاصة بالمنصة' 
-                  : 'J\'accepte les conditions générales et la politique de confidentialité de la plateforme'
-                }
-              </Label>
+            {/* Payment Proof Upload */}
+            <div>
+              <h3 className={`text-lg font-bold text-foreground mb-4 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
+                {language === 'ar' ? 'رفع وصل الدفع' : 'Télécharger le reçu de paiement'}
+              </h3>
+              
+              <div className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/50 transition-colors">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Upload className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground mb-1">
+                      {language === 'ar' ? 'رفع صورة وصل الدفع' : 'Télécharger une photo du reçu'}
+                    </p>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {language === 'ar' ? 'PNG, JPG, GIF حتى 5 ميجابايت' : 'PNG, JPG, GIF jusqu\'à 5MB'}
+                    </p>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      id="payment-proof"
+                    />
+                    <label htmlFor="payment-proof">
+                      <Button type="button" variant="outline" className="cursor-pointer">
+                        <Upload className="w-4 h-4 mr-2" />
+                        {language === 'ar' ? 'اختر ملف' : 'Choisir un fichier'}
+                      </Button>
+                    </label>
+                  </div>
+                  
+                  {paymentProof && (
+                    <div className="flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+                      <FileText className="w-4 h-4 text-green-600" />
+                      <span className="text-sm text-green-800">{paymentProof.name}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setPaymentProof(null)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Order Summary */}
@@ -405,17 +513,17 @@ const SubscriptionForm = ({ isOpen, onClose, userId, userEmail, userName }: Subs
             <Button
               type="submit"
               className="w-full h-12 gradient-primary border-0 rounded-xl shadow-soft hover:shadow-hover transition-all duration-300 text-primary-foreground font-bold text-lg flex items-center justify-center gap-2"
-              disabled={loading}
+              disabled={loading || !paymentProof}
             >
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  {language === 'ar' ? 'جاري المعالجة...' : 'Traitement en cours...'}
+                  {language === 'ar' ? 'جاري الإرسال...' : 'Envoi en cours...'}
                 </>
               ) : (
                 <>
                   <CreditCard className="w-5 h-5" />
-                  {language === 'ar' ? 'تفعيل الاشتراك الآن' : 'Activer l\'abonnement maintenant'}
+                  {language === 'ar' ? 'إرسال طلب الاشتراك' : 'Envoyer la demande d\'abonnement'}
                 </>
               )}
             </Button>

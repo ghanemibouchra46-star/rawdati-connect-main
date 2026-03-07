@@ -313,13 +313,14 @@ export type Database = {
           user_id: string
           plan_type: 'monthly' | 'yearly'
           price: number
-          status: 'active' | 'cancelled' | 'expired'
+          status: 'active' | 'cancelled' | 'expired' | 'pending'
           start_date: string
           end_date: string
           payment_method: string
           card_last_four: string | null
           auto_renew: boolean
           cancelled_at: string | null
+          payment_proof_url: string | null
           created_at: string
           updated_at: string
         }
@@ -328,13 +329,14 @@ export type Database = {
           user_id: string
           plan_type: 'monthly' | 'yearly'
           price: number
-          status?: 'active' | 'cancelled' | 'expired'
+          status?: 'active' | 'cancelled' | 'expired' | 'pending'
           start_date: string
           end_date: string
           payment_method?: string
           card_last_four?: string | null
           auto_renew?: boolean
           cancelled_at?: string | null
+          payment_proof_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -343,13 +345,14 @@ export type Database = {
           user_id?: string
           plan_type?: 'monthly' | 'yearly'
           price?: number
-          status?: 'active' | 'cancelled' | 'expired'
+          status?: 'active' | 'cancelled' | 'expired' | 'pending'
           start_date?: string
           end_date?: string
           payment_method?: string
           card_last_four?: string | null
           auto_renew?: boolean
           cancelled_at?: string | null
+          payment_proof_url?: string | null
           created_at?: string
           updated_at?: string
         }
