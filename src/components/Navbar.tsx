@@ -4,7 +4,6 @@ import { Search, Menu, X, User, Crown, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useMyPlatformSubscription } from '@/hooks/usePlatformSubscription';
 import PlatformSubscriptionButton from '@/components/PlatformSubscriptionButton';
@@ -12,11 +11,30 @@ import logoIcon from '@/assets/logo-icon.png';
 
 const Navbar = () => {
   const { language, dir, setLanguage, t } = useLanguage();
-  const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
   const { data: subscription } = useMyPlatformSubscription();
+
+  useEffect(() => {
+    // Get current user session
+    const getUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+    };
+    
+    getUser();
+
+    // Listen for auth changes
+    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => {
+      authSubscription?.unsubscribe();
+    };
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +45,8 @@ const Navbar = () => {
   };
 
   const handleLogout = async () => {
-    await logout();
+    await supabase.auth.signOut();
+    setUser(null);
     navigate('/');
   };
 
@@ -122,7 +141,7 @@ const Navbar = () => {
                   >
                     <User className="w-4 h-4" />
                     <span className="hidden md:block">
-                      {user.user_metadata?.full_name || user.email}
+                      {user?.user_metadata?.full_name || user?.email}
                     </span>
                   </Button>
                   
@@ -232,7 +251,7 @@ const Navbar = () => {
                 <div className="space-y-3 pt-4 border-t border-border">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <User className="w-4 h-4" />
-                    {user.user_metadata?.full_name || user.email}
+                    {user?.user_metadata?.full_name || user?.email}
                   </div>
                   <Link
                     to="/dashboard"
