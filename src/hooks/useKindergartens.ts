@@ -55,20 +55,20 @@ const normalizeMunicipality = (val: string): string => {
   return val;
 };
 
-const normalizeServiceId = (serviceName: string): string => {
-  if (!serviceName) return '';
-  const lower = serviceName.toLowerCase().trim();
-  // If already an ID, return as-is
-  const validIds = ['bus', 'meals', 'mental-math', 'languages', 'quran', 'sports'];
-  if (validIds.includes(lower)) return lower;
-  // Map Arabic service names to IDs
-  if (serviceName.includes('نقل') || lower.includes('transport')) return 'bus';
-  if (serviceName.includes('وجبات') || serviceName.includes('غذائية') || lower.includes('repas')) return 'meals';
-  if (serviceName.includes('حساب') || serviceName.includes('ذهني') || lower.includes('calcul') || lower.includes('mental')) return 'mental-math';
-  if (serviceName.includes('لغات') || serviceName.includes('أجنبية') || lower.includes('langue')) return 'languages';
-  if (serviceName.includes('قرآن') || serviceName.includes('تحفيظ') || lower.includes('coran') || lower.includes('quran')) return 'quran';
-  if (serviceName.includes('رياضي') || lower.includes('sport')) return 'sports';
-  return serviceName;
+const normalizeServiceName = (serviceId: string): string => {
+  if (!serviceId) return '';
+  const lower = serviceId.toLowerCase().trim();
+  
+  // Map IDs to Arabic names
+  if (lower === 'bus' || serviceId.includes('نقل') || lower.includes('transport')) return 'نقل مدرسي';
+  if (lower === 'meals' || serviceId.includes('وجبات') || lower.includes('repas')) return 'وجبات غذائية';
+  if (lower === 'mental-math' || serviceId.includes('حساب') || lower.includes('calcul')) return 'الحساب الذهني';
+  if (lower === 'languages' || serviceId.includes('لغات') || lower.includes('langue')) return 'لغات أجنبية';
+  if (lower === 'quran' || serviceId.includes('قرآن') || lower.includes('coran')) return 'تحفيظ القرآن';
+  if (lower === 'sports' || serviceId.includes('رياضي') || lower.includes('sport')) return 'أنشطة رياضية';
+  
+  // If already Arabic name, return as-is
+  return serviceId;
 };
 
 const mapRowToKindergarten = (row: any): Kindergarten => {
@@ -175,7 +175,7 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     reviewCount: row?.review_count ?? 0,
     images: images.length ? images : ['/placeholder.svg'],
     facilities,
-    services: parsePostgresArray(row?.services).map(normalizeServiceId),
+    services: parsePostgresArray(row?.services).map(normalizeServiceName),
     activities,
     hasAutismWing: row.has_autism_wing ?? false,
     instagram: row.instagram,

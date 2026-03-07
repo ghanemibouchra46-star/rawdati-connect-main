@@ -10,16 +10,11 @@ export function useMyPlatformSubscription() {
   return useQuery({
     queryKey: ['platform_subscription', 'my'],
     queryFn: async () => {
-      console.log('🔍 useMyPlatformSubscription started');
-      
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        console.log('❌ No user found');
         return null;
       }
-
-      console.log('✅ User found:', user.id);
 
       try {
         const { data, error } = await supabase
@@ -31,21 +26,15 @@ export function useMyPlatformSubscription() {
           .limit(1)
           .single();
 
-        console.log('📊 Query result:', { data, error });
-
         if (error) {
           if (error.code === 'PGRST116') {
-            console.log('ℹ️ No subscription found (PGRST116)');
             return null;
           }
-          console.error('❌ Database error:', error);
           throw error;
         }
 
-        console.log('✅ Subscription data:', data);
         return data;
       } catch (err) {
-        console.error('❌ Query failed:', err);
         throw err;
       }
     },
@@ -114,6 +103,41 @@ export function useUpdatePlatformSubscription() {
         language === 'ar' 
           ? 'حدث خطأ أثناء تحديث حالة الاشتراك' 
           : 'Une erreur est survenue lors de la mise à jour du statut de l\'abonnement'
+      );
+    }
+  });
+}
+
+export function useCreatePlatformSubscription() {
+  const { language } = useLanguage();
+  
+  return useMutation({
+    mutationFn: async (subscriptionData: Omit<PlatformSubscription, 'id' | 'created_at'>) => {
+      const { data, error } = await supabase
+        .from('platform_subscriptions')
+        .insert({
+          ...subscriptionData,
+          id: crypto.randomUUID(),
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      toast.success(
+        language === 'ar' 
+          ? 'تم إنشاء طلب الاشتراك بنجاح' 
+          : 'La demande d\'abonnement a été créée avec succès'
+      );
+    },
+    onError: () => {
+      toast.error(
+        language === 'ar' 
+          ? 'حدث خطأ أثناء إنشاء طلب الاشتراك' 
+          : 'Une erreur est survenue lors de la création de la demande d\'abonnement'
       );
     }
   });
