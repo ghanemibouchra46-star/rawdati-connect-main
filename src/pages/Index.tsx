@@ -6,7 +6,7 @@ import KindergartenCard from '@/components/KindergartenCard';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { GraduationCap, Stethoscope, Shirt, ArrowLeft, ArrowRight, Star, MapPin, Users, MessageCircle, Baby, Calendar, Crown, Search } from 'lucide-react';
+import { GraduationCap, Stethoscope, Shirt, ArrowLeft, ArrowRight, Star, MapPin, Users, MessageCircle, Baby, Calendar, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import childrenPlaying from '@/assets/children-playing.png';
@@ -134,7 +134,7 @@ const Index = () => {
               </Link>
             </div>
 
-            {/* Platform Subscription CTA */}
+            {/* CTA */}
             <div className="mt-8 max-w-md mx-auto">
               <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl p-6 border border-primary/20 backdrop-blur-sm">
                 <div className="text-center mb-4">
@@ -212,79 +212,6 @@ const Index = () => {
                 <ArrowIcon className="w-4 h-4" />
               </Button>
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Platform Subscription Section */}
-      <section className="py-16 bg-gradient-to-b from-background to-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full px-4 py-2 mb-4">
-              <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-accent animate-pulse"></div>
-              <span className="text-sm font-semibold text-primary">
-                {language === 'ar' ? 'ابدأ رحلتك' : 'Commencez votre voyage'}
-              </span>
-              <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-accent animate-pulse"></div>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              {language === 'ar' ? 'العثور على الروضة المثالية' : 'Trouver la crèche parfaite'}
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              {language === 'ar' 
-                ? 'نحن هنا لمساعدتك في العثور على أفضل بيئة تعليمية لطفلك' 
-                : 'Nous sommes là pour vous aider à trouver le meilleur environnement d\'apprentissage pour votre enfant'
-              }
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
-            <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-3xl p-8 border border-blue-500/20">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-foreground">
-                    {language === 'ar' ? 'ابحث عن الروضات' : 'Rechercher des crèches'}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {language === 'ar' ? 'استكشف أفضل الروضات في منطقتك' : 'Découvrez les meilleures crèches dans votre région'}
-                  </p>
-                </div>
-              </div>
-              <Link to="/kindergartens">
-                <Button variant="outline" size="lg" className="w-full">
-                  {language === 'ar' ? 'تصفح الروضات' : 'Parcourir les crèches'}
-                </Button>
-              </Link>
-            </div>
-
-            <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/10 rounded-3xl p-8 border border-amber-500/20 relative">
-              <div className="absolute -top-2 -right-2">
-                <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                  {language === 'ar' ? 'مجاني' : 'Gratuit'}
-                </div>
-              </div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
-                  <Star className="w-6 h-6 text-amber-600" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-foreground">
-                    {language === 'ar' ? 'سجل طفلك الآن' : 'Inscrivez votre enfant maintenant'}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {language === 'ar' ? 'انضم إلى آلاف العائلات السعيدة' : 'Rejoignez des milliers de familles heureuses'}
-                  </p>
-                </div>
-              </div>
-              <Link to="/auth">
-                <Button size="lg" className="w-full">
-                  {language === 'ar' ? 'سجل الآن' : 'S\'inscrire maintenant'}
-                </Button>
-              </Link>
-            </div>
           </div>
         </div>
       </section>
