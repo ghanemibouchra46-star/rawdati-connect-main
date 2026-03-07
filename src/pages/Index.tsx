@@ -3,10 +3,11 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import StatsSection from '@/components/StatsSection';
 import KindergartenCard from '@/components/KindergartenCard';
+import PlatformSubscriptionButton from '@/components/PlatformSubscriptionButton';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { GraduationCap, Stethoscope, Shirt, ArrowLeft, ArrowRight, Star, MapPin, Users, MessageCircle, Baby } from 'lucide-react';
+import { GraduationCap, Stethoscope, Shirt, ArrowLeft, ArrowRight, Star, MapPin, Users, MessageCircle, Baby, Calendar, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import childrenPlaying from '@/assets/children-playing.png';
@@ -134,6 +135,27 @@ const Index = () => {
               </Link>
             </div>
 
+            {/* Platform Subscription CTA */}
+            <div className="mt-8 max-w-md mx-auto">
+              <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl p-6 border border-primary/20 backdrop-blur-sm">
+                <div className="text-center mb-4">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center">
+                    <Baby className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-foreground mb-2">
+                    {language === 'ar' ? 'انضم إلى المنصة المميزة' : 'Rejoignez la plateforme premium'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {language === 'ar' 
+                      ? 'احصل على وصول غير محدود لجميع الروضات وميزات حصرية' 
+                      : 'Accès illimité à toutes les crèches et fonctionnalités exclusives'
+                    }
+                  </p>
+                </div>
+                <PlatformSubscriptionButton size="lg" className="w-full" />
+              </div>
+            </div>
+
             {/* Small floating image */}
             <div className="mt-12 flex justify-center">
               <div className="relative group">
@@ -187,6 +209,141 @@ const Index = () => {
                 <ArrowIcon className="w-4 h-4" />
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Platform Subscription Section */}
+      <section className="py-16 bg-gradient-to-b from-background to-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full px-4 py-2 mb-4">
+              <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-accent animate-pulse"></div>
+              <span className="text-sm font-semibold text-primary">
+                {language === 'ar' ? 'مميزات حصرية' : 'Fonctionnalités exclusives'}
+              </span>
+              <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-accent animate-pulse"></div>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              {language === 'ar' ? 'اشترك في المنصة المميزة' : 'Abonnement Premium'}
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              {language === 'ar' 
+                ? 'احصل على أفضل تجربة للبحث وتسجيل أطفالك في الروضات مع ميزات حصرية' 
+                : 'Obtenez la meilleure expérience pour trouver et inscrire vos enfants avec des fonctionnalités exclusives'
+              }
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
+            <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-3xl p-8 border border-blue-500/20">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-foreground">
+                    {language === 'ar' ? 'الباقة الشهرية' : 'Abonnement mensuel'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {language === 'ar' ? 'مثالية للاستخدام القصير' : 'Idéal pour une utilisation à court terme'}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-6">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold text-foreground">2,999</span>
+                  <span className="text-muted-foreground">{language === 'ar' ? 'دج/شهر' : 'DA/mois'}</span>
+                </div>
+              </div>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center gap-3 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                  </div>
+                  <span>{language === 'ar' ? 'الوصول لجميع الروضات' : 'Accès à toutes les crèches'}</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                  </div>
+                  <span>{language === 'ar' ? 'طلبات غير محدودة' : 'Demandes illimitées'}</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                  </div>
+                  <span>{language === 'ar' ? 'دعم أولوي' : 'Support prioritaire'}</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                  </div>
+                  <span>{language === 'ar' ? 'فلاتر بحث متقدمة' : 'Filtres de recherche avancés'}</span>
+                </li>
+              </ul>
+              <PlatformSubscriptionButton variant="outline" size="lg" className="w-full" />
+            </div>
+
+            <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/10 rounded-3xl p-8 border border-amber-500/20 relative">
+              <div className="absolute top-4 right-4">
+                <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  {language === 'ar' ? 'الأكثر شعبية' : 'Populaire'}
+                </div>
+              </div>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
+                  <Crown className="w-6 h-6 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-foreground">
+                    {language === 'ar' ? 'الباقة السنوية' : 'Abonnement annuel'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {language === 'ar' ? 'وفر 20% سنوياً' : 'Économisez 20% par an'}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-6">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold text-foreground">29,990</span>
+                  <span className="text-muted-foreground">{language === 'ar' ? 'دج/سنة' : 'DA/an'}</span>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-sm text-muted-foreground line-through">35,988</span>
+                  <span className="text-sm font-bold text-green-600">
+                    {language === 'ar' ? 'وفر 20%' : 'Économisez 20%'}
+                  </span>
+                </div>
+              </div>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center gap-3 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                  </div>
+                  <span>{language === 'ar' ? 'كل شيء في الباقة الشهرية' : 'Tout dans l\'abonnement mensuel'}</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                  </div>
+                  <span>{language === 'ar' ? 'رؤى حصرية للروضات' : 'Aperçus exclusifs des crèches'}</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                  </div>
+                  <span>{language === 'ar' ? 'وصول مبكر للميزات' : 'Accès anticipé aux fonctionnalités'}</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                  </div>
+                  <span>{language === 'ar' ? 'توصيات مخصصة' : 'Recommandations personnalisées'}</span>
+                </li>
+              </ul>
+              <PlatformSubscriptionButton size="lg" className="w-full" />
+            </div>
           </div>
         </div>
       </section>
