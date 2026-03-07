@@ -4,6 +4,7 @@ import { Menu, X, User, Building2, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LanguageSelector from '@/components/LanguageSelector';
 import { useLanguage } from '@/contexts/LanguageContext';
+import PlatformSubscriptionButton from '@/components/PlatformSubscriptionButton';
 import logoIcon from '@/assets/logo-icon.png';
 
 const Navbar = () => {
@@ -50,6 +51,9 @@ const Navbar = () => {
           {/* Auth Buttons & Language Selector */}
           <div className="hidden md:flex items-center gap-2">
             <LanguageSelector />
+
+            {/* Platform Subscription Button */}
+            <PlatformSubscriptionButton variant="outline" size="sm" />
 
             {/* Admin Link */}
             <Link to="/admin">
@@ -113,6 +117,9 @@ const Navbar = () => {
               </div>
 
               <div className="border-t-2 border-primary/20 pt-4 mt-2 flex flex-col gap-3">
+                {/* Platform Subscription Button in Mobile */}
+                <PlatformSubscriptionButton variant="outline" size="lg" className="w-full" />
+
                 <Link to="/admin" onClick={() => setIsOpen(false)}>
                   <Button variant="ghost" className="justify-start gap-2 w-full rounded-2xl font-bold text-lg py-6 text-red-500 hover:bg-red-500/10 transition-colors">
                     <Shield className="w-5 h-5" />

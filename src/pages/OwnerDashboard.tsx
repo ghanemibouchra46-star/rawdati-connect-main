@@ -41,7 +41,8 @@ import {
   DollarSign,
   Instagram,
   UserCheck,
-  UserX
+  UserX,
+  Crown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,6 +59,7 @@ import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import { arDZ, fr } from 'date-fns/locale';
 import { useOwnerSubscriptionRequests, useUpdateSubscriptionRequest } from '@/hooks/useSubscriptionRequests';
+import PlatformSubscriptionButton from '@/components/PlatformSubscriptionButton';
 
 // Types
 interface Child {
@@ -427,24 +429,21 @@ const OwnerDashboard = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl gradient-accent flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-primary-foreground" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-soft">
+                <Building2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="font-bold text-lg text-foreground">لوحة تحكم المدير</h1>
-                <p className="text-sm text-muted-foreground">{mockKindergarten.name}</p>
+                <h1 className="text-2xl font-bold text-foreground">{language === 'ar' ? 'لوحة التحكم' : 'Tableau de bord'}</h1>
+                <p className="text-sm text-muted-foreground">{language === 'ar' ? 'روضة' : 'Crèche'} {mockKindergarten.name}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Link to="/">
-                <Button variant="ghost" className="gap-2">
-                  <span>الرئيسية</span>
-                  <ArrowRight className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-0' : 'rotate-180'} `} />
-                </Button>
-              </Link>
-              <Button variant="outline" onClick={handleLogout} className="gap-2 text-destructive hover:text-destructive">
+            <div className="flex items-center gap-3">
+              {/* Platform Subscription Button */}
+              <PlatformSubscriptionButton variant="outline" size="sm" />
+              
+              <Button variant="outline" size="sm" onClick={() => navigate('/owner-auth')} className="gap-2">
                 <LogOut className="w-4 h-4" />
-                <span>خروج</span>
+                {language === 'ar' ? 'خروج' : 'Déconnexion'}
               </Button>
             </div>
           </div>

@@ -12,6 +12,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useMySubscriptionRequests } from '@/hooks/useSubscriptionRequests';
+import PlatformSubscriptionButton from '@/components/PlatformSubscriptionButton';
 
 interface Child {
     id: string;
@@ -221,24 +222,23 @@ const ParentDashboard = () => {
                 <div className="container mx-auto px-4 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl gradient-accent flex items-center justify-center">
-                                <Baby className="w-5 h-5 text-primary-foreground" />
+                            <Link to="/" className="p-2 rounded-lg hover:bg-muted transition-colors">
+                                <ChevronLeft className="w-5 h-5" />
+                            </Link>
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                <Baby className="w-5 h-5 text-primary" />
                             </div>
                             <div>
-                                <h1 className="font-bold text-lg text-foreground">{t('parent.welcome')} {profile?.full_name?.split(' ')[0]}</h1>
-                                <p className="text-xs text-muted-foreground">{t('parent.title')}</p>
+                                <h1 className="text-lg font-bold text-foreground">{language === 'ar' ? 'لوحة التحكم' : 'Tableau de bord'}</h1>
+                                <p className="text-sm text-muted-foreground">{language === 'ar' ? 'ولي الأمر' : 'Parent'}</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
+                            {/* Platform Subscription Button */}
+                            <PlatformSubscriptionButton variant="outline" size="sm" />
+                            
                             <LanguageSelector />
-                            <Button variant="ghost" size="icon" className="relative">
-                                <Bell className="w-5 h-5" />
-                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center">3</span>
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
-                                <Home className="w-5 h-5" />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-red-500 hover:text-red-600">
+                            <Button variant="ghost" size="icon" onClick={() => navigate('/auth')} className="rounded-full">
                                 <LogOut className="w-5 h-5" />
                             </Button>
                         </div>
