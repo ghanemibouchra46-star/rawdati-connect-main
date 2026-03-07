@@ -4,7 +4,7 @@ import {
     Shield, Users, UserCheck, UserX, Clock, LogOut, Home,
     Building2, LayoutDashboard, Settings as SettingsIcon,
     Search, Filter, CheckCircle2, XCircle, Info, ChevronRight,
-    TrendingUp, Baby, Star, CreditCard, Calendar
+    TrendingUp, Baby, Star, CreditCard, Calendar, Check, X, MapPin, Crown, FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -20,6 +20,7 @@ import LanguageSelector from '@/components/LanguageSelector';
 import { Separator } from '@/components/ui/separator';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useAllSubscriptionRequests, useUpdateSubscriptionRequest } from '@/hooks/useSubscriptionRequests';
+import { useAllPlatformSubscriptions, useUpdatePlatformSubscription } from '@/hooks/usePlatformSubscription';
 
 interface UserProfile {
     id: string;
@@ -81,10 +82,14 @@ const AdminDashboard = () => {
     const { t, dir, language } = useLanguage();
     const navigate = useNavigate();
     const { toast } = useToast();
-
-    // Use subscription requests hooks
-    const { data: subscriptionRequests, isLoading: loadingSubscriptions } = useAllSubscriptionRequests();
+    
+    // Hooks for subscription requests
+    const { data: subscriptionRequests, isLoading: loadingSubscriptions, error: subscriptionError } = useAllSubscriptionRequests();
     const updateSubscriptionRequest = useUpdateSubscriptionRequest();
+    
+    // Hooks for platform subscriptions
+    const { data: platformSubscriptions, isLoading: loadingPlatformSubs } = useAllPlatformSubscriptions();
+    const updatePlatformSubscription = useUpdatePlatformSubscription();
 
     const [isLoading, setIsLoading] = useState(true);
     const [users, setUsers] = useState<UserProfile[]>([]);
@@ -445,15 +450,23 @@ const AdminDashboard = () => {
                         </TabsTrigger>
                         <TabsTrigger value="kindergartens" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
                             <Building2 className="w-4 h-4 mx-2" />
-                            {language === 'ar' ? 'الروضات' : 'Kindergartens'}
+                            {language === 'ar' ? 'الروضات' : 'Crèches'}
                         </TabsTrigger>
                         <TabsTrigger value="users" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
                             <Users className="w-4 h-4 mx-2" />
-                            {language === 'ar' ? 'المستخدمون' : 'Users'}
+                            {language === 'ar' ? 'المستخدمون' : 'Utilisateurs'}
+                        </TabsTrigger>
+                        <TabsTrigger value="registrations" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
+                            <Baby className="w-4 h-4 mx-2" />
+                            {language === 'ar' ? 'تسجيلات' : 'Inscriptions'}
                         </TabsTrigger>
                         <TabsTrigger value="subscriptions" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
-                            <CreditCard className="w-4 h-4 mx-2" />
-                            {language === 'ar' ? 'طلبات الاشتراك' : 'Subscription Requests'}
+                            <FileText className="w-4 h-4 mx-2" />
+                            {language === 'ar' ? 'طلبات الروضات' : 'Demandes crèches'}
+                        </TabsTrigger>
+                        <TabsTrigger value="platform-subscriptions" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
+                            <Crown className="w-4 h-4 mx-2" />
+                            {language === 'ar' ? 'اشتراكات المنصة' : 'Abonnements plateforme'}
                         </TabsTrigger>
                         <TabsTrigger value="settings" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
                             <SettingsIcon className="w-4 h-4 mx-2" />
@@ -1001,6 +1014,120 @@ const AdminDashboard = () => {
                                                                 <Button variant="ghost" size="sm" className="text-slate-500 hover:text-white">
                                                                     <ChevronRight className="w-5 h-5" />
                                                                 </Button>
+                                                            </div>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    {/* Platform Subscriptions Tab */}
+                    <TabsContent value="platform-subscriptions" className="space-y-4">
+                        <Card className="bg-slate-900 border-white/5">
+                            <CardHeader>
+                                <CardTitle className="text-white">{language === 'ar' ? 'اشتراكات المنصة' : 'Abonnements plateforme'}</CardTitle>
+                                <CardDescription className="text-slate-400">{language === 'ar' ? 'إدارة اشتراكات المستخدمين في المنصة' : 'Gérer les abonnements des utilisateurs à la plateforme'}</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                {loadingPlatformSubs ? (
+                                    <div className="text-center py-12">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                                        <p className="text-slate-400">{language === 'ar' ? 'جاري التحميل...' : 'Chargement...'}</p>
+                                    </div>
+                                ) : !platformSubscriptions || platformSubscriptions.length === 0 ? (
+                                    <div className="text-center py-12">
+                                        <Crown className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+                                        <p className="text-slate-400">{language === 'ar' ? 'لا توجد اشتراكات حالياً' : 'Aucun abonnement pour le moment'}</p>
+                                    </div>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <Table>
+                                            <TableHeader className="bg-white/5">
+                                                <TableRow className="border-white/5">
+                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'المستخدم' : 'Utilisateur'}</TableHead>
+                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'الباقة' : 'Forfait'}</TableHead>
+                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'السعر' : 'Prix'}</TableHead>
+                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'الحالة' : 'Statut'}</TableHead>
+                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'التاريخ' : 'Date'}</TableHead>
+                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {platformSubscriptions.map((subscription) => (
+                                                    <TableRow key={subscription.id} className="border-white/5">
+                                                        <TableCell className="text-slate-300">
+                                                            <div>
+                                                                <p className="font-medium">{subscription.profiles?.full_name || 'Unknown'}</p>
+                                                                <p className="text-sm text-slate-500">{subscription.profiles?.email}</p>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-slate-300">
+                                                            <Badge className={
+                                                                subscription.plan_type === 'yearly' 
+                                                                    ? 'bg-amber-100 text-amber-800 border-amber-200'
+                                                                    : 'bg-blue-100 text-blue-800 border-blue-200'
+                                                            }>
+                                                                {subscription.plan_type === 'yearly' 
+                                                                    ? (language === 'ar' ? 'سنوي' : 'Annuel')
+                                                                    : (language === 'ar' ? 'شهري' : 'Mensuel')
+                                                                }
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell className="text-slate-300">{subscription.price.toLocaleString()} {language === 'ar' ? 'دج' : 'DA'}</TableCell>
+                                                        <TableCell className="text-slate-300">
+                                                            <Badge className={
+                                                                subscription.status === 'active' 
+                                                                    ? 'bg-green-100 text-green-800 border-green-200'
+                                                                    : subscription.status === 'pending'
+                                                                    ? 'bg-amber-100 text-amber-800 border-amber-200'
+                                                                    : 'bg-red-100 text-red-800 border-red-200'
+                                                            }>
+                                                                {subscription.status === 'active' 
+                                                                    ? (language === 'ar' ? 'نشط' : 'Actif')
+                                                                    : subscription.status === 'pending'
+                                                                    ? (language === 'ar' ? 'قيد المراجعة' : 'En attente')
+                                                                    : (language === 'ar' ? 'ملغي' : 'Annulé')
+                                                                }
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell className="text-slate-300">
+                                                            {new Date(subscription.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}
+                                                        </TableCell>
+                                                        <TableCell className="text-slate-300">
+                                                            <div className="flex gap-2">
+                                                                {subscription.status === 'pending' && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        onClick={() => updatePlatformSubscription.mutate({ id: subscription.id, status: 'active' })}
+                                                                        className="bg-green-600 hover:bg-green-700"
+                                                                    >
+                                                                        <Check className="w-4 h-4" />
+                                                                    </Button>
+                                                                )}
+                                                                {subscription.status === 'active' && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="outline"
+                                                                        onClick={() => updatePlatformSubscription.mutate({ id: subscription.id, status: 'cancelled' })}
+                                                                        className="border-red-500 text-red-500 hover:bg-red-50"
+                                                                    >
+                                                                        <X className="w-4 h-4" />
+                                                                    </Button>
+                                                                )}
+                                                                {subscription.payment_proof_url && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="outline"
+                                                                        onClick={() => window.open(subscription.payment_proof_url, '_blank')}
+                                                                    >
+                                                                        {language === 'ar' ? 'عرض الوصل' : 'Voir le reçu'}
+                                                                    </Button>
+                                                                )}
                                                             </div>
                                                         </TableCell>
                                                     </TableRow>
