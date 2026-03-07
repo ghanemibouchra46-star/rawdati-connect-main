@@ -27,17 +27,34 @@ const PlatformSubscriptionButton = ({
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('👤 PlatformSubscriptionButton - user fetched:', user);
       setUser(user);
     };
     getUser();
   }, []);
 
+  useEffect(() => {
+    console.log('📂 PlatformSubscriptionButton - showSubscriptionForm:', showSubscriptionForm);
+  }, [showSubscriptionForm]);
+
+  useEffect(() => {
+    console.log('📊 PlatformSubscriptionButton - subscription:', subscription);
+    console.log('⏳ PlatformSubscriptionButton - isLoading:', isLoading);
+  }, [subscription, isLoading]);
+
   const handleSubscribe = () => {
+    console.log('🚀 handleSubscribe called');
+    console.log('👤 User:', user);
+    console.log('📂 Show form:', showSubscriptionForm);
+    
     if (!user) {
+      console.log('🔐 No user, redirecting to login');
       // Redirect to login
       window.location.href = '/auth';
       return;
     }
+    
+    console.log('✅ Setting showSubscriptionForm to true');
     setShowSubscriptionForm(true);
   };
 

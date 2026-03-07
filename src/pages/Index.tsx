@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import StatsSection from '@/components/StatsSection';
 import KindergartenCard from '@/components/KindergartenCard';
 import PlatformSubscriptionButton from '@/components/PlatformSubscriptionButton';
+import DebugSubscription from '@/components/DebugSubscription';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -251,42 +252,42 @@ const Index = () => {
                 </div>
               </div>
               <div className="mb-6">
-                <div className="flex items-baseline gap-2">
+                <div className="flex items-baseline gap-1">
                   <span className="text-4xl font-bold text-foreground">2,999</span>
                   <span className="text-muted-foreground">{language === 'ar' ? 'دج/شهر' : 'DA/mois'}</span>
                 </div>
               </div>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-3 text-sm">
-                  <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
                   </div>
-                  <span>{language === 'ar' ? 'الوصول لجميع الروضات' : 'Accès à toutes les crèches'}</span>
-                </li>
-                <li className="flex items-center gap-3 text-sm">
-                  <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                  <span className="text-muted-foreground">{language === 'ar' ? 'الوصول لجميع الروضات' : 'Accès à toutes les crèches'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
                   </div>
-                  <span>{language === 'ar' ? 'طلبات غير محدودة' : 'Demandes illimitées'}</span>
-                </li>
-                <li className="flex items-center gap-3 text-sm">
-                  <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                  <span className="text-muted-foreground">{language === 'ar' ? 'طلبات تسجيل غير محدودة' : 'Demandes d\'inscription illimitées'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
                   </div>
-                  <span>{language === 'ar' ? 'دعم أولوي' : 'Support prioritaire'}</span>
-                </li>
-                <li className="flex items-center gap-3 text-sm">
-                  <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                  <span className="text-muted-foreground">{language === 'ar' ? 'دعم أولوي' : 'Support prioritaire'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
                   </div>
-                  <span>{language === 'ar' ? 'فلاتر بحث متقدمة' : 'Filtres de recherche avancés'}</span>
-                </li>
-              </ul>
+                  <span className="text-muted-foreground">{language === 'ar' ? 'فلاتر بحث متقدمة' : 'Filtres de recherche avancés'}</span>
+                </div>
+              </div>
               <PlatformSubscriptionButton variant="outline" size="lg" className="w-full" />
             </div>
 
             <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/10 rounded-3xl p-8 border border-amber-500/20 relative">
-              <div className="absolute top-4 right-4">
+              <div className="absolute -top-2 -right-2">
                 <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full">
                   {language === 'ar' ? 'الأكثر شعبية' : 'Populaire'}
                 </div>
@@ -305,7 +306,7 @@ const Index = () => {
                 </div>
               </div>
               <div className="mb-6">
-                <div className="flex items-baseline gap-2">
+                <div className="flex items-baseline gap-1">
                   <span className="text-4xl font-bold text-foreground">29,990</span>
                   <span className="text-muted-foreground">{language === 'ar' ? 'دج/سنة' : 'DA/an'}</span>
                 </div>
@@ -316,35 +317,42 @@ const Index = () => {
                   </span>
                 </div>
               </div>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-3 text-sm">
-                  <div className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-amber-500"></div>
                   </div>
-                  <span>{language === 'ar' ? 'كل شيء في الباقة الشهرية' : 'Tout dans l\'abonnement mensuel'}</span>
-                </li>
-                <li className="flex items-center gap-3 text-sm">
-                  <div className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-muted-foreground">{language === 'ar' ? 'كل شيء في الباقة الشهرية' : 'Tout dans l\'abonnement mensuel'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-amber-500"></div>
                   </div>
-                  <span>{language === 'ar' ? 'رؤى حصرية للروضات' : 'Aperçus exclusifs des crèches'}</span>
-                </li>
-                <li className="flex items-center gap-3 text-sm">
-                  <div className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-muted-foreground">{language === 'ar' ? 'رؤى حصرية للروضات' : 'Aperçus exclusifs des crèches'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-amber-500"></div>
                   </div>
-                  <span>{language === 'ar' ? 'وصول مبكر للميزات' : 'Accès anticipé aux fonctionnalités'}</span>
-                </li>
-                <li className="flex items-center gap-3 text-sm">
-                  <div className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-muted-foreground">{language === 'ar' ? 'وصول مبكر للميزات الجديدة' : 'Accès anticipé aux nouvelles fonctionnalités'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-amber-500"></div>
                   </div>
-                  <span>{language === 'ar' ? 'توصيات مخصصة' : 'Recommandations personnalisées'}</span>
-                </li>
-              </ul>
+                  <span className="text-muted-foreground">{language === 'ar' ? 'توصيات مخصصة' : 'Recommandations personnalisées'}</span>
+                </div>
+              </div>
               <PlatformSubscriptionButton size="lg" className="w-full" />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Debug Section */}
+      <section className="py-8 bg-muted/50">
+        <div className="container mx-auto px-4">
+          <DebugSubscription />
         </div>
       </section>
 

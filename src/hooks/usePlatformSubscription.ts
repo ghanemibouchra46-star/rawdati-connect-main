@@ -10,28 +10,46 @@ export function useMyPlatformSubscription() {
   return useQuery({
     queryKey: ['platform_subscription', 'my'],
     queryFn: async () => {
+      console.log('🔍 useMyPlatformSubscription started');
+      
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
+        console.log('❌ No user found');
         return null;
       }
 
-      const { data, error } = await supabase
-        .from('platform_subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .in('status', ['active', 'pending'])
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+      console.log('✅ User found:', user.id);
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
+      try {
+        const { data, error } = await supabase
+          .from('platform_subscriptions')
+          .select('*')
+          .eq('user_id', user.id)
+          .in('status', ['active', 'pending'])
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        console.log('📊 Query result:', { data, error });
+
+        if (error) {
+          if (error.code === 'PGRST116') {
+            console.log('ℹ️ No subscription found (PGRST116)');
+            return null;
+          }
+          console.error('❌ Database error:', error);
+          throw error;
+        }
+
+        console.log('✅ Subscription data:', data);
+        return data;
+      } catch (err) {
+        console.error('❌ Query failed:', err);
+        throw err;
       }
-
-      return data;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
     retry: 2,
   });
 }
