@@ -3,6 +3,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import StatsSection from '@/components/StatsSection';
 import KindergartenCard from '@/components/KindergartenCard';
+import PlatformSubscriptionButton from '@/components/PlatformSubscriptionButton';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -260,30 +261,26 @@ const Index = () => {
               </Link>
             </div>
 
-            <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/10 rounded-3xl p-8 border border-amber-500/20 relative">
+              <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/10 rounded-3xl p-8 border border-amber-500/20 relative">
               <div className="absolute -top-2 -right-2">
                 <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                  {language === 'ar' ? 'مجاني' : 'Gratuit'}
+                  {language === 'ar' ? 'مميز' : 'Premium'}
                 </div>
               </div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
-                  <Star className="w-6 h-6 text-amber-600" />
+                  <Crown className="w-6 h-6 text-amber-600" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-foreground">
-                    {language === 'ar' ? 'سجل طفلك الآن' : 'Inscrivez votre enfant maintenant'}
+                    {language === 'ar' ? 'اشتراك المنصة المميز' : 'Abonnement Premium'}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {language === 'ar' ? 'انضم إلى آلاف العائلات السعيدة' : 'Rejoignez des milliers de familles heureuses'}
+                    {language === 'ar' ? 'احصل على ميزات حصرية ووصول غير محدود' : 'Obtenez des fonctionnalités exclusives et un accès illimité'}
                   </p>
                 </div>
               </div>
-              <Link to="/auth">
-                <Button size="lg" className="w-full">
-                  {language === 'ar' ? 'سجل الآن' : 'S\'inscrire maintenant'}
-                </Button>
-              </Link>
+              <PlatformSubscriptionButton size="lg" className="w-full" />
             </div>
           </div>
         </div>
