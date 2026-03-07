@@ -3,13 +3,10 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import StatsSection from '@/components/StatsSection';
 import KindergartenCard from '@/components/KindergartenCard';
-import PlatformSubscriptionButton from '@/components/PlatformSubscriptionButton';
-import TestSimpleForm from '@/components/TestSimpleForm';
-import DebugSubscription from '@/components/DebugSubscription';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { GraduationCap, Stethoscope, Shirt, ArrowLeft, ArrowRight, Star, MapPin, Users, MessageCircle, Baby, Calendar, Crown } from 'lucide-react';
+import { GraduationCap, Stethoscope, Shirt, ArrowLeft, ArrowRight, Star, MapPin, Users, MessageCircle, Baby, Calendar, Crown, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import childrenPlaying from '@/assets/children-playing.png';
@@ -145,16 +142,20 @@ const Index = () => {
                     <Baby className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="text-lg font-bold text-foreground mb-2">
-                    {language === 'ar' ? 'انضم إلى المنصة المميزة' : 'Rejoignez la plateforme premium'}
+                    {language === 'ar' ? 'انضم إلينا' : 'Rejoignez-nous'}
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">
                     {language === 'ar' 
-                      ? 'احصل على وصول غير محدود لجميع الروضات وميزات حصرية' 
-                      : 'Accès illimité à toutes les crèches et fonctionnalités exclusives'
+                      ? 'ابدأ رحلتك في العثور على الروضة المثالية لطفلك' 
+                      : 'Commencez votre voyage pour trouver la crèche parfaite pour votre enfant'
                     }
                   </p>
                 </div>
-                <PlatformSubscriptionButton size="lg" className="w-full" />
+                <Link to="/auth">
+                  <Button size="lg" className="w-full">
+                    {language === 'ar' ? 'ابدأ الآن' : 'Commencer maintenant'}
+                  </Button>
+                </Link>
               </div>
             </div>
 
@@ -222,17 +223,17 @@ const Index = () => {
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full px-4 py-2 mb-4">
               <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-accent animate-pulse"></div>
               <span className="text-sm font-semibold text-primary">
-                {language === 'ar' ? 'مميزات حصرية' : 'Fonctionnalités exclusives'}
+                {language === 'ar' ? 'ابدأ رحلتك' : 'Commencez votre voyage'}
               </span>
               <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-accent animate-pulse"></div>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              {language === 'ar' ? 'اشترك في المنصة المميزة' : 'Abonnement Premium'}
+              {language === 'ar' ? 'العثور على الروضة المثالية' : 'Trouver la crèche parfaite'}
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               {language === 'ar' 
-                ? 'احصل على أفضل تجربة للبحث وتسجيل أطفالك في الروضات مع ميزات حصرية' 
-                : 'Obtenez la meilleure expérience pour trouver et inscrire vos enfants avec des fonctionnalités exclusives'
+                ? 'نحن هنا لمساعدتك في العثور على أفضل بيئة تعليمية لطفلك' 
+                : 'Nous sommes là pour vous aider à trouver le meilleur environnement d\'apprentissage pour votre enfant'
               }
             </p>
           </div>
@@ -245,122 +246,46 @@ const Index = () => {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-foreground">
-                    {language === 'ar' ? 'الباقة الشهرية' : 'Abonnement mensuel'}
+                    {language === 'ar' ? 'ابحث عن الروضات' : 'Rechercher des crèches'}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {language === 'ar' ? 'مثالية للاستخدام القصير' : 'Idéal pour une utilisation à court terme'}
+                    {language === 'ar' ? 'استكشف أفضل الروضات في منطقتك' : 'Découvrez les meilleures crèches dans votre région'}
                   </p>
                 </div>
               </div>
-              <div className="mb-6">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-foreground">2,999</span>
-                  <span className="text-muted-foreground">{language === 'ar' ? 'دج/شهر' : 'DA/mois'}</span>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  </div>
-                  <span className="text-muted-foreground">{language === 'ar' ? 'الوصول لجميع الروضات' : 'Accès à toutes les crèches'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  </div>
-                  <span className="text-muted-foreground">{language === 'ar' ? 'طلبات تسجيل غير محدودة' : 'Demandes d\'inscription illimitées'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  </div>
-                  <span className="text-muted-foreground">{language === 'ar' ? 'دعم أولوي' : 'Support prioritaire'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  </div>
-                  <span className="text-muted-foreground">{language === 'ar' ? 'فلاتر بحث متقدمة' : 'Filtres de recherche avancés'}</span>
-                </div>
-              </div>
-              <PlatformSubscriptionButton variant="outline" size="lg" className="w-full" />
+              <Link to="/kindergartens">
+                <Button variant="outline" size="lg" className="w-full">
+                  {language === 'ar' ? 'تصفح الروضات' : 'Parcourir les crèches'}
+                </Button>
+              </Link>
             </div>
 
             <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/10 rounded-3xl p-8 border border-amber-500/20 relative">
               <div className="absolute -top-2 -right-2">
                 <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                  {language === 'ar' ? 'الأكثر شعبية' : 'Populaire'}
+                  {language === 'ar' ? 'مجاني' : 'Gratuit'}
                 </div>
               </div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
-                  <Crown className="w-6 h-6 text-amber-600" />
+                  <Star className="w-6 h-6 text-amber-600" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-foreground">
-                    {language === 'ar' ? 'الباقة السنوية' : 'Abonnement annuel'}
+                    {language === 'ar' ? 'سجل طفلك الآن' : 'Inscrivez votre enfant maintenant'}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {language === 'ar' ? 'وفر 20% سنوياً' : 'Économisez 20% par an'}
+                    {language === 'ar' ? 'انضم إلى آلاف العائلات السعيدة' : 'Rejoignez des milliers de familles heureuses'}
                   </p>
                 </div>
               </div>
-              <div className="mb-6">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-foreground">29,990</span>
-                  <span className="text-muted-foreground">{language === 'ar' ? 'دج/سنة' : 'DA/an'}</span>
-                </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sm text-muted-foreground line-through">35,988</span>
-                  <span className="text-sm font-bold text-green-600">
-                    {language === 'ar' ? 'وفر 20%' : 'Économisez 20%'}
-                  </span>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                  </div>
-                  <span className="text-muted-foreground">{language === 'ar' ? 'كل شيء في الباقة الشهرية' : 'Tout dans l\'abonnement mensuel'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                  </div>
-                  <span className="text-muted-foreground">{language === 'ar' ? 'رؤى حصرية للروضات' : 'Aperçus exclusifs des crèches'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                  </div>
-                  <span className="text-muted-foreground">{language === 'ar' ? 'وصول مبكر للميزات الجديدة' : 'Accès anticipé aux nouvelles fonctionnalités'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                  </div>
-                  <span className="text-muted-foreground">{language === 'ar' ? 'توصيات مخصصة' : 'Recommandations personnalisées'}</span>
-                </div>
-              </div>
-              <PlatformSubscriptionButton size="lg" className="w-full" />
+              <Link to="/auth">
+                <Button size="lg" className="w-full">
+                  {language === 'ar' ? 'سجل الآن' : 'S\'inscrire maintenant'}
+                </Button>
+              </Link>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Test Section */}
-      <section className="py-8 bg-muted/50">
-        <div className="container mx-auto px-4">
-          <TestSimpleForm />
-        </div>
-      </section>
-
-      {/* Debug Section */}
-      <section className="py-8 bg-muted/50">
-        <div className="container mx-auto px-4">
-          <DebugSubscription />
         </div>
       </section>
 
@@ -376,18 +301,54 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => (
-              <Card key={index} className="border-0 shadow-soft hover:shadow-hover transition-all duration-300">
-                <CardContent className="p-6 text-center">
-                  <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <feature.icon className="w-7 h-7 text-primary" />
-                  </div>
-                  <h3 className="font-bold text-foreground mb-2">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="text-center group">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Search className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-2">
+                {t('features.search.title')}
+              </h3>
+              <p className="text-muted-foreground">
+                {t('features.search.description')}
+              </p>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <MapPin className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-2">
+                {t('features.location.title')}
+              </h3>
+              <p className="text-muted-foreground">
+                {t('features.location.description')}
+              </p>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Star className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-2">
+                {t('features.reviews.title')}
+              </h3>
+              <p className="text-muted-foreground">
+                {t('features.reviews.description')}
+              </p>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <MessageCircle className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-2">
+                {t('features.contact.title')}
+              </h3>
+              <p className="text-muted-foreground">
+                {t('features.contact.description')}
+              </p>
+            </div>
           </div>
         </div>
       </section>
