@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import StatsSection from '@/components/StatsSection';
 import KindergartenCard from '@/components/KindergartenCard';
 import PlatformSubscriptionButton from '@/components/PlatformSubscriptionButton';
+import TestSimpleForm from '@/components/TestSimpleForm';
 import DebugSubscription from '@/components/DebugSubscription';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
@@ -346,6 +347,13 @@ const Index = () => {
               <PlatformSubscriptionButton size="lg" className="w-full" />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Test Section */}
+      <section className="py-8 bg-muted/50">
+        <div className="container mx-auto px-4">
+          <TestSimpleForm />
         </div>
       </section>
 
