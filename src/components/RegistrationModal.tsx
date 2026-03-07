@@ -1,37 +1,49 @@
 import { useState } from 'react';
-import { X, User, Phone, Mail, Calendar, CheckCircle } from 'lucide-react';
+import { X, User, Mail, Phone, Calendar, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Kindergarten } from '@/data/kindergartens';
-import { supabase } from '@/integrations/supabase/client';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface RegistrationModalProps {
-  kindergarten: Kindergarten | null;
   isOpen: boolean;
   onClose: () => void;
+  kindergartenId: string;
+  kindergartenName: string;
+  onSuccess?: () => void;
 }
 
-const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalProps) => {
-  const { t, language } = useLanguage();
+const RegistrationModal = ({
+  isOpen,
+  onClose,
+  kindergartenId,
+  kindergartenName,
+  onSuccess
+}: RegistrationModalProps) => {
+  const { language } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    parentName: '',
-    parentPhone: '',
-    parentEmail: '',
     childName: '',
-    childAge: '',
-    childGender: '',
-    notes: ''
+    parentName: '',
+    email: '',
+    phone: '',
+    birthDate: '',
+    gender: '',
+    address: ''
   });
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!kindergarten) return;
-
     setIsLoading(true);
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
@@ -39,200 +51,182 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
         return;
       }
 
-      // Create registration record
+      // Create registration request
       const { error } = await supabase
         .from('registrations')
         .insert({
-          kindergarten_id: kindergarten.id,
-          parent_id: session.user.id,
-          parent_name: formData.parentName,
-          parent_phone: formData.parentPhone,
-          parent_email: formData.parentEmail,
+          user_id: session.user.id,
+          kindergarten_id: kindergartenId,
           child_name: formData.childName,
-          child_age: parseInt(formData.childAge),
-          child_gender: formData.childGender,
-          notes: formData.notes,
+          parent_name: formData.parentName,
+          email: formData.email,
+          phone: formData.phone,
+          birth_date: formData.birthDate,
+          gender: formData.gender,
+          address: formData.address,
           status: 'pending'
         });
 
       if (error) throw error;
 
-      toast.success(language === 'ar' ? 'تم إرسال طلب التسجيل بنجاح' : 'Registration request sent successfully');
+      toast.success(language === 'ar' ? 'تم إرسال طلب التسجيل بنجاح!' : 'Registration request sent successfully!');
+      onSuccess?.();
       onClose();
       setFormData({
-        parentName: '',
-        parentPhone: '',
-        parentEmail: '',
         childName: '',
-        childAge: '',
-        childGender: '',
-        notes: ''
+        parentName: '',
+        email: '',
+        phone: '',
+        birthDate: '',
+        gender: '',
+        address: ''
       });
     } catch (error) {
       console.error('Registration error:', error);
-      toast.error(language === 'ar' ? 'حدث خطأ في التسجيل' : 'Registration failed');
+      toast.error(language === 'ar' ? 'فشل في إرسال طلب التسجيل' : 'Registration request failed');
     } finally {
       setIsLoading(false);
     }
-
-      function newFunction(): "kindergartens" | "notifications" | "owner_kindergartens" | "profiles" | "registration_requests" | "subscription_requests" | "platform_subscriptions" | "reviews" | "user_roles" {
-          return 'registrations';
-      }
   };
 
-  if (!isOpen || !kindergarten) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-800">
-              {language === 'ar' ? 'تسجيل في الروضة' : 'Register for Kindergarten'}
-            </h2>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="w-5 h-5" />
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <User className="w-5 h-5" />
+            {language === 'ar' ? 'تسجيل طفل' : 'Child Registration'}
+          </DialogTitle>
+          <p className="text-sm text-gray-600">
+            {language === 'ar' ? `التسجيل في: ${kindergartenName}` : `Registering for: ${kindergartenName}`}
+          </p>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="childName">
+              {language === 'ar' ? 'اسم الطفل' : 'Child Name'} *
+            </Label>
+            <Input
+              id="childName"
+              value={formData.childName}
+              onChange={(e) => handleInputChange('childName', e.target.value)}
+              placeholder={language === 'ar' ? 'الاسم الكامل للطفل' : 'Child full name'}
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="parentName">
+              {language === 'ar' ? 'اسم الوالد' : 'Parent Name'} *
+            </Label>
+            <Input
+              id="parentName"
+              value={formData.parentName}
+              onChange={(e) => handleInputChange('parentName', e.target.value)}
+              placeholder={language === 'ar' ? 'اسم الوالد أو الوصي' : 'Parent or guardian name'}
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="email">
+              {language === 'ar' ? 'البريد الإلكتروني' : 'Email'} *
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+              placeholder="email@example.com"
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="phone">
+              {language === 'ar' ? 'رقم الهاتف' : 'Phone Number'} *
+            </Label>
+            <Input
+              id="phone"
+              value={formData.phone}
+              onChange={(e) => handleInputChange('phone', e.target.value)}
+              placeholder="+212 6XX XXX XXX"
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="birthDate">
+              {language === 'ar' ? 'تاريخ الميلاد' : 'Birth Date'} *
+            </Label>
+            <Input
+              id="birthDate"
+              type="date"
+              value={formData.birthDate}
+              onChange={(e) => handleInputChange('birthDate', e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="gender">
+              {language === 'ar' ? 'الجنس' : 'Gender'} *
+            </Label>
+            <Select value={formData.gender} onValueChange={(value) => handleInputChange('gender', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder={language === 'ar' ? 'اختر الجنس' : 'Select gender'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">{language === 'ar' ? 'ذكر' : 'Male'}</SelectItem>
+                <SelectItem value="female">{language === 'ar' ? 'أنثى' : 'Female'}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="address">
+              {language === 'ar' ? 'العنوان' : 'Address'}
+            </Label>
+            <Input
+              id="address"
+              value={formData.address}
+              onChange={(e) => handleInputChange('address', e.target.value)}
+              placeholder={language === 'ar' ? 'العنوان الكامل' : 'Full address'}
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="flex-1"
+              disabled={isLoading}
+            >
+              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+            </Button>
+            <Button
+              type="submit"
+              className="flex-1"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  {language === 'ar' ? 'جاري الإرسال...' : 'Sending...'}
+                </>
+              ) : (
+                <>
+                  <User className="w-4 h-4 mr-2" />
+                  {language === 'ar' ? 'تسجيل' : 'Register'}
+                </>
+              )}
             </Button>
           </div>
-
-          <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-semibold text-blue-800 mb-2">
-              {language === 'ar' ? kindergarten.nameAr : kindergarten.nameFr}
-            </h3>
-            <p className="text-sm text-blue-600">
-              {language === 'ar' ? kindergarten.addressAr : kindergarten.addressFr}
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {language === 'ar' ? 'اسم الوالد' : 'Parent Name'}
-              </label>
-              <Input
-                type="text"
-                value={formData.parentName}
-                onChange={(e) => setFormData(prev => ({ ...prev, parentName: e.target.value }))}
-                required
-                placeholder={language === 'ar' ? 'أدخل اسم الوالد' : 'Enter parent name'}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {language === 'ar' ? 'رقم الهاتف' : 'Phone Number'}
-              </label>
-              <Input
-                type="tel"
-                value={formData.parentPhone}
-                onChange={(e) => setFormData(prev => ({ ...prev, parentPhone: e.target.value }))}
-                required
-                placeholder={language === 'ar' ? 'أدخل رقم الهاتف' : 'Enter phone number'}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
-              </label>
-              <Input
-                type="email"
-                value={formData.parentEmail}
-                onChange={(e) => setFormData(prev => ({ ...prev, parentEmail: e.target.value }))}
-                required
-                placeholder={language === 'ar' ? 'أدخل البريد الإلكتروني' : 'Enter email'}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {language === 'ar' ? 'اسم الطفل' : 'Child Name'}
-              </label>
-              <Input
-                type="text"
-                value={formData.childName}
-                onChange={(e) => setFormData(prev => ({ ...prev, childName: e.target.value }))}
-                required
-                placeholder={language === 'ar' ? 'أدخل اسم الطفل' : 'Enter child name'}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {language === 'ar' ? 'العمر' : 'Age'}
-                </label>
-                <Input
-                  type="number"
-                  value={formData.childAge}
-                  onChange={(e) => setFormData(prev => ({ ...prev, childAge: e.target.value }))}
-                  required
-                  min="2"
-                  max="6"
-                  placeholder={language === 'ar' ? 'العمر' : 'Age'}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {language === 'ar' ? 'الجنس' : 'Gender'}
-                </label>
-                <select
-                  value={formData.childGender}
-                  onChange={(e) => setFormData(prev => ({ ...prev, childGender: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  <option value="">
-                    {language === 'ar' ? 'اختر' : 'Select'}
-                  </option>
-                  <option value="male">
-                    {language === 'ar' ? 'ذكر' : 'Male'}
-                  </option>
-                  <option value="female">
-                    {language === 'ar' ? 'أنثى' : 'Female'}
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {language === 'ar' ? 'ملاحظات إضافية' : 'Additional Notes'}
-              </label>
-              <Textarea
-                value={formData.notes}
-                onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                placeholder={language === 'ar' ? 'أي ملاحظات إضافية...' : 'Any additional notes...'}
-                rows={3}
-              />
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="flex-1"
-              >
-                {language === 'ar' ? 'إلغاء' : 'Cancel'}
-              </Button>
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="flex-1"
-              >
-                {isLoading ? (
-                  language === 'ar' ? 'جاري الإرسال...' : 'Sending...'
-                ) : (
-                  language === 'ar' ? 'إرسال الطلب' : 'Send Request'
-                )}
-              </Button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 
