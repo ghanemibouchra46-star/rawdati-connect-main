@@ -3,6 +3,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import StatsSection from '@/components/StatsSection';
 import KindergartenCard from '@/components/KindergartenCard';
+import PlatformSubscriptionButton from '@/components/PlatformSubscriptionButton';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -268,22 +269,18 @@ const Index = () => {
               </div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
-                  <Star className="w-6 h-6 text-amber-600" />
+                  <Crown className="w-6 h-6 text-amber-600" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-foreground">
-                    {language === 'ar' ? 'سجل طفلك الآن' : 'Inscrivez votre enfant maintenant'}
+                    {language === 'ar' ? 'اشتراك المنصة المميز' : 'Abonnement Premium'}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {language === 'ar' ? 'انضم إلى آلاف العائلات السعيدة' : 'Rejoignez des milliers de familles heureuses'}
+                    {language === 'ar' ? 'احصل على ميزات حصرية ووصول غير محدود' : 'Obtenez des fonctionnalités exclusives et un accès illimité'}
                   </p>
                 </div>
               </div>
-              <Link to="/auth">
-                <Button size="lg" className="w-full">
-                  {language === 'ar' ? 'سجل الآن' : 'S\'inscrire maintenant'}
-                </Button>
-              </Link>
+              <PlatformSubscriptionButton size="lg" className="w-full" />
             </div>
           </div>
         </div>
