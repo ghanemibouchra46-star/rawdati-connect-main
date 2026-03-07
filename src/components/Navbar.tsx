@@ -1,40 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, User, Crown, LogOut } from 'lucide-react';
+import { Search, Menu, X, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { useMyPlatformSubscription } from '@/hooks/usePlatformSubscription';
-import PlatformSubscriptionButton from '@/components/PlatformSubscriptionButton';
 import logoIcon from '@/assets/logo-icon.png';
 
 const Navbar = () => {
   const { language, dir, setLanguage, t } = useLanguage();
+  const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
-  const { data: subscription } = useMyPlatformSubscription();
-
-  useEffect(() => {
-    // Get current user session
-    const getUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user || null);
-    };
-    
-    getUser();
-
-    // Listen for auth changes
-    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
-    });
-
-    return () => {
-      authSubscription?.unsubscribe();
-    };
-  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,8 +24,7 @@ const Navbar = () => {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
+    await logout();
     navigate('/');
   };
 
@@ -124,55 +102,40 @@ const Navbar = () => {
 
             {/* User Menu */}
             {user ? (
-              <div className="flex items-center gap-3">
-                {/* Subscription Status */}
-                {subscription?.status === 'active' && (
-                  <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                    <Crown className="w-3 h-3" />
-                    {language === 'ar' ? 'مشترك' : 'Premium'}
-                  </div>
-                )}
+              <div className="relative group">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <User className="w-4 h-4" />
+                  <span className="hidden md:block">
+                    {user.user_metadata?.full_name || user.email}
+                  </span>
+                </Button>
                 
-                <div className="relative group">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="flex items-center gap-2"
-                  >
-                    <User className="w-4 h-4" />
-                    <span className="hidden md:block">
-                      {user?.user_metadata?.full_name || user?.email}
-                    </span>
-                  </Button>
-                  
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                    <div className="py-2">
-                      <Link
-                        to="/dashboard"
-                        className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
-                      >
-                        {language === 'ar' ? 'لوحة التحكم' : 'Tableau de bord'}
-                      </Link>
-                      <Link
-                        to="/profile"
-                        className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
-                      >
-                        {language === 'ar' ? 'الملف الشخصي' : 'Profil'}
-                      </Link>
-                      {!subscription && (
-                        <div className="px-4 py-2">
-                          <PlatformSubscriptionButton variant="ghost" size="sm" />
-                        </div>
-                      )}
-                      <hr className="my-2" />
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        {language === 'ar' ? 'تسجيل الخروج' : 'Déconnexion'}
-                      </button>
-                    </div>
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <div className="py-2">
+                    <Link
+                      to="/dashboard"
+                      className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                    >
+                      {language === 'ar' ? 'لوحة التحكم' : 'Tableau de bord'}
+                    </Link>
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                    >
+                      {language === 'ar' ? 'الملف الشخصي' : 'Profil'}
+                    </Link>
+                    <hr className="my-2" />
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      {language === 'ar' ? 'تسجيل الخروج' : 'Déconnexion'}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -183,7 +146,11 @@ const Navbar = () => {
                     {language === 'ar' ? 'تسجيل الدخول' : 'Connexion'}
                   </Button>
                 </Link>
-                <PlatformSubscriptionButton size="sm" />
+                <Link to="/auth">
+                  <Button size="sm">
+                    {language === 'ar' ? 'سجل الآن' : 'S\'inscrire'}
+                  </Button>
+                </Link>
               </div>
             )}
 
@@ -251,7 +218,7 @@ const Navbar = () => {
                 <div className="space-y-3 pt-4 border-t border-border">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <User className="w-4 h-4" />
-                    {user?.user_metadata?.full_name || user?.email}
+                    {user.user_metadata?.full_name || user.email}
                   </div>
                   <Link
                     to="/dashboard"
@@ -282,9 +249,15 @@ const Navbar = () => {
                       {language === 'ar' ? 'تسجيل الدخول' : 'Connexion'}
                     </Button>
                   </Link>
-                  <div onClick={() => setIsMenuOpen(false)}>
-                    <PlatformSubscriptionButton size="sm" className="w-full" />
-                  </div>
+                  <Link
+                    to="/auth"
+                    className="block text-center"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Button size="sm" className="w-full">
+                      {language === 'ar' ? 'سجل الآن' : 'S\'inscrire'}
+                    </Button>
+                  </Link>
                 </div>
               )}
             </div>
