@@ -11,7 +11,7 @@ import { Kindergarten } from '@/data/kindergartens';
 import { supabase } from '@/integrations/supabase/client';
 import ReviewCard from '@/components/ReviewCard';
 import ActivityCard from '@/components/ActivityCard';
-import PaymentModal from '@/components/PaymentModalTemp';
+import PaymentModal from '@/components/PaymentModal';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { toast } from 'sonner';
