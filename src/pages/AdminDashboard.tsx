@@ -19,7 +19,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import { Separator } from '@/components/ui/separator';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
-import { useAllSubscriptionRequests, useUpdateSubscriptionRequest } from '@/hooks/useSubscriptionRequests';
+import { useSubscriptionRequests } from '@/hooks/useSubscriptionRequests';
 import { useAllPlatformSubscriptions, useUpdatePlatformSubscription } from '@/hooks/usePlatformSubscription';
 
 interface UserProfile {
@@ -84,12 +84,11 @@ const AdminDashboard = () => {
     const { toast } = useToast();
     
     // Hooks for subscription requests
-    const { data: subscriptionRequests, isLoading: loadingSubscriptions, error: subscriptionError } = useAllSubscriptionRequests();
-    const updateSubscriptionRequest = useUpdateSubscriptionRequest();
+    const { requests: subscriptionRequests, isLoading: loadingSubscriptions, error: subscriptionError, approveRequest, rejectRequest } = useSubscriptionRequests();
     
     // Hooks for platform subscriptions
-    const { data: platformSubscriptions, isLoading: loadingPlatformSubs } = useAllPlatformSubscriptions();
-    const updatePlatformSubscription = useUpdatePlatformSubscription();
+    const { subscriptionRequests: platformSubscriptions, isLoading: loadingPlatformSubs } = useAllPlatformSubscriptions();
+    const { approveSubscription, rejectSubscription } = useUpdatePlatformSubscription();
 
     const [isLoading, setIsLoading] = useState(true);
     const [users, setUsers] = useState<UserProfile[]>([]);
@@ -944,17 +943,23 @@ const AdminDashboard = () => {
                                                         <TableCell className="text-white">
                                                             <div>
                                                                 <p className="text-sm font-medium">
-                                                                    {language === 'ar' ? request.kindergartens?.name_ar : request.kindergartens?.name_fr}
+                                                                    {(() => {
+                                                                        const kg = localKindergartens.find(k => k.id === request.kindergarten_id);
+                                                                        return language === 'ar' ? kg?.nameAr : kg?.nameFr;
+                                                                    })()}
                                                                 </p>
                                                                 <p className="text-xs text-slate-400">
-                                                                    {language === 'ar' ? request.kindergartens?.municipality_ar : request.kindergartens?.municipality_fr}
+                                                                    {(() => {
+                                                                        const kg = localKindergartens.find(k => k.id === request.kindergarten_id);
+                                                                        return language === 'ar' ? kg?.municipalityAr : kg?.municipalityFr;
+                                                                    })()}
                                                                 </p>
                                                             </div>
                                                         </TableCell>
                                                         <TableCell className="text-white">
                                                             <div>
                                                                 <p className="text-sm font-medium">
-                                                                    {request.profiles?.full_name || `${request.first_name} ${request.last_name}`}
+                                                                    {`${request.first_name} ${request.last_name}`}
                                                                 </p>
                                                                 <p className="text-xs text-slate-400">{request.email}</p>
                                                             </div>
@@ -989,11 +994,7 @@ const AdminDashboard = () => {
                                                                             variant="ghost"
                                                                             size="sm"
                                                                             className="text-green-500 hover:text-green-400 hover:bg-green-500/10"
-                                                                            onClick={() => updateSubscriptionRequest.mutate({ 
-                                                                                id: request.id, 
-                                                                                status: 'approved' 
-                                                                            })}
-                                                                            disabled={updateSubscriptionRequest.isPending}
+                                                                            onClick={() => approveRequest(request.id)}
                                                                         >
                                                                             <UserCheck className="w-4 h-4" />
                                                                         </Button>
@@ -1001,11 +1002,7 @@ const AdminDashboard = () => {
                                                                             variant="ghost"
                                                                             size="sm"
                                                                             className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                                                                            onClick={() => updateSubscriptionRequest.mutate({ 
-                                                                                id: request.id, 
-                                                                                status: 'rejected' 
-                                                                            })}
-                                                                            disabled={updateSubscriptionRequest.isPending}
+                                                                            onClick={() => rejectRequest(request.id)}
                                                                         >
                                                                             <UserX className="w-4 h-4" />
                                                                         </Button>
@@ -1014,120 +1011,6 @@ const AdminDashboard = () => {
                                                                 <Button variant="ghost" size="sm" className="text-slate-500 hover:text-white">
                                                                     <ChevronRight className="w-5 h-5" />
                                                                 </Button>
-                                                            </div>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-
-                    {/* Platform Subscriptions Tab */}
-                    <TabsContent value="platform-subscriptions" className="space-y-4">
-                        <Card className="bg-slate-900 border-white/5">
-                            <CardHeader>
-                                <CardTitle className="text-white">{language === 'ar' ? 'اشتراكات المنصة' : 'Abonnements plateforme'}</CardTitle>
-                                <CardDescription className="text-slate-400">{language === 'ar' ? 'إدارة اشتراكات المستخدمين في المنصة' : 'Gérer les abonnements des utilisateurs à la plateforme'}</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                {loadingPlatformSubs ? (
-                                    <div className="text-center py-12">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                                        <p className="text-slate-400">{language === 'ar' ? 'جاري التحميل...' : 'Chargement...'}</p>
-                                    </div>
-                                ) : !platformSubscriptions || platformSubscriptions.length === 0 ? (
-                                    <div className="text-center py-12">
-                                        <Crown className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                                        <p className="text-slate-400">{language === 'ar' ? 'لا توجد اشتراكات حالياً' : 'Aucun abonnement pour le moment'}</p>
-                                    </div>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <Table>
-                                            <TableHeader className="bg-white/5">
-                                                <TableRow className="border-white/5">
-                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'المستخدم' : 'Utilisateur'}</TableHead>
-                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'الباقة' : 'Forfait'}</TableHead>
-                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'السعر' : 'Prix'}</TableHead>
-                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'الحالة' : 'Statut'}</TableHead>
-                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'التاريخ' : 'Date'}</TableHead>
-                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {platformSubscriptions.map((subscription) => (
-                                                    <TableRow key={subscription.id} className="border-white/5">
-                                                        <TableCell className="text-slate-300">
-                                                            <div>
-                                                                <p className="font-medium">{subscription.profiles?.full_name || 'Unknown'}</p>
-                                                                <p className="text-sm text-slate-500">{subscription.profiles?.email}</p>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell className="text-slate-300">
-                                                            <Badge className={
-                                                                subscription.plan_type === 'yearly' 
-                                                                    ? 'bg-amber-100 text-amber-800 border-amber-200'
-                                                                    : 'bg-blue-100 text-blue-800 border-blue-200'
-                                                            }>
-                                                                {subscription.plan_type === 'yearly' 
-                                                                    ? (language === 'ar' ? 'سنوي' : 'Annuel')
-                                                                    : (language === 'ar' ? 'شهري' : 'Mensuel')
-                                                                }
-                                                            </Badge>
-                                                        </TableCell>
-                                                        <TableCell className="text-slate-300">{subscription.price.toLocaleString()} {language === 'ar' ? 'دج' : 'DA'}</TableCell>
-                                                        <TableCell className="text-slate-300">
-                                                            <Badge className={
-                                                                subscription.status === 'active' 
-                                                                    ? 'bg-green-100 text-green-800 border-green-200'
-                                                                    : subscription.status === 'pending'
-                                                                    ? 'bg-amber-100 text-amber-800 border-amber-200'
-                                                                    : 'bg-red-100 text-red-800 border-red-200'
-                                                            }>
-                                                                {subscription.status === 'active' 
-                                                                    ? (language === 'ar' ? 'نشط' : 'Actif')
-                                                                    : subscription.status === 'pending'
-                                                                    ? (language === 'ar' ? 'قيد المراجعة' : 'En attente')
-                                                                    : (language === 'ar' ? 'ملغي' : 'Annulé')
-                                                                }
-                                                            </Badge>
-                                                        </TableCell>
-                                                        <TableCell className="text-slate-300">
-                                                            {new Date(subscription.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}
-                                                        </TableCell>
-                                                        <TableCell className="text-slate-300">
-                                                            <div className="flex gap-2">
-                                                                {subscription.status === 'pending' && (
-                                                                    <Button
-                                                                        size="sm"
-                                                                        onClick={() => updatePlatformSubscription.mutate({ id: subscription.id, status: 'active' })}
-                                                                        className="bg-green-600 hover:bg-green-700"
-                                                                    >
-                                                                        <Check className="w-4 h-4" />
-                                                                    </Button>
-                                                                )}
-                                                                {subscription.status === 'active' && (
-                                                                    <Button
-                                                                        size="sm"
-                                                                        variant="outline"
-                                                                        onClick={() => updatePlatformSubscription.mutate({ id: subscription.id, status: 'cancelled' })}
-                                                                        className="border-red-500 text-red-500 hover:bg-red-50"
-                                                                    >
-                                                                        <X className="w-4 h-4" />
-                                                                    </Button>
-                                                                )}
-                                                                {subscription.payment_proof_url && (
-                                                                    <Button
-                                                                        size="sm"
-                                                                        variant="outline"
-                                                                        onClick={() => window.open(subscription.payment_proof_url, '_blank')}
-                                                                    >
-                                                                        {language === 'ar' ? 'عرض الوصل' : 'Voir le reçu'}
-                                                                    </Button>
-                                                                )}
                                                             </div>
                                                         </TableCell>
                                                     </TableRow>
