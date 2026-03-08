@@ -28,8 +28,8 @@ const translations: Record<Language, Record<string, string>> = {
         'nav.ownerLogin': 'دخول الملاك',
 
         // Hero Section
-        'hero.title1': 'اكتشف أفضل الروضات',
-        'hero.title2': 'لمنطقتك',
+        'hero.title1': 'اختر الروضة المثالية',
+        'hero.title2': 'لطفلك',
         'hero.description': 'نساعدك في العثور على أفضل رياض الأطفال من خلال معلومات شاملة وتقييمات حقيقية',
         'hero.explore': 'استكشف الروضات',
         'hero.aboutUs': 'تعرف علينا',
@@ -57,7 +57,7 @@ const translations: Record<Language, Record<string, string>> = {
         'services.speechTherapyDesc': 'أخصائيون في علاج اضطرابات النطق والتواصل',
         'services.clothing': 'محلات الملابس',
         'services.clothingDesc': 'أفضل محلات ملابس الأطفال',
-        'hero.badge': 'أفضل الروضات',
+        'hero.badge': 'أفضل الروضات لطفلك',
         'hero.searchPlaceholder': 'ابحث باسم الروضة...',
         'hero.searchButton': 'بحث',
         'hero.municipalitiesLabel': 'البلديات الرئيسية:',
@@ -343,8 +343,8 @@ const translations: Record<Language, Record<string, string>> = {
         'nav.ownerLogin': 'Espace propriétaire',
 
         // Hero Section
-        'hero.title1': 'Découvrez les meilleures crèches',
-        'hero.title2': 'près de chez vous',
+        'hero.title1': 'Choisissez le jardin d\'enfants idéal',
+        'hero.title2': 'pour votre enfant',
         'hero.description': 'Nous vous aidons à trouver les meilleurs jardins d\'enfants avec des informations complètes et des avis authentiques',
         'hero.explore': 'Explorer les jardins',
         'hero.aboutUs': 'À propos de nous',
@@ -376,7 +376,7 @@ const translations: Record<Language, Record<string, string>> = {
         'services.speechTherapyDesc': 'Spécialistes des troubles de la parole et de la communication',
         'services.clothing': 'Boutiques de vêtements',
         'services.clothingDesc': 'Les meilleures boutiques de vêtements pour enfants',
-        'hero.badge': 'Les meilleures crèches',
+        'hero.badge': 'Les meilleurs jardins d\'enfants',
         'hero.searchPlaceholder': 'Rechercher par nom...',
         'hero.searchButton': 'Rechercher',
         'hero.municipalitiesLabel': 'Principales communes:',
@@ -663,8 +663,8 @@ const translations: Record<Language, Record<string, string>> = {
         'nav.ownerLogin': 'Owner Login',
 
         // Hero Section
-        'hero.title1': 'Discover the best kindergartens',
-        'hero.title2': 'in your area',
+        'hero.title1': 'Choose the perfect kindergarten',
+        'hero.title2': 'for your child',
         'hero.description': 'We help you find the best kindergartens with comprehensive information and authentic reviews',
         'hero.explore': 'Explore Kindergartens',
         'hero.aboutUs': 'About Us',
@@ -692,7 +692,7 @@ const translations: Record<Language, Record<string, string>> = {
         'services.speechTherapyDesc': 'Specialists in speech and communication disorders',
         'services.clothing': 'Clothing Stores',
         'services.clothingDesc': 'Best children\'s clothing stores',
-        'hero.badge': 'Best Kindergartens',
+        'hero.badge': 'Best Kindergartens for Your Child',
         'hero.searchPlaceholder': 'Search by name...',
         'hero.searchButton': 'Search',
         'hero.municipalitiesLabel': 'Main Municipalities:',
