@@ -301,9 +301,9 @@ export function useKindergartens() {
             console.error("Error mapping single row:", e, row);
             return null;
           }
-        }).filter(Boolean).filter(k => k.id && k.nameAr && k.nameFr && k.images && k.images.length > 0) as Kindergarten[];
+        }).filter(Boolean) as Kindergarten[];
 
-        console.log(`✓ Loaded ${mappedData.length} valid kindergartens successfully`);
+        console.log(`✓ Loaded ${mappedData.length} kindergartens successfully`);
         return mappedData;
       } catch (e) {
         console.error("Error in useKindergartens:", e);
