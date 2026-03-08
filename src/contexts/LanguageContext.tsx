@@ -26,7 +26,6 @@ const translations: Record<Language, Record<string, string>> = {
         'nav.about': 'من نحن',
         'nav.login': 'تسجيل الدخول',
         'nav.ownerLogin': 'دخول الملاك',
-        'nav.admin': 'الأدمن',
 
         // Hero Section
         'hero.title1': 'اختر الروضة المثالية',
@@ -342,7 +341,6 @@ const translations: Record<Language, Record<string, string>> = {
         'nav.about': 'À propos',
         'nav.login': 'Connexion',
         'nav.ownerLogin': 'Espace propriétaire',
-        'nav.admin': 'Admin',
 
         // Hero Section
         'hero.title1': 'Choisissez le jardin d\'enfants idéal',
@@ -663,7 +661,6 @@ const translations: Record<Language, Record<string, string>> = {
         'nav.about': 'About Us',
         'nav.login': 'Login',
         'nav.ownerLogin': 'Owner Login',
-        'nav.admin': 'Admin',
 
         // Hero Section
         'hero.title1': 'Choose the perfect kindergarten',

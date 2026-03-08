@@ -141,11 +141,6 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <Link to="/admin-auth">
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                    {t('nav.admin')}
-                  </Button>
-                </Link>
                 <Link to="/auth">
                   <Button variant="outline" size="sm">
                     {language === 'ar' ? 'تسجيل الدخول' : 'Connexion'}
@@ -245,15 +240,6 @@ const Navbar = () => {
                 </div>
               ) : (
                 <div className="space-y-3 pt-4 border-t border-border">
-                  <Link
-                    to="/admin-auth"
-                    className="block text-center"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <Button variant="ghost" size="sm" className="w-full text-muted-foreground">
-                      {t('nav.admin')}
-                    </Button>
-                  </Link>
                   <Link
                     to="/auth"
                     className="block text-center"
