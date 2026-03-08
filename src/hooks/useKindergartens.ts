@@ -74,17 +74,27 @@ const normalizeServiceName = (serviceId: string): string => {
 const mapRowToKindergarten = (row: any): Kindergarten => {
   const parsePostgresArray = (val: any): string[] => {
     if (!val) return [];
-    if (Array.isArray(val)) return val;
+    if (Array.isArray(val)) return val.filter(Boolean);
     if (typeof val === 'string') {
-      if (val.startsWith('{') && val.endsWith('}')) {
-        return val.substring(1, val.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+      const trimmed = val.trim();
+      if (!trimmed) return [];
+      if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+        return trimmed.substring(1, trimmed.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, '')).filter(Boolean);
       }
-      return val.split(',').map(s => s.trim()).filter(Boolean);
+      return trimmed.split(',').map(s => s.trim()).filter(Boolean);
     }
     return [];
   };
 
-  const images = parsePostgresArray(row?.images);
+  const images = (parsePostgresArray(row?.images) || []).map(img => {
+    if (!img || typeof img !== 'string') return null;
+    return resolveImageUrl(img);
+  }).filter(Boolean);
+  
+  if (!images || images.length === 0) {
+    console.warn(`⚠️ No valid images for kindergarten ${row?.id}, will use placeholder`);
+  }
+  
   const rawActivities = parsePostgresArray(row?.activities);
 
   const getActivityIcon = (name: string): string => {
@@ -158,36 +168,36 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
 
   return {
     id: row?.id || '',
-    name: row?.name_ar || '',
-    nameAr: row?.name_ar || '',
-    nameFr: row?.name_fr || '',
+    name: (row?.name_ar || row?.name || 'روضة بدون اسم'),
+    nameAr: (row?.name_ar || row?.name || 'روضة بدون اسم'),
+    nameFr: (row?.name_fr || row?.name || 'Garderie sans nom'),
     municipality: normalizeMunicipality(row?.municipality || row?.municipality_ar || ''),
-    municipalityAr: row?.municipality_ar || '',
-    municipalityFr: row?.municipality_fr || '',
-    address: row?.address_ar || '',
-    addressAr: row?.address_ar || '',
-    addressFr: row?.address_fr || '',
-    phone: row?.phone || '',
-    pricePerMonth: row?.price_per_month || 0,
-    ageRange: { min: row?.age_min || 3, max: row?.age_max || 6 },
-    workingHours: { open: row?.working_hours_open || '07:30', close: row?.working_hours_close || '17:00' },
-    rating: Number(row?.rating) || 0,
-    reviewCount: row?.review_count ?? 0,
-    images: images.length ? images : ['/placeholder.svg'],
-    facilities,
-    services: parsePostgresArray(row?.services).map(normalizeServiceName),
-    activities,
-    hasAutismWing: row?.has_autism_wing ?? false,
-    instagram: row?.instagram,
-    videos: (row?.videos as any) || [],
-    programs: (row?.programs as any) || [],
+    municipalityAr: (row?.municipality_ar || ''),
+    municipalityFr: (row?.municipality_fr || ''),
+    address: (row?.address_ar || ''),
+    addressAr: (row?.address_ar || ''),
+    addressFr: (row?.address_fr || ''),
+    phone: (row?.phone || ''),
+    pricePerMonth: (row?.price_per_month ? Number(row.price_per_month) : 0),
+    ageRange: { min: (row?.age_min || row?.age_from || 3), max: (row?.age_max || row?.age_to || 6) },
+    workingHours: { open: (row?.working_hours_open || row?.working_hours?.open || '07:30'), close: (row?.working_hours_close || row?.working_hours?.close || '17:00') },
+    rating: (row?.rating ? Number(row.rating) : 0),
+    reviewCount: (row?.review_count ?? 0),
+    images: (images?.length > 0 ? images : ['/placeholder.svg']),
+    facilities: (Array.isArray(facilities) ? facilities : []),
+    services: (parsePostgresArray(row?.services) || []).map(normalizeServiceName).filter(Boolean),
+    activities: (Array.isArray(activities) ? activities : []),
+    hasAutismWing: (row?.has_autism_wing === true),
+    instagram: (row?.instagram || null),
+    videos: (Array.isArray(row?.videos) ? row.videos : []),
+    programs: (Array.isArray(row?.programs) ? row.programs : []),
     partners: {
-      doctors: parsePostgresArray(row?.doctors || row?.doctor_info),
+      doctors: (parsePostgresArray(row?.doctors || row?.doctor_info) || []).filter(Boolean),
       stores: []
     },
-    description: row?.description_ar || '',
-    descriptionAr: row?.description_ar || '',
-    descriptionFr: row?.description_fr || '',
+    description: (row?.description_ar || row?.description || ''),
+    descriptionAr: (row?.description_ar || ''),
+    descriptionFr: (row?.description_fr || ''),
     coordinates: coords,
     priceBreakdown,
     isPremium: row?.is_premium || false,
@@ -277,13 +287,17 @@ export function useKindergartens() {
           .order('rating', { ascending: false });
 
         if (error) {
-          console.error("Error fetching kindergartens:", error);
-          // Return local data as fallback
+          console.error("Error fetching kindergartens from Supabase:", error?.message);
           console.log("Using local kindergartens as fallback");
           return kindergartens;
         }
 
-        console.log("Raw Supabase data:", data);
+        if (!data) {
+          console.warn("No data returned from Supabase");
+          return kindergartens;
+        }
+
+        console.log(`Fetched ${data?.length || 0} kindergartens from Supabase`);
 
         if (!data || data.length === 0) {
           console.log("No data from Supabase, using local kindergartens");
@@ -291,14 +305,20 @@ export function useKindergartens() {
         }
 
         const mappedData = (data ?? []).map((row: any) => {
+          if (!row?.id) {
+            console.warn("Skipping row without ID:", row);
+            return null;
+          }
           try {
             const mapped = mapRowToKindergarten(row);
-            if (mapped.kindergartenGallery && mapped.kindergartenGallery.length > 0) {
-              console.log(`✓ ${mapped.nameAr}: ${mapped.kindergartenGallery.length} gallery items`);
+            if (!mapped?.nameAr) {
+              console.warn(`Skipped kindergarten with no name:`, row?.id);
+              return null;
             }
+            console.log(`✓ Mapped: ${mapped?.nameAr} (ID: ${mapped?.id})`);
             return mapped;
           } catch (e) {
-            console.error("Error mapping single row:", e, row);
+            console.error(`Error mapping kindergarten ${row?.id}:`, e);
             return null;
           }
         }).filter(Boolean) as Kindergarten[];
