@@ -27,8 +27,8 @@ const activityKeywords: Record<string, string[]> = {
 const kindergartenMatchesActivity = (k: Kindergarten, activityFilterId: string): boolean => {
   const keywords = activityKeywords[activityFilterId];
   if (!keywords) return false;
-  return k.activities.some(act => {
-    const name = (act.nameAr + ' ' + act.nameFr).toLowerCase();
+  return k?.activities?.some(act => {
+    const name = ((act?.nameAr || '') + ' ' + (act?.nameFr || '')).toLowerCase();
     return keywords.some(kw => name.includes(kw.toLowerCase()));
   });
 };
@@ -58,23 +58,23 @@ const Kindergartens = () => {
 
   const filteredKindergartens = useMemo(() => {
     return kindergartens.filter((k) => {
-      const name = language === 'ar' ? k.nameAr : k.nameFr;
-      if (searchQuery && !name.toLowerCase().includes(searchQuery.toLowerCase())) {
+      const name = language === 'ar' ? k?.nameAr : k?.nameFr;
+      if (searchQuery && !name?.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
-      if (selectedMunicipality && k.municipality !== selectedMunicipality) {
+      if (selectedMunicipality && k?.municipality !== selectedMunicipality) {
         return false;
       }
-      if (k.pricePerMonth < priceRange[0] || k.pricePerMonth > priceRange[1]) {
+      if (k?.pricePerMonth < priceRange[0] || k?.pricePerMonth > priceRange[1]) {
         return false;
       }
-      if (selectedServices.length > 0 && !selectedServices.every((s) => k.services.includes(s))) {
+      if (selectedServices.length > 0 && !selectedServices.every((s) => k?.services?.includes(s))) {
         return false;
       }
       if (selectedActivities.length > 0 && !selectedActivities.every((a) => kindergartenMatchesActivity(k, a))) {
         return false;
       }
-      if (hasAutismWing && !k.hasAutismWing) {
+      if (hasAutismWing && !k?.hasAutismWing) {
         return false;
       }
       return true;
@@ -91,17 +91,17 @@ const Kindergartens = () => {
   };
 
   const handleViewDetails = (id: string) => {
-    const kg = kindergartens.find((k) => k.id === id);
+    const kg = kindergartens.find((k) => k?.id === id);
     if (kg) setDetailModalKindergarten(kg);
   };
 
   const handleRegister = (id: string) => {
-    const kg = kindergartens.find((k) => k.id === id);
+    const kg = kindergartens.find((k) => k?.id === id);
     if (kg) setRegisterModalKindergarten(kg);
   };
 
   const handleBooking = (id: string) => {
-    const kg = kindergartens.find((k) => k.id === id);
+    const kg = kindergartens.find((k) => k?.id === id);
     if (kg) setBookingModalKindergarten(kg);
   };
 

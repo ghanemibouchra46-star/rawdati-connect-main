@@ -104,7 +104,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
 
       L.marker([kindergarten.coordinates.lat, kindergarten.coordinates.lng])
         .addTo(mapInstanceRef.current)
-        .bindPopup(language === 'ar' ? kindergarten.nameAr : kindergarten.nameFr)
+        .bindPopup(language === 'ar' ? kindergarten?.nameAr : kindergarten?.nameFr)
         .openPopup();
 
       // Fix for Leaflet in a modal not loading tiles properly
@@ -178,16 +178,16 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
   if (!isOpen || !kindergarten) return null;
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % kindergarten.images.length);
+    setCurrentImageIndex((prev) => (prev + 1) % (kindergarten?.images?.length || 1));
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + kindergarten.images.length) % kindergarten.images.length);
+    setCurrentImageIndex((prev) => (prev - 1 + (kindergarten?.images?.length || 1)) % (kindergarten?.images?.length || 1));
   };
 
-  const name = language === 'ar' ? kindergarten.nameAr : kindergarten.nameFr;
-  const description = language === 'ar' ? kindergarten.descriptionAr : kindergarten.descriptionFr;
-  const municipality = language === 'ar' ? kindergarten.municipalityAr : kindergarten.municipalityFr;
+  const name = language === 'ar' ? kindergarten?.nameAr : kindergarten?.nameFr;
+  const description = language === 'ar' ? kindergarten?.descriptionAr : kindergarten?.descriptionFr;
+  const municipality = language === 'ar' ? kindergarten?.municipalityAr : kindergarten?.municipalityFr;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -205,14 +205,14 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
         {/* Image Gallery */}
         <div className="relative h-72 md:h-96 overflow-hidden rounded-t-3xl">
           <img
-            src={kindergarten.images[currentImageIndex]}
+            src={kindergarten?.images?.[currentImageIndex]}
             alt={name}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-transparent" />
 
           {/* Gallery Navigation */}
-          {kindergarten.images.length > 1 && (
+          {kindergarten?.images?.length > 1 && (
             <>
               <button
                 onClick={prevImage}
@@ -228,7 +228,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
               </button>
 
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                {kindergarten.images.map((_, index) => (
+                {kindergarten?.images?.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
@@ -293,7 +293,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                 <div key={item.id} className="flex justify-between items-center p-2 bg-card rounded-lg border border-border/30">
                   <div className="flex flex-col">
                     <span className="font-medium text-sm">
-                      {language === 'ar' ? item.nameAr : item.nameFr}
+                      {language === 'ar' ? item?.nameAr : item?.nameFr}
                       {item.optional && <span className="text-xs text-muted-foreground mx-1">({language === 'ar' ? 'اختياري' : 'Optionnel'})</span>}
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -385,7 +385,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                 {kindergarten.activities?.slice(0, 6).map((activity) => (
                   <ActivityCard key={activity.id} activity={{
                     ...activity,
-                    nameAr: language === 'ar' ? activity.nameAr : activity.nameFr
+                    nameAr: language === 'ar' ? activity?.nameAr : activity?.nameFr
                   }} />
                 ))}
 
@@ -396,8 +396,8 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                       {prog.icon}
                     </div>
                     <div>
-                      <h4 className="font-bold text-sm">{language === 'ar' ? prog.nameAr : prog.nameFr}</h4>
-                      <p className="text-xs text-muted-foreground">{language === 'ar' ? prog.descriptionAr : prog.descriptionFr}</p>
+                      <h4 className="font-bold text-sm">{language === 'ar' ? prog?.nameAr : prog?.nameFr}</h4>
+                      <p className="text-xs text-muted-foreground">{language === 'ar' ? prog?.descriptionAr : prog?.descriptionFr}</p>
                     </div>
                   </div>
                 ))}
@@ -483,7 +483,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                   <div key={index} className="group relative aspect-video rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
                     <img
                       src={facility.image}
-                      alt={language === 'ar' ? facility.nameAr : facility.nameFr}
+                      alt={language === 'ar' ? facility?.nameAr : facility?.nameFr}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-3">

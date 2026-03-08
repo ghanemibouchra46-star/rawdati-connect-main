@@ -36,9 +36,9 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
     sports: t('filter.sports') || 'Sports',
   };
 
-  const name = language === 'ar' ? kindergarten.nameAr : kindergarten.nameFr;
-  const address = language === 'ar' ? kindergarten.addressAr : kindergarten.addressFr;
-  const municipality = language === 'ar' ? kindergarten.municipalityAr : kindergarten.municipalityFr;
+  const name = language === 'ar' ? kindergarten?.nameAr : kindergarten?.nameFr;
+  const address = language === 'ar' ? kindergarten?.addressAr : kindergarten?.addressFr;
+  const municipality = language === 'ar' ? kindergarten?.municipalityAr : kindergarten?.municipalityFr;
 
   return (
     <>
@@ -46,7 +46,7 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
         {/* Image */}
         <div className="relative h-48 overflow-hidden">
           <img
-            src={kindergarten.images[0]}
+            src={kindergarten?.images?.[0]}
             alt={name}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           />
@@ -56,10 +56,10 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
           <div className={`absolute top-3 ${dir === 'rtl' ? 'left-3' : 'right-3'} flex items-center gap-2`}>
             <div className="flex items-center gap-1 px-2.5 py-1 bg-card/90 backdrop-blur-sm rounded-full">
               <Star className="w-3.5 h-3.5 text-accent fill-accent" />
-              <span className="text-sm font-semibold text-foreground">{kindergarten.rating}</span>
-              <span className="text-xs text-muted-foreground">({kindergarten.reviewCount})</span>
+              <span className="text-sm font-semibold text-foreground">{kindergarten?.rating}</span>
+              <span className="text-xs text-muted-foreground">({kindergarten?.reviewCount})</span>
             </div>
-            {kindergarten.isPremium && (
+            {kindergarten?.isPremium && (
               <div className="px-2 py-1 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-full">
                 <span className="text-xs font-bold">⭐ PREMIUM</span>
               </div>
@@ -68,7 +68,7 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
 
           {/* Price Badge */}
           <div className={`absolute bottom-3 ${dir === 'rtl' ? 'left-3' : 'right-3'} px-3 py-1.5 bg-primary/90 backdrop-blur-sm rounded-lg`}>
-            <span className="text-sm font-bold text-primary-foreground">{kindergarten.pricePerMonth.toLocaleString()} {language === 'ar' ? 'دج' : 'DA'}</span>
+            <span className="text-sm font-bold text-primary-foreground">{kindergarten?.pricePerMonth?.toLocaleString()} {language === 'ar' ? 'دج' : 'DA'}</span>
             <span className="text-xs text-primary-foreground/80">/{language === 'ar' ? 'شهر' : 'mois'}</span>
           </div>
 
@@ -94,11 +94,11 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
           <div className={`flex items-center gap-4 mb-3 text-sm text-muted-foreground ${dir === 'rtl' ? 'flex-row' : 'flex-row-reverse'}`}>
             <div className="flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-primary" />
-              <span>{kindergarten.workingHours.open} - {kindergarten.workingHours.close}</span>
+              <span>{kindergarten?.workingHours?.open} - {kindergarten?.workingHours?.close}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Users className="w-4 h-4 text-secondary" />
-              <span>{kindergarten.ageRange.min}-{kindergarten.ageRange.max} {t('parent.age')}</span>
+              <span>{kindergarten?.ageRange?.min}-{kindergarten?.ageRange?.max} {t('parent.age')}</span>
             </div>
           </div>
 
@@ -111,7 +111,7 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
 
           {/* Services */}
           <div className={`flex flex-wrap gap-1.5 mb-5 ${dir === 'rtl' ? 'flex-row' : 'flex-row-reverse'}`}>
-            {kindergarten.services.slice(0, 4).map((service) => (
+            {kindergarten?.services?.slice(0, 4).map((service) => (
               <Badge
                 key={service}
                 variant="secondary"
@@ -121,34 +121,34 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
                 {serviceNames[service] || service}
               </Badge>
             ))}
-            {kindergarten.services.length > 4 && (
+            {kindergarten?.services?.length > 4 && (
               <Badge variant="secondary" className="px-2 py-1 text-xs bg-muted text-muted-foreground rounded-md">
-                +{kindergarten.services.length - 4}
+                +{kindergarten?.services?.length - 4}
               </Badge>
             )}
           </div>
 
           {/* Actions */}
-          <div className={`flex gap-2 ${kindergarten.isPremium ? 'grid grid-cols-2' : ''}`}>
+          <div className={`flex gap-2 ${kindergarten?.isPremium ? 'grid grid-cols-2' : ''}`}>
             <Button
               variant="outline"
               className={`${kindergarten.isPremium ? 'col-span-2' : 'flex-1'} rounded-xl border-border hover:bg-muted font-bold`}
-              onClick={() => onViewDetails(kindergarten.id)}
+              onClick={() => onViewDetails(kindergarten?.id)}
             >
               {t('card.viewDetails')}
             </Button>
-            {!kindergarten.isPremium && (
+            {!kindergarten?.isPremium && (
               <Button
                 variant="secondary"
                 className="flex-1 rounded-xl font-bold bg-purple-100 text-purple-700 hover:bg-purple-200"
-                onClick={() => onBook(kindergarten.id)}
+                onClick={() => onBook(kindergarten?.id)}
               >
                 {language === 'ar' ? 'حجز زيارة' : 'Réserver'}
               </Button>
             )}
             <Button
-              className={`${kindergarten.isPremium ? 'col-span-2' : 'flex-1'} rounded-xl gradient-accent border-0 shadow-soft hover:shadow-hover transition-all duration-300 text-primary-foreground font-bold`}
-              onClick={() => onRegister(kindergarten.id)}
+              className={`${kindergarten?.isPremium ? 'col-span-2' : 'flex-1'} rounded-xl gradient-accent border-0 shadow-soft hover:shadow-hover transition-all duration-300 text-primary-foreground font-bold`}
+              onClick={() => onRegister(kindergarten?.id)}
             >
               {t('card.register')}
             </Button>
