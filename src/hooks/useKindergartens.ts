@@ -177,12 +177,12 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     facilities,
     services: parsePostgresArray(row?.services).map(normalizeServiceName),
     activities,
-    hasAutismWing: row.has_autism_wing ?? false,
-    instagram: row.instagram,
-    videos: (row.videos as any) || [],
-    programs: (row.programs as any) || [],
+    hasAutismWing: row?.has_autism_wing ?? false,
+    instagram: row?.instagram,
+    videos: (row?.videos as any) || [],
+    programs: (row?.programs as any) || [],
     partners: {
-      doctors: parsePostgresArray(row.doctors || row.doctor_info),
+      doctors: parsePostgresArray(row?.doctors || row?.doctor_info),
       stores: []
     },
     description: row?.description_ar || '',
@@ -301,9 +301,9 @@ export function useKindergartens() {
             console.error("Error mapping single row:", e, row);
             return null;
           }
-        }).filter(Boolean) as Kindergarten[];
+        }).filter(Boolean).filter(k => k.id && k.nameAr && k.nameFr && k.images && k.images.length > 0) as Kindergarten[];
 
-        console.log(`✓ Loaded ${mappedData.length} kindergartens successfully`);
+        console.log(`✓ Loaded ${mappedData.length} valid kindergartens successfully`);
         return mappedData;
       } catch (e) {
         console.error("Error in useKindergartens:", e);
