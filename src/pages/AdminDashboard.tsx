@@ -21,7 +21,6 @@ import { Separator } from '@/components/ui/separator';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useSubscriptionRequests } from '@/hooks/useSubscriptionRequests';
 import { useAllPlatformSubscriptions, useUpdatePlatformSubscription } from '@/hooks/usePlatformSubscription';
-
 interface UserProfile {
     id: string;
     full_name: string | null;
@@ -44,6 +43,20 @@ interface Kindergarten {
     owner_id?: string;
     status: 'pending' | 'approved' | 'rejected';
     created_at: string;
+}
+
+interface RegistrationRequest {
+    id: string;
+    kindergarten_id: string;
+    parent_name: string;
+    phone: string;
+    email: string | null;
+    child_name: string;
+    child_age: number;
+    message: string | null;
+    status: 'pending' | 'approved' | 'rejected';
+    created_at: string;
+    user_id?: string;
 }
 
 const mockRegistrations: RegistrationRequest[] = [];
