@@ -148,18 +148,6 @@ const Index = () => {
                 </Link>
               </div>
             </div>
-
-            {/* Small floating image */}
-            <div className="mt-12 flex justify-center">
-              <div className="relative group">
-                <div className="absolute -inset-2 bg-gradient-to-r from-primary to-accent rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
-                <img
-                  src={childrenPlaying}
-                  alt={t('platform.name')}
-                  className="relative w-24 h-24 object-cover rounded-2xl shadow-xl border-3 border-white/90 group-hover:scale-110 transition-transform duration-300"
-                />
-              </div>
-            </div>
           </div>
         </div>
       </section>
