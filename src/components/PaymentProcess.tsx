@@ -90,7 +90,7 @@ const PaymentProcess = ({ kindergarten, bookingData, onComplete }: PaymentProces
               <CardContent className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">{language === 'ar' ? 'السعر' : 'Prix'}:</span>
-                  <span className="text-2xl font-bold text-primary">{kindergarten.price || 0} {language === 'ar' ? 'دج' : 'MAD'}</span>
+                  <span className="text-2xl font-bold text-primary">{kindergarten.pricePerMonth || 0} {language === 'ar' ? 'دج' : 'MAD'}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
@@ -267,7 +267,7 @@ const PaymentProcess = ({ kindergarten, bookingData, onComplete }: PaymentProces
                     </div>
                     <div className="flex justify-between">
                       <span>{language === 'ar' ? 'المبلغ' : 'Montant'}:</span>
-                      <span className="font-medium">{kindergarten.price || 0} {language === 'ar' ? 'دج' : 'MAD'}</span>
+                      <span className="font-medium">{kindergarten.pricePerMonth || 0} {language === 'ar' ? 'دج' : 'MAD'}</span>
                     </div>
                   </div>
                 </div>
