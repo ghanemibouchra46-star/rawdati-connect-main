@@ -93,31 +93,33 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <Router>
-          <AuthHandler />
-          <AIChatbot />
-          <Routes>
-            <Route path="/welcome" element={<Welcome />} />
-            <Route path="/" element={< Index />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/admin-auth" element={<AdminAuth />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/owner-auth" element={<OwnerAuth />} />
-            <Route path="/owner" element={<OwnerDashboard />} />
-            <Route path="/parent" element={<ParentDashboard />} />
-            <Route path="/parent/notifications" element={<ParentNotifications />} />
-            <Route path="/parent/photos" element={<ParentPhotos />} />
-            <Route path="/parent/schedule" element={<ParentSchedule />} />
-            <Route path="/parent/settings" element={<ParentSettings />} />
-            <Route path="/kindergartens" element={<Kindergartens />} />
-            <Route path="/clothing-stores" element={<ClothingStores />} />
-            <Route path="/doctors" element={<Doctors />} />
-            <Route path="/speech-therapy" element={<SpeechTherapy />} />
-            <Route path="/recovery" element={<Recovery />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Router>
+        <AuthProvider>
+          <Router>
+            <AuthHandler />
+            <AIChatbot />
+            <Routes>
+              <Route path="/welcome" element={<Welcome />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/admin-auth" element={<AdminAuth />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/owner-auth" element={<OwnerAuth />} />
+              <Route path="/owner" element={<OwnerDashboard />} />
+              <Route path="/parent" element={<ParentDashboard />} />
+              <Route path="/parent/notifications" element={<ParentNotifications />} />
+              <Route path="/parent/photos" element={<ParentPhotos />} />
+              <Route path="/parent/schedule" element={<ParentSchedule />} />
+              <Route path="/parent/settings" element={<ParentSettings />} />
+              <Route path="/kindergartens" element={<Kindergartens />} />
+              <Route path="/clothing-stores" element={<ClothingStores />} />
+              <Route path="/doctors" element={<Doctors />} />
+              <Route path="/speech-therapy" element={<SpeechTherapy />} />
+              <Route path="/recovery" element={<Recovery />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Router>
+        </AuthProvider>
       </TooltipProvider>
     </LanguageProvider>
   </QueryClientProvider>
