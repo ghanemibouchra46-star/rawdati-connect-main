@@ -6,12 +6,10 @@ import KindergartenCard from '@/components/KindergartenCard';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { GraduationCap, Stethoscope, Shirt, ArrowLeft, ArrowRight, Star, MapPin, Users, MessageCircle, Baby, Calendar, Search } from 'lucide-react';
+import { GraduationCap, ArrowLeft, ArrowRight, Star, MapPin, Users, Baby, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import childrenPlaying from '@/assets/children-playing.png';
-import childrenLearning from '@/assets/children-learning.png';
-
 import SearchAutocomplete from '@/components/SearchAutocomplete';
 
 const FEATURED_COUNT = 6;
@@ -34,24 +32,24 @@ const Index = () => {
 
   const features = [
     {
-      icon: GraduationCap,
-      title: t('features.certified'),
-      description: t('features.certifiedDesc')
-    },
-    {
-      icon: Star,
-      title: t('features.reviews'),
-      description: t('features.reviewsDesc')
+      icon: Search,
+      title: t('features.search.title'),
+      description: t('features.search.description')
     },
     {
       icon: MapPin,
-      title: t('features.nearby'),
-      description: t('features.nearbyDesc')
+      title: t('features.location.title'),
+      description: t('features.location.description')
+    },
+    {
+      icon: Star,
+      title: t('features.reviews.title'),
+      description: t('features.reviews.description')
     },
     {
       icon: Users,
-      title: t('features.easyRegister'),
-      description: t('features.easyRegisterDesc')
+      title: t('features.easyRegister.title'),
+      description: t('features.easyRegister.description')
     }
   ];
 
@@ -83,10 +81,6 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-accent/20" />
         </div>
 
-        {/* Decorative elements */}
-        <div className="absolute top-20 right-10 w-32 h-32 bg-accent/30 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 left-10 w-40 h-40 bg-primary/30 rounded-full blur-3xl animate-pulse" />
-
         {/* Content */}
         <div className="container mx-auto px-4 relative z-10 pt-20">
           <div className="text-center max-w-4xl mx-auto">
@@ -94,12 +88,6 @@ const Index = () => {
             <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary/20 to-accent/20 backdrop-blur-sm rounded-full shadow-lg mb-8 border border-primary/30">
               <span className="text-2xl font-bold text-primary">{t('welcome')}</span>
               <span className="text-xl">👋</span>
-            </div>
-
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-card/90 backdrop-blur-sm rounded-full shadow-lg mb-8">
-              <Baby className="w-6 h-6 text-primary animate-bounce" />
-              <span className="text-base font-semibold text-primary">{t('welcome.subtitle')}</span>
-              <span className="text-xl">🌟</span>
             </div>
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight drop-shadow-lg">
@@ -142,18 +130,20 @@ const Index = () => {
                     <Baby className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="text-lg font-bold text-foreground mb-2">
-                    {language === 'ar' ? 'انضم إلينا' : 'Rejoignez-nous'}
+                    {language === 'ar' ? 'انضم إلينا' : language === 'fr' ? 'Rejoignez-nous' : 'Join Us'}
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">
                     {language === 'ar' 
                       ? 'ابدأ رحلتك في العثور على الروضة المثالية لطفلك' 
-                      : 'Commencez votre voyage pour trouver la crèche parfaite pour votre enfant'
+                      : language === 'fr' 
+                      ? 'Commencez votre voyage pour trouver la crèche parfaite pour votre enfant'
+                      : 'Start your journey to find the perfect kindergarten for your child'
                     }
                   </p>
                 </div>
                 <Link to="/auth">
                   <Button size="lg" className="w-full">
-                    {language === 'ar' ? 'ابدأ الآن' : 'Commencer maintenant'}
+                    {language === 'ar' ? 'ابدأ الآن' : language === 'fr' ? 'Commencer maintenant' : 'Get Started'}
                   </Button>
                 </Link>
               </div>
@@ -164,7 +154,7 @@ const Index = () => {
               <div className="relative group">
                 <div className="absolute -inset-2 bg-gradient-to-r from-primary to-accent rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
                 <img
-                  src={childrenLearning}
+                  src={childrenPlaying}
                   alt={t('platform.name')}
                   className="relative w-24 h-24 object-cover rounded-2xl shadow-xl border-3 border-white/90 group-hover:scale-110 transition-transform duration-300"
                 />
@@ -208,7 +198,7 @@ const Index = () => {
           <div className="text-center mt-8">
             <Link to="/kindergartens">
               <Button variant="outline" size="lg" className="gap-2">
-                {t('kindergartens.count').replace('{count}', String(totalCount))} — {language === 'ar' ? 'عرض الكل' : 'Voir tout'}
+                {t('kindergartens.count').replace('{count}', String(totalCount))} — {language === 'ar' ? 'عرض الكل' : language === 'fr' ? 'Voir tout' : 'View All'}
                 <ArrowIcon className="w-4 h-4" />
               </Button>
             </Link>
@@ -229,53 +219,19 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="text-center group">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Search className="w-8 h-8 text-white" />
+            {features.map((feature, index) => (
+              <div key={index} className="text-center group">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <feature.icon className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-foreground mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-muted-foreground">
+                  {feature.description}
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">
-                {t('features.search.title')}
-              </h3>
-              <p className="text-muted-foreground">
-                {t('features.search.description')}
-              </p>
-            </div>
-
-            <div className="text-center group">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <MapPin className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">
-                {t('features.location.title')}
-              </h3>
-              <p className="text-muted-foreground">
-                {t('features.location.description')}
-              </p>
-            </div>
-
-            <div className="text-center group">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Star className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">
-                {t('features.reviews.title')}
-              </h3>
-              <p className="text-muted-foreground">
-                {t('features.reviews.description')}
-              </p>
-            </div>
-
-            <div className="text-center group">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <MessageCircle className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">
-                {t('features.contact.title')}
-              </h3>
-              <p className="text-muted-foreground">
-                {t('features.contact.description')}
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
