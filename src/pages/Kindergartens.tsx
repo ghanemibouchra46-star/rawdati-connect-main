@@ -223,7 +223,6 @@ const Kindergartens = () => {
       />
 
       <RegistrationModal
-        kindergarten={registerModalKindergarten}
         isOpen={!!registerModalKindergarten}
         onClose={() => setRegisterModalKindergarten(null)}
       />
