@@ -136,10 +136,10 @@ const Index = () => {
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">
                     {language === 'ar' 
-                      ? 'ابدأ رحلتك في العثور على الروضة المثالية لطفلك' 
+                      ? 'ابدأ رحلتك واستكشف الروضات والخدمات' 
                       : language === 'fr' 
-                      ? 'Commencez votre voyage pour trouver la crèche parfaite pour votre enfant'
-                      : 'Start your journey to find the perfect kindergarten for your child'
+                      ? 'Commencez votre voyage et explorez les crèches et services'
+                      : 'Start your journey and explore kindergartens and services'
                     }
                   </p>
                 </div>
