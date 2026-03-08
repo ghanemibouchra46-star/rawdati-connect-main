@@ -269,20 +269,27 @@ export function useKindergartens() {
   const query = useQuery({
     queryKey: ['kindergartens'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('kindergartens')
-        .select('*')
-        .eq('status', 'approved')
-        .order('rating', { ascending: false });
-
-      if (error) {
-        console.error("Error fetching kindergartens:", error);
-        return [];
-      }
-
-      console.log("Raw Supabase data:", data);
-
       try {
+        const { data, error } = await supabase
+          .from('kindergartens')
+          .select('*')
+          .eq('status', 'approved')
+          .order('rating', { ascending: false });
+
+        if (error) {
+          console.error("Error fetching kindergartens:", error);
+          // Return local data as fallback
+          console.log("Using local kindergartens as fallback");
+          return kindergartens;
+        }
+
+        console.log("Raw Supabase data:", data);
+
+        if (!data || data.length === 0) {
+          console.log("No data from Supabase, using local kindergartens");
+          return kindergartens;
+        }
+
         const mappedData = (data ?? []).map((row: any) => {
           try {
             const mapped = mapRowToKindergarten(row);
@@ -299,8 +306,10 @@ export function useKindergartens() {
         console.log(`✓ Loaded ${mappedData.length} kindergartens successfully`);
         return mappedData;
       } catch (e) {
-        console.error("Error mapping kindergartens:", e);
-        return [];
+        console.error("Error in useKindergartens:", e);
+        // Return local data as fallback
+        console.log("Using local kindergartens as fallback due to error");
+        return kindergartens;
       }
     },
     staleTime: 60 * 1000,
