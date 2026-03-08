@@ -6,7 +6,7 @@ import KindergartenCard from '@/components/KindergartenCard';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { GraduationCap, ArrowLeft, ArrowRight, Star, MapPin, Users, Baby, Search, HandMetal } from 'lucide-react';
+import { GraduationCap, ArrowLeft, ArrowRight, Star, MapPin, Users, Baby, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import childrenPlaying from '@/assets/children-playing.png';
@@ -68,83 +68,86 @@ const Index = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
-        {/* Background */}
+      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
+        {/* Background Image */}
         <div className="absolute inset-0">
           <img
             src={childrenPlaying}
             alt={t('platform.name')}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/75 via-background/60 to-background/80" />
-          <div className="absolute inset-0 bg-gradient-to-r from-pink-100/30 via-transparent to-amber-100/30" />
+          {/* Overlay gradient */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/70 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-accent/20" />
         </div>
 
-        {/* زرّان كبيران كما في التصميم */}
-        <div className="container mx-auto px-4 relative z-10 py-16">
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center max-w-3xl mx-auto">
-            <Link
-              to="/kindergartens"
-              className="flex items-center gap-4 w-full sm:w-auto rounded-3xl px-8 py-5 bg-[#fef3f2] border-2 border-pink-200/80 hover:bg-pink-50/90 hover:border-pink-300 transition-all duration-300 shadow-sm hover:shadow-md text-[#c2410c] font-bold text-lg"
-            >
-              <span className="flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 text-amber-600">
-                <Star className="w-7 h-7" />
-              </span>
-              <span>{t('hero.platformCamp')}</span>
-            </Link>
-            <Link
-              to="/about"
-              className="flex items-center gap-4 w-full sm:w-auto rounded-3xl px-8 py-5 bg-[#fff7ed] border-2 border-orange-200/80 hover:bg-orange-50/90 hover:border-orange-300 transition-all duration-300 shadow-sm hover:shadow-md text-[#c2410c] font-bold text-lg"
-            >
-              <span className="flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 text-amber-600">
-                <HandMetal className="w-7 h-7" />
-              </span>
-              <span>{t('welcome')}</span>
-            </Link>
-          </div>
+        {/* Content */}
+        <div className="container mx-auto px-4 relative z-10 pt-20">
+          <div className="text-center max-w-4xl mx-auto">
+            {/* Welcome Banner */}
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary/20 to-accent/20 backdrop-blur-sm rounded-full shadow-lg mb-4 border border-primary/30">
+              <span className="text-2xl font-bold text-primary">{t('welcome')}</span>
+              <span className="text-xl">👋</span>
+            </div>
 
-          {/* بقية المحتوى تحت الزرّين */}
-          <div className="text-center max-w-4xl mx-auto pt-12">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 leading-tight">
-              <span className="block mb-2 text-foreground">{t('hero.title1')}</span>
-              <span className="block text-transparent bg-gradient-to-r from-primary via-primary to-accent bg-clip-text">
+            {/* Platform name badge (منصة روضتي بدون معسكر) */}
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-card/90 backdrop-blur-sm rounded-full shadow-soft mb-8 border border-primary/20">
+              <span className="text-base font-bold text-foreground">✨ {t('welcome.subtitle')}</span>
+            </div>
+
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight drop-shadow-lg">
+              <span className="block mb-3 text-foreground">
+                {t('hero.title1')}
+              </span>
+              <span className="block text-transparent bg-gradient-to-r from-primary via-primary to-accent bg-clip-text drop-shadow-none">
                 {t('hero.title2')}
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-foreground/80 mb-8 max-w-2xl mx-auto font-medium">
+
+            <p className="text-xl md:text-2xl text-foreground/80 mb-10 max-w-2xl mx-auto leading-relaxed font-medium drop-shadow-sm">
               {t('hero.description')}
+              <span className="inline-block mx-2">🏫</span>
             </p>
-            <div className="max-w-xl mx-auto mb-8">
-              <SearchAutocomplete onSearch={handleSearch} />
+
+            <div className="max-w-2xl mx-auto mb-12">
+              <div className="relative">
+                <SearchAutocomplete onSearch={handleSearch} />
+              </div>
             </div>
-            <div className="flex flex-wrap justify-center gap-4">
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/kindergartens">
-                <Button size="lg" variant="outline" className="gap-2 bg-card/80 backdrop-blur-sm hover:bg-card font-semibold">
-                  <GraduationCap className="w-5 h-5" />
+                <Button size="lg" variant="outline" className="gap-2 text-lg px-10 py-6 bg-card/80 backdrop-blur-sm hover:bg-card transition-all duration-300 font-semibold shadow-soft">
+                  <GraduationCap className="w-6 h-6" />
                   {t('hero.explore')}
                 </Button>
               </Link>
               <Link to="/about">
-                <Button size="lg" variant="outline" className="gap-2 bg-card/80 backdrop-blur-sm hover:bg-card font-semibold">
+                <Button size="lg" variant="outline" className="gap-2 text-lg px-10 py-6 bg-card/80 backdrop-blur-sm hover:bg-card transition-all duration-300 font-semibold">
                   {t('hero.aboutUs')}
                 </Button>
               </Link>
             </div>
-            <div className="mt-10 max-w-md mx-auto">
+
+            {/* CTA */}
+            <div className="mt-8 max-w-md mx-auto">
               <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl p-6 border border-primary/20 backdrop-blur-sm">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center">
-                  <Baby className="w-6 h-6 text-white" />
+                <div className="text-center mb-4">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center">
+                    <Baby className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-foreground mb-2">
+                    {language === 'ar' ? 'انضم إلينا' : language === 'fr' ? 'Rejoignez-nous' : 'Join Us'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {language === 'ar' 
+                      ? 'ابدأ رحلتك في العثور على الروضة المثالية لطفلك' 
+                      : language === 'fr' 
+                      ? 'Commencez votre voyage pour trouver la crèche parfaite pour votre enfant'
+                      : 'Start your journey to find the perfect kindergarten for your child'
+                    }
+                  </p>
                 </div>
-                <h3 className="text-lg font-bold text-foreground mb-2">
-                  {language === 'ar' ? 'انضم إلينا' : language === 'fr' ? 'Rejoignez-nous' : 'Join Us'}
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {language === 'ar'
-                    ? 'ابدأ رحلتك في العثور على الروضة المثالية لطفلك'
-                    : language === 'fr'
-                    ? 'Commencez votre voyage pour trouver la crèche parfaite pour votre enfant'
-                    : 'Start your journey to find the perfect kindergarten for your child'}
-                </p>
                 <Link to="/auth">
                   <Button size="lg" className="w-full">
                     {language === 'ar' ? 'ابدأ الآن' : language === 'fr' ? 'Commencer maintenant' : 'Get Started'}

@@ -13,7 +13,7 @@ const translations: Record<Language, Record<string, string>> = {
     ar: {
         // Welcome & General
         'welcome': 'مرحباً بكم',
-        'welcome.subtitle': 'منصة روضتي - Rawdati',
+        'welcome.subtitle': 'منصة روضتي',
         'platform.name': 'روضتي',
         'mascara': 'معسكر',
 
@@ -57,7 +57,6 @@ const translations: Record<Language, Record<string, string>> = {
         'services.speechTherapyDesc': 'أخصائيون في علاج اضطرابات النطق والتواصل',
         'services.clothing': 'محلات الملابس',
         'services.clothingDesc': 'أفضل محلات ملابس الأطفال',
-        'hero.platformCamp': 'منصة روضتي - معسكر',
         'hero.badge': 'أفضل الروضات لطفلك',
         'hero.searchPlaceholder': 'ابحث باسم الروضة...',
         'hero.searchButton': 'بحث',
@@ -377,7 +376,6 @@ const translations: Record<Language, Record<string, string>> = {
         'services.speechTherapyDesc': 'Spécialistes des troubles de la parole et de la communication',
         'services.clothing': 'Boutiques de vêtements',
         'services.clothingDesc': 'Les meilleures boutiques de vêtements pour enfants',
-        'hero.platformCamp': 'Rawdati - Camp',
         'hero.badge': 'Les meilleurs jardins d\'enfants',
         'hero.searchPlaceholder': 'Rechercher par nom...',
         'hero.searchButton': 'Rechercher',
@@ -694,7 +692,6 @@ const translations: Record<Language, Record<string, string>> = {
         'services.speechTherapyDesc': 'Specialists in speech and communication disorders',
         'services.clothing': 'Clothing Stores',
         'services.clothingDesc': 'Best children\'s clothing stores',
-        'hero.platformCamp': 'Rawdati - Camp',
         'hero.badge': 'Best Kindergartens for Your Child',
         'hero.searchPlaceholder': 'Search by name...',
         'hero.searchButton': 'Search',
