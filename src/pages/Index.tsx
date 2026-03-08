@@ -32,24 +32,24 @@ const Index = () => {
 
   const features = [
     {
-      icon: Search,
-      title: t('features.search.title'),
-      description: t('features.search.description')
-    },
-    {
-      icon: MapPin,
-      title: t('features.location.title'),
-      description: t('features.location.description')
+      icon: GraduationCap,
+      title: t('features.certified'),
+      description: t('features.certifiedDesc')
     },
     {
       icon: Star,
-      title: t('features.reviews.title'),
-      description: t('features.reviews.description')
+      title: t('features.reviews'),
+      description: t('features.reviewsDesc')
+    },
+    {
+      icon: MapPin,
+      title: t('features.nearby'),
+      description: t('features.nearbyDesc')
     },
     {
       icon: Users,
-      title: t('features.easyRegister.title'),
-      description: t('features.easyRegister.description')
+      title: t('features.easyRegister'),
+      description: t('features.easyRegisterDesc')
     }
   ];
 
@@ -105,7 +105,9 @@ const Index = () => {
             </p>
 
             <div className="max-w-2xl mx-auto mb-12">
-              <SearchAutocomplete onSearch={handleSearch} />
+              <div className="relative">
+                <SearchAutocomplete onSearch={handleSearch} />
+              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -207,19 +209,53 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => (
-              <div key={index} className="text-center group">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <feature.icon className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-lg font-bold text-foreground mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-muted-foreground">
-                  {feature.description}
-                </p>
+            <div className="text-center group">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <GraduationCap className="w-8 h-8 text-white" />
               </div>
-            ))}
+              <h3 className="text-lg font-bold text-foreground mb-2">
+                {t('features.certified')}
+              </h3>
+              <p className="text-muted-foreground">
+                {t('features.certifiedDesc')}
+              </p>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Star className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-2">
+                {t('features.reviews')}
+              </h3>
+              <p className="text-muted-foreground">
+                {t('features.reviewsDesc')}
+              </p>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <MapPin className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-2">
+                {t('features.nearby')}
+              </h3>
+              <p className="text-muted-foreground">
+                {t('features.nearbyDesc')}
+              </p>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Users className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-2">
+                {t('features.easyRegister')}
+              </h3>
+              <p className="text-muted-foreground">
+                {t('features.easyRegisterDesc')}
+              </p>
+            </div>
           </div>
         </div>
       </section>
