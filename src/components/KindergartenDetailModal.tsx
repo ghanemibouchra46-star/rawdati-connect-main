@@ -228,7 +228,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
               </button>
 
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                {kindergarten?.images?.map((_, index) => (
+                {(kindergarten?.images || []).map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
@@ -289,7 +289,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
               {language === 'ar' ? 'تفصيلات السعر' : 'Détails des tarifs'}
             </h3>
             <div className="space-y-2">
-              {kindergarten.priceBreakdown.map((item) => (
+              {(kindergarten?.priceBreakdown || []).map((item) => (
                 <div key={item.id} className="flex justify-between items-center p-2 bg-card rounded-lg border border-border/30">
                   <div className="flex flex-col">
                     <span className="font-medium text-sm">
@@ -382,7 +382,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
               <h3 className={`text-lg font-bold text-foreground mb-3 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{language === 'ar' ? 'البرامج والأنشطة' : 'Activités et Programmes'}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {/* Traditional Activities */}
-                {kindergarten.activities?.slice(0, 6).map((activity) => (
+                {(kindergarten?.activities || []).slice(0, 6).map((activity) => (
                   <ActivityCard key={activity.id} activity={{
                     ...activity,
                     nameAr: language === 'ar' ? activity?.nameAr : activity?.nameFr
@@ -390,7 +390,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                 ))}
 
                 {/* Custom Programs */}
-                {kindergarten.programs?.map((prog) => (
+                {(kindergarten?.programs || []).map((prog) => (
                   <div key={prog.id} className="p-4 rounded-xl border bg-card flex items-start gap-4">
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-xl">
                       {prog.icon}
@@ -479,7 +479,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                 {language === 'ar' ? 'مرافق الروضة (من الداخل)' : 'Installations (Intérieur)'}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {kindergarten.facilities.map((facility, index) => (
+                {(kindergarten?.facilities || []).map((facility, index) => (
                   <div key={index} className="group relative aspect-video rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
                     <img
                       src={facility.image}

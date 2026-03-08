@@ -111,7 +111,7 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
 
           {/* Services */}
           <div className={`flex flex-wrap gap-1.5 mb-5 ${dir === 'rtl' ? 'flex-row' : 'flex-row-reverse'}`}>
-            {kindergarten?.services?.slice(0, 4).map((service) => (
+            {(kindergarten?.services || []).slice(0, 4).map((service) => (
               <Badge
                 key={service}
                 variant="secondary"
@@ -121,9 +121,9 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
                 {serviceNames[service] || service}
               </Badge>
             ))}
-            {kindergarten?.services?.length > 4 && (
+            {(kindergarten?.services || []).length > 4 && (
               <Badge variant="secondary" className="px-2 py-1 text-xs bg-muted text-muted-foreground rounded-md">
-                +{kindergarten?.services?.length - 4}
+                +{(kindergarten?.services || []).length - 4}
               </Badge>
             )}
           </div>
