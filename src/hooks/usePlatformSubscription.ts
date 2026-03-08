@@ -5,10 +5,16 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SubscriptionRequest {
   id: string;
-  user_id: string;
-  user_email: string;
-  user_name: string;
-  subscription_type: string;
+  kindergarten_id: string;
+  parent_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  child_name: string;
+  child_age: string;
+  ccp: string;
+  address: string;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
   updated_at: string;
@@ -32,7 +38,12 @@ export const usePlatformSubscription = () => {
 
       if (error) throw error;
 
-      setSubscriptionRequests(data || []);
+      const mappedData = (data || []).map(item => ({
+        ...item,
+        status: item.status as 'pending' | 'approved' | 'rejected'
+      }));
+
+      setSubscriptionRequests(mappedData);
     } catch (err) {
       console.error('Error fetching subscription requests:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch subscription requests');
