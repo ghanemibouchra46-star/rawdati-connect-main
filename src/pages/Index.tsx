@@ -222,7 +222,7 @@ const Index = () => {
             </div>
 
             <div className="text-center group">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Star className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-bold text-foreground mb-2">
@@ -234,7 +234,7 @@ const Index = () => {
             </div>
 
             <div className="text-center group">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <MapPin className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-bold text-foreground mb-2">
@@ -246,7 +246,7 @@ const Index = () => {
             </div>
 
             <div className="text-center group">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Users className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-bold text-foreground mb-2">
