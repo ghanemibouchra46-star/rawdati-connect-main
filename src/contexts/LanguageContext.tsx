@@ -358,6 +358,10 @@ const translations: Record<Language, Record<string, string>> = {
         'features.reviewsDesc': 'Opinions et expériences de vrais parents pour vous aider à choisir',
         'features.nearby': 'Près de chez vous',
         'features.nearbyDesc': 'Trouvez des jardins dans votre commune ou les zones voisines',
+        'features.search': 'Recherche avancée',
+        'features.searchDesc': 'Recherchez des jardins par nom, localisation ou services spécifiques',
+        'features.location': 'Localisation précise',
+        'features.locationDesc': 'Trouvez facilement des jardins près de chez vous avec notre système de localisation',
         'features.easyRegister': 'Inscription facile',
         'features.easyRegisterDesc': 'Inscrivez votre enfant directement via la plateforme en quelques étapes',
 

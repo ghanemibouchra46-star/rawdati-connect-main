@@ -83,10 +83,11 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
       }
       return trimmed.split(',').map(s => s.trim()).filter(Boolean);
     }
+    // Handle null/undefined cases
     return [];
   };
 
-  const images = (parsePostgresArray(row?.images) || []).map(img => {
+  const images = parsePostgresArray(row?.images).map(img => {
     if (!img || typeof img !== 'string') return null;
     return resolveImageUrl(img);
   }).filter(Boolean);
@@ -96,6 +97,8 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
   }
   
   const rawActivities = parsePostgresArray(row?.activities);
+  const facilities = parsePostgresArray(row?.facilities);
+  const priceBreakdown = parsePostgresArray(row?.price_breakdown);
 
   const getActivityIcon = (name: string): string => {
     if (!name) return '📚';
@@ -131,8 +134,6 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
 
     return act;
   }) as Activity[];
-  const facilities = (Array.isArray(row?.facilities) ? row.facilities : []) as Facility[];
-  const priceBreakdown = (Array.isArray(row?.price_breakdown) ? row.price_breakdown : []) as PriceItem[];
 
   let rawCoords = row?.coordinates;
   if (typeof rawCoords === 'string') {
@@ -184,7 +185,7 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     rating: Number(row?.rating) || 0,
     reviewCount: row?.review_count ?? 0,
     images: (images?.length > 0 ? images : ['/placeholder.svg']),
-    facilities: facilities,
+    facilities: (facilities as unknown) as Facility[],
     services: parsePostgresArray(row?.services).map(normalizeServiceName),
     activities: activities,
     hasAutismWing: row?.has_autism_wing ?? false,
@@ -199,7 +200,7 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     descriptionAr: row?.description_ar || '',
     descriptionFr: row?.description_fr || '',
     coordinates: coords,
-    priceBreakdown,
+    priceBreakdown: (priceBreakdown as unknown) as PriceItem[],
     isPremium: row?.is_premium || false,
     paymentInfo: row?.payment_info || null,
     kindergartenGallery: (() => {
