@@ -19,7 +19,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import { Separator } from '@/components/ui/separator';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
-import { useSubscriptionRequests } from '@/hooks/useSubscriptionRequests';
+import { useAllSubscriptionRequests } from '@/hooks/useSubscriptionRequests';
 import { useAllPlatformSubscriptions, useUpdatePlatformSubscription } from '@/hooks/usePlatformSubscription';
 interface UserProfile {
     id: string;
@@ -97,7 +97,7 @@ const AdminDashboard = () => {
     const { toast } = useToast();
     
     // Hooks for subscription requests
-    const { requests: subscriptionRequests, isLoading: loadingSubscriptions, error: subscriptionError, approveRequest, rejectRequest } = useSubscriptionRequests();
+    const { requests: subscriptionRequests, isLoading: loadingSubscriptions, error: subscriptionError, approveRequest, rejectRequest } = useAllSubscriptionRequests();
     
     // Hooks for platform subscriptions
     const { subscriptionRequests: platformSubscriptions, isLoading: loadingPlatformSubs } = useAllPlatformSubscriptions();

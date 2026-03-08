@@ -137,3 +137,7 @@ export const useSubscriptionRequests = () => {
     refetch: fetchRequests
   };
 };
+
+export const useAllSubscriptionRequests = () => {
+  return useSubscriptionRequests();
+};

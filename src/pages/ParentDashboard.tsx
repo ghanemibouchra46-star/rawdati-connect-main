@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import { useKindergartens } from '@/hooks/useKindergartens';
-import { useMySubscriptionRequests } from '@/hooks/useSubscriptionRequests';
+import { useSubscriptionRequests } from '@/hooks/useSubscriptionRequests';
 import PlatformSubscriptionButton from '@/components/PlatformSubscriptionButton';
 
 interface Child {
@@ -46,7 +46,7 @@ interface Payment {
 const ParentDashboard = () => {
     const { t, dir, language } = useLanguage();
     const { data: kindergartens = [] } = useKindergartens();
-    const { data: subscriptionRequests, isLoading: loadingSubscriptions } = useMySubscriptionRequests();
+    const { requests: subscriptionRequests, isLoading: loadingSubscriptions } = useSubscriptionRequests();
     const [children, setChildren] = useState<Child[]>([]);
     const [activities, setActivities] = useState<Activity[]>([]);
     const [payments, setPayments] = useState<Payment[]>([]);
@@ -235,7 +235,7 @@ const ParentDashboard = () => {
                         </div>
                         <div className="flex items-center gap-3">
                             {/* Platform Subscription Button */}
-                            <PlatformSubscriptionButton variant="outline" size="sm" />
+                            <PlatformSubscriptionButton />
                             
                             <LanguageSelector />
                             <Button variant="ghost" size="icon" onClick={() => navigate('/auth')} className="rounded-full">
@@ -325,14 +325,23 @@ const ParentDashboard = () => {
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-3 mb-2">
                                                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                                                        {language === 'ar' ? request.kindergartens?.name_ar?.charAt(0) : request.kindergartens?.name_fr?.charAt(0)}
+                                                        {(() => {
+                                                            const kg = kindergartens.find(k => k.id === request.kindergarten_id);
+                                                            return language === 'ar' ? kg?.nameAr?.charAt(0) : kg?.nameFr?.charAt(0);
+                                                        })()}
                                                     </div>
                                                     <div>
                                                         <h3 className="font-bold text-foreground">
-                                                            {language === 'ar' ? request.kindergartens?.name_ar : request.kindergartens?.name_fr}
+                                                            {(() => {
+                                                                const kg = kindergartens.find(k => k.id === request.kindergarten_id);
+                                                                return language === 'ar' ? kg?.nameAr : kg?.nameFr;
+                                                            })()}
                                                         </h3>
                                                         <p className="text-sm text-muted-foreground">
-                                                            {language === 'ar' ? request.kindergartens?.municipality_ar : request.kindergartens?.municipality_fr}
+                                                            {(() => {
+                                                                const kg = kindergartens.find(k => k.id === request.kindergarten_id);
+                                                                return language === 'ar' ? kg?.municipalityAr : kg?.municipalityFr;
+                                                            })()}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -537,11 +546,15 @@ const ParentDashboard = () => {
 
             {activePayment && (
                 <PaymentProcess
-                    amount={activePayment.amount}
-                    childName={activePayment.childName}
-                    month={activePayment.month}
-                    onSuccess={handlePaymentSuccess}
-                    onCancel={() => setActivePayment(null)}
+                    kindergarten={kindergartens.find(k => k.id === activePayment.kindergartenId)!}
+                    bookingData={{
+                        childName: activePayment.childName,
+                        month: activePayment.month,
+                        amount: activePayment.amount,
+                        monthNum: activePayment.monthNum,
+                        year: activePayment.year
+                    }}
+                    onComplete={() => setActivePayment(null)}
                 />
             )}
         </div>

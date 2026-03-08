@@ -58,7 +58,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import { arDZ, fr } from 'date-fns/locale';
-import { useOwnerSubscriptionRequests, useUpdateSubscriptionRequest } from '@/hooks/useSubscriptionRequests';
+import { useSubscriptionRequests } from '@/hooks/useSubscriptionRequests';
 import PlatformSubscriptionButton from '@/components/PlatformSubscriptionButton';
 
 // Types
@@ -108,8 +108,7 @@ const OwnerDashboard = () => {
   const { toast } = useToast();
 
   // Use subscription requests hooks
-  const { data: subscriptionRequests, isLoading: loadingSubscriptions } = useOwnerSubscriptionRequests();
-  const updateSubscriptionRequest = useUpdateSubscriptionRequest();
+  const { requests: subscriptionRequests, isLoading: loadingSubscriptions, approveRequest, rejectRequest } = useSubscriptionRequests();
 
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -439,7 +438,7 @@ const OwnerDashboard = () => {
             </div>
             <div className="flex items-center gap-3">
               {/* Platform Subscription Button */}
-              <PlatformSubscriptionButton variant="outline" size="sm" />
+              <PlatformSubscriptionButton />
               
               <Button variant="outline" size="sm" onClick={() => navigate('/owner-auth')} className="gap-2">
                 <LogOut className="w-4 h-4" />
@@ -721,7 +720,7 @@ const OwnerDashboard = () => {
                             <TableCell>
                               <div>
                                 <p className="text-sm font-medium">
-                                  {request.profiles?.full_name || request.first_name + ' ' + request.last_name}
+                                  {request.first_name + ' ' + request.last_name}
                                 </p>
                                 <p className="text-xs text-muted-foreground">{request.email}</p>
                               </div>
@@ -757,11 +756,7 @@ const OwnerDashboard = () => {
                                       variant="ghost"
                                       size="sm"
                                       className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                      onClick={() => updateSubscriptionRequest.mutate({ 
-                                        id: request.id, 
-                                        status: 'approved' 
-                                      })}
-                                      disabled={updateSubscriptionRequest.isPending}
+                                      onClick={() => approveRequest(request.id)}
                                     >
                                       <UserCheck className="w-4 h-4" />
                                     </Button>
@@ -769,11 +764,7 @@ const OwnerDashboard = () => {
                                       variant="ghost"
                                       size="sm"
                                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                      onClick={() => updateSubscriptionRequest.mutate({ 
-                                        id: request.id, 
-                                        status: 'rejected' 
-                                      })}
-                                      disabled={updateSubscriptionRequest.isPending}
+                                      onClick={() => rejectRequest(request.id)}
                                     >
                                       <UserX className="w-4 h-4" />
                                     </Button>
