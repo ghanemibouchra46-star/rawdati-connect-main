@@ -43,6 +43,11 @@ const Kindergartens = () => {
     ? supabaseKindergartens
     : localKindergartens;
 
+  console.log("Kindergartens.tsx - supabaseKindergartens:", supabaseKindergartens);
+  console.log("Kindergartens.tsx - localKindergartens:", localKindergartens);
+  console.log("Kindergartens.tsx - final kindergartens:", kindergartens);
+  console.log("Kindergartens.tsx - isLoadingKg:", isLoadingKg);
+
   const [searchQuery, setSearchQuery] = useState(urlSearchQuery);
   const [selectedMunicipality, setSelectedMunicipality] = useState('');
 
