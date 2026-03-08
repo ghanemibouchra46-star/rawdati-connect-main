@@ -62,7 +62,12 @@ const Kindergartens = () => {
   const [bookingModalKindergarten, setBookingModalKindergarten] = useState<Kindergarten | null>(null);
 
   const filteredKindergartens = useMemo(() => {
-    return kindergartens.filter((k) => {
+    console.log("Computing filteredKindergartens...");
+    console.log("Total kindergartens:", kindergartens?.length || 0);
+    console.log("Search query:", searchQuery);
+    console.log("Selected municipality:", selectedMunicipality);
+    
+    const filtered = kindergartens.filter((k) => {
       const name = language === 'ar' ? k?.nameAr : k?.nameFr;
       if (searchQuery && !name?.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
@@ -84,6 +89,9 @@ const Kindergartens = () => {
       }
       return true;
     });
+    
+    console.log("Filtered kindergartens:", filtered.length);
+    return filtered;
   }, [searchQuery, selectedMunicipality, priceRange, selectedServices, selectedActivities, hasAutismWing, language]);
 
   const handleClearFilters = () => {
@@ -96,8 +104,15 @@ const Kindergartens = () => {
   };
 
   const handleViewDetails = (id: string) => {
+    console.log("handleViewDetails called with id:", id);
     const kg = kindergartens.find((k) => k?.id === id);
-    if (kg) setDetailModalKindergarten(kg);
+    console.log("Found kindergarten:", kg);
+    if (kg) {
+      console.log("Setting detailModalKindergarten");
+      setDetailModalKindergarten(kg);
+    } else {
+      console.log("Kindergarten not found!");
+    }
   };
 
   const handleRegister = (id: string) => {
@@ -216,12 +231,17 @@ const Kindergartens = () => {
       <KindergartenDetailModal
         kindergarten={detailModalKindergarten}
         isOpen={!!detailModalKindergarten}
-        onClose={() => setDetailModalKindergarten(null)}
+        onClose={() => {
+          console.log("Closing detail modal");
+          setDetailModalKindergarten(null);
+        }}
         onRegister={() => {
+          console.log("Register from detail modal");
           setRegisterModalKindergarten(detailModalKindergarten);
           setDetailModalKindergarten(null);
         }}
         onBook={() => {
+          console.log("Book from detail modal");
           setBookingModalKindergarten(detailModalKindergarten);
           setDetailModalKindergarten(null);
         }}
