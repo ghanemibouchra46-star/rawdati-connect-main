@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { LanguageProvider, useLanguage } from "./contexts/LanguageContext";
 import { useToast } from "./hooks/use-toast";
+import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
 import About from "./pages/About";
