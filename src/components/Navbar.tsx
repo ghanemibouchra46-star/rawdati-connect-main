@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, User, LogOut } from 'lucide-react';
+import { Menu, X, User, LogOut, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,16 +11,7 @@ const Navbar = () => {
   const { language, dir, setLanguage, t } = useLanguage();
   const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/kindergartens?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
-    }
-  };
 
   const handleLogout = async () => {
     await logout();
@@ -41,8 +31,8 @@ const Navbar = () => {
             <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-soft group-hover:shadow-hover transition-all duration-300 group-hover:scale-105 border-2 border-primary/20">
               <img src={logoIcon} alt={t('platform.name')} className="w-full h-full object-cover" />
             </div>
-            <span className="font-bold text-xl text-foreground">
-              {t('platform.name')}
+            <span className="font-bold text-xl text-pink-500">
+              روضتي
             </span>
           </Link>
 
@@ -66,29 +56,14 @@ const Navbar = () => {
             >
               {t('nav.about')}
             </Link>
-            <Link
-              to="/contact"
-              className="text-foreground hover:text-primary transition-colors font-medium"
-            >
-              {t('nav.contact')}
-            </Link>
           </div>
 
           {/* Right side items */}
           <div className="flex items-center gap-4">
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="hidden md:block">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input
-                  type="text"
-                  placeholder={t('nav.search')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 w-64"
-                />
-              </div>
-            </form>
+            {/* Admin Login */}
+            <Link to="/admin-auth" className="text-muted-foreground hover:text-foreground transition-colors" title={language === 'ar' ? 'دخول الأدمن' : 'Admin Login'}>
+              <Shield className="w-5 h-5" />
+            </Link>
 
             {/* Language Toggle */}
             <Button
@@ -192,26 +167,13 @@ const Navbar = () => {
                 {t('nav.about')}
               </Link>
               <Link
-                to="/contact"
-                className="block text-foreground hover:text-primary transition-colors font-medium"
+                to="/admin-auth"
+                className="block text-foreground hover:text-primary transition-colors font-medium flex items-center gap-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                {t('nav.contact')}
+                <Shield className="w-4 h-4" />
+                {language === 'ar' ? 'دخول الأدمن' : 'Admin Login'}
               </Link>
-              
-              {/* Mobile Search */}
-              <form onSubmit={handleSearch}>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input
-                    type="text"
-                    placeholder={t('nav.search')}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-4"
-                  />
-                </div>
-              </form>
 
               {/* Mobile Auth */}
               {user ? (
