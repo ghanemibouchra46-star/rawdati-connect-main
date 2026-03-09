@@ -88,6 +88,7 @@ const Index = () => {
             <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500/20 to-emerald-600/20 backdrop-blur-sm rounded-full shadow-lg mb-8 border border-pink-500/30">
               <span className="text-2xl font-bold text-pink-500">مرحباً بك</span>
               <span className="text-xl">👋</span>
+              <span className="text-lg font-medium text-emerald-600 ml-2">Welcome</span>
             </div>
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight drop-shadow-lg">
@@ -97,12 +98,18 @@ const Index = () => {
               <span className="block text-transparent bg-gradient-to-r from-pink-500 via-pink-500 to-emerald-600 bg-clip-text drop-shadow-none">
                 المثالية لطفلك
               </span>
+              <span className="block mt-3 text-lg font-medium text-emerald-600">
+                Choose the perfect kindergarten
+              </span>
             </h1>
 
             <p className="text-xl md:text-2xl text-foreground/80 mb-10 max-w-2xl mx-auto leading-relaxed font-medium drop-shadow-sm inline-flex flex-wrap items-center justify-center gap-2">
               منصتك الأولى للعثور على أفضل الروضات في منطقتك
               <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-pink-500/20 text-pink-500">
                 <Home className="w-4 h-4" />
+              </span>
+              <span className="text-lg font-medium text-emerald-600 ml-2">
+                Your first platform to find the best kindergartens in your area
               </span>
             </p>
 
@@ -116,12 +123,12 @@ const Index = () => {
               <Link to="/kindergartens">
                 <Button size="lg" variant="outline" className="gap-2 text-lg px-10 py-6 bg-card/80 backdrop-blur-sm hover:bg-card transition-all duration-300 font-semibold shadow-soft">
                   <GraduationCap className="w-6 h-6" />
-                  {t('hero.explore')}
+                  استكشف الروضات
                 </Button>
               </Link>
               <Link to="/about">
                 <Button size="lg" variant="outline" className="gap-2 text-lg px-10 py-6 bg-card/80 backdrop-blur-sm hover:bg-card transition-all duration-300 font-semibold">
-                  {t('hero.aboutUs')}
+                  من نحن
                 </Button>
               </Link>
             </div>
@@ -137,15 +144,18 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-              {t('kindergartens.pageTitle')}
+              أفضل الروضات في منطقتك
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto mb-6">
-              {t('kindergartens.pageSubtitle')}
+              استكشف أفضل الروضات مع معلومات شاملة وآراء حقيقية
+              <span className="block text-emerald-600 font-medium mt-2">
+                Discover the best kindergartens with comprehensive information and authentic reviews
+              </span>
             </p>
             <Link to="/kindergartens">
               <Button size="lg" className="gap-2 gradient-accent border-0 shadow-soft hover:shadow-hover">
                 <GraduationCap className="w-5 h-5" />
-                {t('hero.explore')}
+                استكشف الآن
               </Button>
             </Link>
           </div>
@@ -176,10 +186,13 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-              {t('features.title')}
+              لماذا روضتي؟
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              {t('features.subtitle')}
+              نوفر لك كل ما تحتاجه لاتخاذ القرار الصحيح
+              <span className="block text-emerald-600 font-medium mt-2">
+                We provide you with everything you need to make the right decision
+              </span>
             </p>
           </div>
 
@@ -189,10 +202,13 @@ const Index = () => {
                 <GraduationCap className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-bold text-foreground mb-2">
-                {t('features.certified')}
+                روضات معتمدة
               </h3>
               <p className="text-muted-foreground">
-                {t('features.certifiedDesc')}
+                جميع الروضات مرخصة وتتبع معايير الجودة التعليمية
+                <span className="block text-emerald-600 font-medium mt-2">
+                  All kindergartens are licensed and follow educational quality standards
+                </span>
               </p>
             </div>
 
@@ -201,10 +217,13 @@ const Index = () => {
                 <Star className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-bold text-foreground mb-2">
-                {t('features.reviews')}
+                آراء حقيقية
               </h3>
               <p className="text-muted-foreground">
-                {t('features.reviewsDesc')}
+                آراء وتجارب آباء حقيقيين لمساعدتك في الاختيار
+                <span className="block text-emerald-600 font-medium mt-2">
+                  Real parents opinions and experiences to help you choose
+                </span>
               </p>
             </div>
 
@@ -213,10 +232,13 @@ const Index = () => {
                 <MapPin className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-bold text-foreground mb-2">
-                {t('features.nearby')}
+                بالقرب منك
               </h3>
               <p className="text-muted-foreground">
-                {t('features.nearbyDesc')}
+                اعثر على روضات في بلديتك أو المناطق المجاورة
+                <span className="block text-emerald-600 font-medium mt-2">
+                  Find kindergartens in your municipality or nearby areas
+                </span>
               </p>
             </div>
 
@@ -225,10 +247,13 @@ const Index = () => {
                 <Users className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-bold text-foreground mb-2">
-                {t('features.easyRegister')}
+                تسجيل سهل
               </h3>
               <p className="text-muted-foreground">
-                {t('features.easyRegisterDesc')}
+                سجل طفلك مباشرة عبر المنصة بخطوات بسيطة
+                <span className="block text-emerald-600 font-medium mt-2">
+                  Register your child directly via the platform in simple steps
+                </span>
               </p>
             </div>
           </div>
@@ -240,10 +265,13 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-              {t('services.title')}
+              خدماتنا
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              {t('services.subtitle')}
+              استكشف جميع خدماتنا المخصصة للأطفال
+              <span className="block text-emerald-600 font-medium mt-2">
+                Discover all our services dedicated to children
+              </span>
             </p>
           </div>
 
@@ -280,11 +308,15 @@ const Index = () => {
           </h2>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
             انضم إلى منصتنا ووصل إلى آلاف الآباء الباحثين عن أفضل الخيارات
+            <span className="block text-emerald-600 font-medium mt-2">
+              Join our platform and reach thousands of parents looking for best options
+            </span>
           </p>
           <Link to="/owner-auth">
             <Button size="lg" className="gap-2 bg-gradient-to-r from-pink-500 to-emerald-600 text-white border-0 shadow-soft hover:shadow-hover transition-all duration-300">
               سجل روضتك الآن
               <ArrowIcon className="w-4 h-4" />
+              <span className="ml-2 text-sm">Register Now</span>
             </Button>
           </Link>
         </div>
