@@ -104,7 +104,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
 
       L.marker([kindergarten.coordinates.lat, kindergarten.coordinates.lng])
         .addTo(mapInstanceRef.current)
-        .bindPopup(language === 'ar' ? kindergarten?.nameAr : kindergarten?.nameFr)
+        .bindPopup(language === 'ar' ? kindergarten?.name_ar : kindergarten?.nameFr)
         .openPopup();
 
       // Fix for Leaflet in a modal not loading tiles properly
@@ -185,9 +185,9 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
     setCurrentImageIndex((prev) => (prev - 1 + (kindergarten?.images?.length || 1)) % (kindergarten?.images?.length || 1));
   };
 
-  const name = language === 'ar' ? kindergarten?.nameAr : kindergarten?.nameFr;
-  const description = language === 'ar' ? kindergarten?.descriptionAr : kindergarten?.descriptionFr;
-  const municipality = language === 'ar' ? kindergarten?.municipalityAr : kindergarten?.municipalityFr;
+  const name = language === 'ar' ? kindergarten?.name_ar : kindergarten?.nameFr;
+  const description = language === 'ar' ? kindergarten?.description_ar : kindergarten?.descriptionFr;
+  const municipality = language === 'ar' ? kindergarten?.municipality_ar : kindergarten?.municipalityFr;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -293,7 +293,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                 <div key={item.id} className="flex justify-between items-center p-2 bg-card rounded-lg border border-border/30">
                   <div className="flex flex-col">
                     <span className="font-medium text-sm">
-                      {language === 'ar' ? item?.nameAr : item?.nameFr}
+                      {language === 'ar' ? item?.name_ar : item?.nameFr}
                       {item.optional && <span className="text-xs text-muted-foreground mx-1">({language === 'ar' ? 'اختياري' : 'Optionnel'})</span>}
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -385,7 +385,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                 {(kindergarten?.activities || []).slice(0, 6).map((activity) => (
                   <ActivityCard key={activity.id} activity={{
                     ...activity,
-                    nameAr: language === 'ar' ? activity?.nameAr : activity?.nameFr
+                    nameAr: language === 'ar' ? activity?.name_ar : activity?.nameFr
                   }} />
                 ))}
 
@@ -396,8 +396,8 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                       {prog.icon}
                     </div>
                     <div>
-                      <h4 className="font-bold text-sm">{language === 'ar' ? prog?.nameAr : prog?.nameFr}</h4>
-                      <p className="text-xs text-muted-foreground">{language === 'ar' ? prog?.descriptionAr : prog?.descriptionFr}</p>
+                      <h4 className="font-bold text-sm">{language === 'ar' ? prog?.name_ar : prog?.nameFr}</h4>
+                      <p className="text-xs text-muted-foreground">{language === 'ar' ? prog?.description_ar : prog?.descriptionFr}</p>
                     </div>
                   </div>
                 ))}
@@ -414,7 +414,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                   <div key={item.id} className="group relative aspect-video rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
                     <img
                       src={item.image}
-                      alt={language === 'ar' ? item.titleAr : item.titleFr}
+                      alt={language === 'ar' ? item.title_ar : item.titleFr}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       onError={(e) => {
                         e.currentTarget.src = '/placeholder.svg';
@@ -423,11 +423,11 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-3">
                       <div className="text-white">
                         <h4 className="font-bold text-sm mb-1">
-                          {language === 'ar' ? item.titleAr : item.titleFr}
+                          {language === 'ar' ? item.title_ar : item.titleFr}
                         </h4>
-                        {(item.descriptionAr || item.descriptionFr) && (
+                        {(item.description_ar || item.descriptionFr) && (
                           <p className="text-xs opacity-90">
-                            {language === 'ar' ? item.descriptionAr : item.descriptionFr}
+                            {language === 'ar' ? item.description_ar : item.descriptionFr}
                           </p>
                         )}
                         <div className="mt-1">
@@ -460,7 +460,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                     <iframe
                       className="w-full h-full"
                       src={video.url.replace('watch?v=', 'embed/')}
-                      title={language === 'ar' ? video.titleAr : video.titleFr}
+                      title={language === 'ar' ? video.title_ar : video.titleFr}
                       frameBorder="0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
@@ -483,12 +483,12 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                   <div key={index} className="group relative aspect-video rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
                     <img
                       src={facility.image}
-                      alt={language === 'ar' ? facility?.nameAr : facility?.nameFr}
+                      alt={language === 'ar' ? facility?.name_ar : facility?.nameFr}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-3">
                       <span className="text-white font-bold text-sm">
-                        {language === 'ar' ? facility.nameAr : facility.nameFr}
+                        {language === 'ar' ? facility.name_ar : facility.nameFr}
                       </span>
                     </div>
                   </div>

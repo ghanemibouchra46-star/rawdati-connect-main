@@ -84,7 +84,7 @@ const HeroSection = ({ onSearch, onMunicipalitySelect }: HeroSectionProps) => {
                   className="inline-flex items-center gap-2 px-5 py-3 bg-card hover:bg-primary/10 rounded-full text-base font-bold text-foreground shadow-soft hover:shadow-hover border-2 border-primary/20 hover:border-primary transition-all duration-300 hover:scale-105"
                 >
                   <MapPin className="w-4 h-4 text-primary" />
-                  {language === 'ar' ? muni.nameAr : (language === 'fr' ? muni.nameFr : muni.nameAr)}
+                  {language === 'ar' ? muni.name_ar : (language === 'fr' ? muni.nameFr : muni.name_ar)}
                 </button>
               ))}
             </div>

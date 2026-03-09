@@ -162,7 +162,7 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     } else if (row?.name_ar?.includes('اليسر اكاديمي')) {
       coords = { lat: 35.4050, lng: 0.1300 }; // القسم 94
     } else {
-      const mockK = kindergartens.find(k => k.nameAr === row?.name_ar || k.nameFr === row?.name_fr);
+      const mockK = kindergartens.find(k => k.name_ar === row?.name_ar || k.name_ar === row?.name_fr);
       coords = mockK ? mockK.coordinates : { lat: 35.3975, lng: 0.1397 }; // Default to Mascara
     }
   }
@@ -170,14 +170,14 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
   return {
     id: row?.id || '',
     name: row?.name_ar || '',
-    nameAr: row?.name_ar || '',
-    nameFr: row?.name_fr || '',
+    name_ar: row?.name_ar || '',
+    name_fr: row?.name_fr || '',
     municipality: normalizeMunicipality(row?.municipality || row?.municipality_ar || ''),
-    municipalityAr: row?.municipality_ar || '',
-    municipalityFr: row?.municipality_fr || '',
+    municipality_ar: row?.municipality_ar || '',
+    municipality_fr: row?.municipality_fr || '',
     address: row?.address_ar || '',
-    addressAr: row?.address_ar || '',
-    addressFr: row?.address_fr || '',
+    address_ar: row?.address_ar || '',
+    address_fr: row?.address_fr || '',
     phone: row?.phone || '',
     pricePerMonth: row?.price_per_month || 0,
     ageRange: { min: row?.age_min || 3, max: row?.age_max || 6 },
@@ -198,7 +198,7 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     },
     description: row?.description_ar || '',
     descriptionAr: row?.description_ar || '',
-    descriptionFr: row?.description_fr || '',
+    descriptionFr: row?.description_ar || '',
     coordinates: coords,
     priceBreakdown: (priceBreakdown as unknown) as PriceItem[],
     isPremium: row?.is_premium || false,
@@ -215,9 +215,9 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
             if (typeof item === 'string') {
               return {
                 id: `gallery-${row.id}-${index}`,
-                titleAr: `صورة ${index + 1}`,
+                title_ar: `صورة ${index + 1}`,
                 titleFr: `Image ${index + 1}`,
-                descriptionAr: '',
+                description_ar: '',
                 descriptionFr: '',
                 image: item.startsWith('http') ? item : resolveImageUrl(item),
                 category: 'activity' as const
@@ -226,9 +226,9 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
             // If it's already an object, use it as-is
             return {
               id: item.id || `gallery-${row.id}-${index}`,
-              titleAr: item.titleAr || `صورة ${index + 1}`,
+              title_ar: item.title_ar || `صورة ${index + 1}`,
               titleFr: item.titleFr || `Image ${index + 1}`,
-              descriptionAr: item.descriptionAr || '',
+              description_ar: item.description_ar || '',
               descriptionFr: item.descriptionFr || '',
               image: item.image || '/placeholder.svg',
               category: item.category || 'activity'
@@ -245,9 +245,9 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
               if (typeof item === 'string') {
                 return {
                   id: `gallery-${row.id}-${index}`,
-                  titleAr: `صورة ${index + 1}`,
+                  title_ar: `صورة ${index + 1}`,
                   titleFr: `Image ${index + 1}`,
-                  descriptionAr: '',
+                  description_ar: '',
                   descriptionFr: '',
                   image: item.startsWith('http') ? item : resolveImageUrl(item),
                   category: 'activity' as const
@@ -256,9 +256,9 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
               // If it's already an object, use it as-is
               return {
                 id: item.id || `gallery-${row.id}-${index}`,
-                titleAr: item.titleAr || `صورة ${index + 1}`,
+                title_ar: item.title_ar || `صورة ${index + 1}`,
                 titleFr: item.titleFr || `Image ${index + 1}`,
-                descriptionAr: item.descriptionAr || '',
+                description_ar: item.description_ar || '',
                 descriptionFr: item.descriptionFr || '',
                 image: item.image || '/placeholder.svg',
                 category: item.category || 'activity'
@@ -312,11 +312,11 @@ export function useKindergartens() {
           }
           try {
             const mapped = mapRowToKindergarten(row);
-            if (!mapped?.nameAr) {
+            if (!mapped?.name_ar) {
               console.warn(`Skipped kindergarten with no name:`, row?.id);
               return null;
             }
-            console.log(`✓ Mapped: ${mapped?.nameAr} (ID: ${mapped?.id})`);
+            console.log(`✓ Mapped: ${mapped?.name_ar} (ID: ${mapped?.id})`);
             return mapped;
           } catch (e) {
             console.error(`Error mapping kindergarten ${row?.id}:`, e);

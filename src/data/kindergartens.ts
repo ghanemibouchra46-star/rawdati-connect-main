@@ -1,6 +1,6 @@
 export interface Activity {
   id: string;
-  nameAr: string;
+  name_ar: string;
   nameFr: string;
   description: string;
   schedule: string;
@@ -9,7 +9,7 @@ export interface Activity {
 
 export interface PriceItem {
   id: string;
-  nameAr: string;
+  name_ar: string;
   nameFr: string;
   price: number;
   type: 'monthly' | 'annual' | 'one-time';
@@ -17,16 +17,16 @@ export interface PriceItem {
 }
 
 export interface Facility {
-  nameAr: string;
+  name_ar: string;
   nameFr: string;
   image: string;
 }
 
 export interface KindergartenGallery {
   id: string;
-  titleAr: string;
+  title_ar: string;
   titleFr: string;
-  descriptionAr?: string;
+  description_ar?: string;
   descriptionFr?: string;
   image: string;
   category: 'activity' | 'program';
@@ -35,13 +35,13 @@ export interface KindergartenGallery {
 export interface Kindergarten {
   id: string;
   name: string;
-  nameAr: string;
+  name_ar: string;
   nameFr: string;
   municipality: string;
-  municipalityAr: string;
+  municipality_ar: string;
   municipalityFr: string;
   address: string;
-  addressAr: string;
+  address_ar: string;
   addressFr: string;
   phone: string;
   pricePerMonth: number;
@@ -56,8 +56,8 @@ export interface Kindergarten {
   activities: Activity[];
   hasAutismWing: boolean;
   instagram?: string;
-  videos?: { id: string; url: string; titleAr: string; titleFr: string }[];
-  programs?: { id: string; nameAr: string; nameFr: string; descriptionAr: string; descriptionFr: string; icon: string }[];
+  videos?: { id: string; url: string; title_ar: string; titleFr: string }[];
+  programs?: { id: string; name_ar: string; nameFr: string; description_ar: string; descriptionFr: string; icon: string }[];
   kindergartenGallery?: KindergartenGallery[];
   isPremium?: boolean;
   paymentInfo?: string | null;
@@ -66,35 +66,35 @@ export interface Kindergarten {
     stores: string[];
   };
   description: string;
-  descriptionAr: string;
+  description_ar: string;
   descriptionFr: string;
   coordinates: { lat: number; lng: number };
 }
 
 export const municipalities = [
-  { id: 'mascara', nameAr: 'معسكر', nameFr: 'Mascara' },
-  { id: 'sig', nameAr: 'سيق', nameFr: 'Sig' },
-  { id: 'tighennif', nameAr: 'تيغنيف', nameFr: 'Tighennif' },
-  { id: 'mohammadia', nameAr: 'المحمدية', nameFr: 'Mohammadia' },
-  { id: 'ghriss', nameAr: 'غريس', nameFr: 'Ghriss' },
+  { id: 'mascara', name_ar: 'معسكر', nameFr: 'Mascara' },
+  { id: 'sig', name_ar: 'سيق', nameFr: 'Sig' },
+  { id: 'tighennif', name_ar: 'تيغنيف', nameFr: 'Tighennif' },
+  { id: 'mohammadia', name_ar: 'المحمدية', nameFr: 'Mohammadia' },
+  { id: 'ghriss', name_ar: 'غريس', nameFr: 'Ghriss' },
 ];
 
 export const services = [
-  { id: 'bus', nameAr: 'نقل مدرسي', nameFr: 'Transport scolaire', icon: '🚌' },
-  { id: 'meals', nameAr: 'وجبات غذائية', nameFr: 'Repas', icon: '🍽️' },
-  { id: 'mental-math', nameAr: 'الحساب الذهني', nameFr: 'Calcul mental', icon: '🧮' },
-  { id: 'languages', nameAr: 'لغات أجنبية', nameFr: 'Langues étrangères', icon: '🌍' },
-  { id: 'quran', nameAr: 'تحفيظ القرآن', nameFr: 'Mémorisation du Coran', icon: '📖' },
-  { id: 'sports', nameAr: 'أنشطة رياضية', nameFr: 'Activités sportives', icon: '⚽' },
+  { id: 'bus', name_ar: 'نقل مدرسي', nameFr: 'Transport scolaire', icon: '🚌' },
+  { id: 'meals', name_ar: 'وجبات غذائية', nameFr: 'Repas', icon: '🍽️' },
+  { id: 'mental-math', name_ar: 'الحساب الذهني', nameFr: 'Calcul mental', icon: '🧮' },
+  { id: 'languages', name_ar: 'لغات أجنبية', nameFr: 'Langues étrangères', icon: '🌍' },
+  { id: 'quran', name_ar: 'تحفيظ القرآن', nameFr: 'Mémorisation du Coran', icon: '📖' },
+  { id: 'sports', name_ar: 'أنشطة رياضية', nameFr: 'Activités sportives', icon: '⚽' },
 ];
 
 export const filterableActivities = [
-  { id: 'drawing', nameAr: 'الرسم والتلوين', nameFr: 'Dessin', icon: '🎨' },
-  { id: 'music', nameAr: 'الأناشيد', nameFr: 'Chants', icon: '🎵' },
-  { id: 'robotics', nameAr: 'الروبوتيك', nameFr: 'Robotique', icon: '🤖' },
-  { id: 'swimming', nameAr: 'السباحة', nameFr: 'Natation', icon: '🏊' },
-  { id: 'games', nameAr: 'ألعاب تعليمية', nameFr: 'Jeux éducatifs', icon: '🧩' },
-  { id: 'quran', nameAr: 'تحفيظ القرآن', nameFr: 'Coran', icon: '📖' },
+  { id: 'drawing', name_ar: 'الرسم والتلوين', nameFr: 'Dessin', icon: '🎨' },
+  { id: 'music', name_ar: 'الأناشيد', nameFr: 'Chants', icon: '🎵' },
+  { id: 'robotics', name_ar: 'الروبوتيك', nameFr: 'Robotique', icon: '🤖' },
+  { id: 'swimming', name_ar: 'السباحة', nameFr: 'Natation', icon: '🏊' },
+  { id: 'games', name_ar: 'ألعاب تعليمية', nameFr: 'Jeux éducatifs', icon: '🧩' },
+  { id: 'quran', name_ar: 'تحفيظ القرآن', nameFr: 'Coran', icon: '📖' },
 ];
 
 /** قائمة الروضات من قاعدة البيانات فقط - لا توجد بيانات وهمية */

@@ -65,12 +65,12 @@ const mockRegistrations: RegistrationRequest[] = [];
 function adaptKindergarten(kg: any): Kindergarten {
     return {
         id: kg.id,
-        name_ar: kg.nameAr,
+        name_ar: kg.name_ar,
         name_fr: kg.nameFr,
-        address_ar: kg.addressAr,
+        address_ar: kg.address_ar,
         address_fr: kg.addressFr,
         municipality: kg.municipality,
-        municipality_ar: kg.municipalityAr,
+        municipality_ar: kg.municipality_ar,
         municipality_fr: kg.municipalityFr,
         status: 'approved',
         created_at: kg.created_at || new Date().toISOString(),
