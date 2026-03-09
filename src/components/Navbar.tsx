@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, User, LogOut, ShieldCheck } from 'lucide-react';
+import { Search, Menu, X, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +12,16 @@ const Navbar = () => {
   const { language, dir, setLanguage, t } = useLanguage();
   const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/kindergartens?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -56,19 +66,29 @@ const Navbar = () => {
             >
               {t('nav.about')}
             </Link>
+            <Link
+              to="/contact"
+              className="text-foreground hover:text-primary transition-colors font-medium"
+            >
+              {t('nav.contact')}
+            </Link>
           </div>
 
           {/* Right side items */}
           <div className="flex items-center gap-4">
-            {/* Admin Login Icon */}
-            <Link
-              to="/admin-auth"
-              className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-md hover:bg-muted/50"
-              title={language === 'ar' ? 'دخول الأدمن' : 'Connexion Admin'}
-              aria-label={language === 'ar' ? 'دخول الأدمن' : 'Admin login'}
-            >
-              <ShieldCheck className="w-5 h-5" />
-            </Link>
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="hidden md:block">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder={t('nav.search')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 w-64"
+                />
+              </div>
+            </form>
 
             {/* Language Toggle */}
             <Button
@@ -172,13 +192,26 @@ const Navbar = () => {
                 {t('nav.about')}
               </Link>
               <Link
-                to="/admin-auth"
-                className="flex items-center gap-2 text-foreground hover:text-primary transition-colors font-medium"
+                to="/contact"
+                className="block text-foreground hover:text-primary transition-colors font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <ShieldCheck className="w-4 h-4" />
-                {language === 'ar' ? 'دخول الأدمن' : 'Connexion Admin'}
+                {t('nav.contact')}
               </Link>
+              
+              {/* Mobile Search */}
+              <form onSubmit={handleSearch}>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Input
+                    type="text"
+                    placeholder={t('nav.search')}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-4"
+                  />
+                </div>
+              </form>
 
               {/* Mobile Auth */}
               {user ? (
