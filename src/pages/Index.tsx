@@ -56,10 +56,10 @@ const Index = () => {
   const services = [
     {
       icon: GraduationCap,
-      title: 'روضتي بالوردي',
+      title: 'روضتي',
       description: 'اكتشف أفضل الروضات في منطقتك',
       link: '/kindergartens',
-      color: 'from-purple-500 to-purple-600'
+      color: 'from-pink-500 to-pink-600'
     }
   ];
 
@@ -85,23 +85,23 @@ const Index = () => {
         <div className="container mx-auto px-4 relative z-10 pt-20">
           <div className="text-center max-w-4xl mx-auto">
             {/* Welcome Banner */}
-            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600/20 to-emerald-600/20 backdrop-blur-sm rounded-full shadow-lg mb-8 border border-purple-600/30">
-              <span className="text-2xl font-bold text-purple-600">مرحباً بك في</span>
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500/20 to-emerald-600/20 backdrop-blur-sm rounded-full shadow-lg mb-8 border border-pink-500/30">
+              <span className="text-2xl font-bold text-pink-500">مرحباً بك في</span>
               <span className="text-xl">👋</span>
             </div>
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight drop-shadow-lg">
               <span className="block mb-3 text-foreground">
-                روضتي
+                <span className="text-pink-500 font-arabic">روضتي</span>
               </span>
-              <span className="block text-transparent bg-gradient-to-r from-purple-600 via-purple-600 to-emerald-600 bg-clip-text drop-shadow-none">
+              <span className="block text-transparent bg-gradient-to-r from-pink-500 via-pink-500 to-emerald-600 bg-clip-text drop-shadow-none">
                 بالوردي
               </span>
             </h1>
 
             <p className="text-xl md:text-2xl text-foreground/80 mb-10 max-w-2xl mx-auto leading-relaxed font-medium drop-shadow-sm inline-flex flex-wrap items-center justify-center gap-2">
               منصتك الأولى للعثور على أفضل الروضات في منطقتك
-              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-purple-600/20 text-purple-600">
+              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-pink-500/20 text-pink-500">
                 <Home className="w-4 h-4" />
               </span>
             </p>
@@ -252,12 +252,12 @@ const Index = () => {
               <Link to="/kindergartens">
                 <Card className="h-full border-0 shadow-soft hover:shadow-hover transition-all duration-300 group cursor-pointer overflow-hidden">
                   <CardContent className="p-0">
-                    <div className="h-32 bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                    <div className="h-32 bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center">
                       <GraduationCap className="w-16 h-16 text-white/90" />
                     </div>
                     <div className="p-6">
                       <h3 className="font-bold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
-                        {services[0].title}
+                        <span className="text-pink-500 font-arabic">روضتي</span>
                       </h3>
                       <p className="text-muted-foreground text-sm">{services[0].description}</p>
                     </div>
@@ -273,17 +273,17 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-primary/5">
+      <section className="py-16 bg-gradient-to-br from-pink-500/10 to-emerald-600/10">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-            {t('cta.ownerTitle')}
+            هل أنت مالك روضة؟
           </h2>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-            {t('cta.ownerDesc')}
+            انضم إلى منصة <span className="text-pink-500 font-arabic">روضتي</span> ووصل إلى آلاف الآباء الباحثين عن أفضل الخيارات
           </p>
           <Link to="/owner-auth">
-            <Button size="lg" className="gap-2 gradient-accent border-0 shadow-soft hover:shadow-hover transition-all duration-300">
-              {t('cta.register')}
+            <Button size="lg" className="gap-2 bg-gradient-to-r from-pink-500 to-emerald-600 text-white border-0 shadow-soft hover:shadow-hover transition-all duration-300">
+              سجل روضتك الآن
               <ArrowIcon className="w-4 h-4" />
             </Button>
           </Link>

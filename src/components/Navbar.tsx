@@ -32,8 +32,7 @@ const Navbar = () => {
               <img src={logoIcon} alt={t('platform.name')} className="w-full h-full object-cover" />
             </div>
             <span className="font-bold text-xl">
-              <span className="text-purple-600">روضتي</span>
-              <span className="text-emerald-600"> بالوردي</span>
+              <span className="text-pink-500 font-arabic">روضتي</span>
             </span>
           </Link>
 
