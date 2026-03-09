@@ -56,7 +56,7 @@ const Index = () => {
   const services = [
     {
       icon: GraduationCap,
-      title: 'روضتي',
+      title: 'اختر الروضة المثالية لطفلك',
       description: 'اكتشف أفضل الروضات في منطقتك',
       link: '/kindergartens',
       color: 'from-pink-500 to-pink-600'
@@ -86,16 +86,16 @@ const Index = () => {
           <div className="text-center max-w-4xl mx-auto">
             {/* Welcome Banner */}
             <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500/20 to-emerald-600/20 backdrop-blur-sm rounded-full shadow-lg mb-8 border border-pink-500/30">
-              <span className="text-2xl font-bold text-pink-500">مرحباً بك في</span>
+              <span className="text-2xl font-bold text-pink-500">مرحباً بك</span>
               <span className="text-xl">👋</span>
             </div>
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight drop-shadow-lg">
               <span className="block mb-3 text-foreground">
-                <span className="text-pink-500 font-arabic">روضتي</span>
+                اختر الروضة
               </span>
               <span className="block text-transparent bg-gradient-to-r from-pink-500 via-pink-500 to-emerald-600 bg-clip-text drop-shadow-none">
-                بالوردي
+                المثالية لطفلك
               </span>
             </h1>
 
@@ -257,7 +257,7 @@ const Index = () => {
                     </div>
                     <div className="p-6">
                       <h3 className="font-bold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
-                        <span className="text-pink-500 font-arabic">روضتي</span>
+                        اختر الروضة المثالية لطفلك
                       </h3>
                       <p className="text-muted-foreground text-sm">{services[0].description}</p>
                     </div>
@@ -279,7 +279,7 @@ const Index = () => {
             هل أنت مالك روضة؟
           </h2>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-            انضم إلى منصة <span className="text-pink-500 font-arabic">روضتي</span> ووصل إلى آلاف الآباء الباحثين عن أفضل الخيارات
+            انضم إلى منصتنا ووصل إلى آلاف الآباء الباحثين عن أفضل الخيارات
           </p>
           <Link to="/owner-auth">
             <Button size="lg" className="gap-2 bg-gradient-to-r from-pink-500 to-emerald-600 text-white border-0 shadow-soft hover:shadow-hover transition-all duration-300">
