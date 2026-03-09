@@ -123,8 +123,8 @@ const AIChatbot = () => {
 
         if (text.includes('سعر') || text.includes('ثمن') || text.includes('prix') || text.includes('price')) {
             return language === 'ar'
-                ? 'تختلف الأسعار حسب الروضة والخدمات المختارة. تتراوح أسعار الروضات في Rawdati بين 4500 و 9000 دج شهرياً. أي روضة تهمك لأعطيك سعرها بالتحديد؟'
-                : 'Les prix varient selon le jardin d\'enfants et les services choisis. Ils se situent généralement entre 4500 et 9000 DA par mois à Rawdati. Quel jardin vous intéresse pour un prix précis ?';
+                ? 'تختلف الأسعار حسب الروضة والخدمات المختارة. تتراوح أسعار الروضات في روضتي بين 4500 و 9000 دج شهرياً. أي روضة تهمك لأعطيك سعرها بالتحديد؟'
+                : 'Les prix varient selon le jardin d\'enfants et les services choisis. Ils se situent généralement entre 4500 et 9000 DA par mois à روضتي. Quel jardin vous intéresse pour un prix précis ?';
         }
 
         // Default response context-aware
@@ -136,25 +136,25 @@ const AIChatbot = () => {
                     : 'Il n\'y a pas de jardins d\'enfants enregistrés pour le moment. Revenez plus tard.';
             }
             return language === 'ar'
-                ? `لدينا العديد من الروضات المميزة في Rawdati، مثل: ${topKgs}. يمكنك إخباري باسم البلدية أو اسم الروضة التي تبحث عنها.`
-                : `Nous avons plusieurs jardins d'enfants excellents à Rawdati, tels que : ${topKgs}. Vous pouvez me dire le nom de la commune ou du jardin que vous recherchez.`;
+                ? `لدينا العديد من الروضات المميزة في روضتي، مثل: ${topKgs}. يمكنك إخباري باسم البلدية أو اسم الروضة التي تبحث عنها.`
+                : `Nous avons plusieurs jardins d'enfants excellents à روضتي, tels que : ${topKgs}. Vous pouvez me dire le nom de la commune ou du jardin que vous recherchez.`;
         }
 
         if (text.includes('طبيب') || text.includes('médecin') || text.includes('doctor')) {
             return language === 'ar'
-                ? 'يمكنني مساعدتك في العثور على أطباء الأطفال المتخصصين في Rawdati من خلال قسم الأطباء المتوفر في القائمة الرئيسية.'
-                : 'Je peux vous aider à trouver des pédiatres spécialisés à Rawdati via la section Médecins disponible dans le menu principal.';
+                ? 'يمكنني مساعدتك في العثور على أطباء الأطفال المتخصصين في روضتي من خلال قسم الأطباء المتوفر في القائمة الرئيسية.'
+                : 'Je peux vous aider à trouver des pédiatres spécialisés à روضتي via la section Médecins disponible dans le menu principal.';
         }
 
         if (text.includes('ملابس') || text.includes('vêtements') || text.includes('clothing')) {
             return language === 'ar'
-                ? 'لدينا قائمة بأفضل محلات ملابس الأطفال في Rawdati. يمكنك العثور عليها في قسم المحلات في التطبيق.'
-                : 'Nous avons une liste des meilleures boutiques de vêtements pour enfants à Rawdati. Vous pouvez les trouver dans la section Boutiques de l\'application.';
+                ? 'لدينا قائمة بأفضل محلات ملابس الأطفال في روضتي. يمكنك العثور عليها في قسم المحلات في التطبيق.'
+                : 'Nous avons une liste des meilleures boutiques de vêtements pour enfants à روضتي. Vous pouvez les trouver dans la section Boutiques de l\'application.';
         }
 
         return language === 'ar'
-            ? 'أنا هنا لمساعدتك في العثور على أفضل الخدمات لأطفالك في Rawdati. يمكنك سؤالي عن روضة معينة، أو خدمات مثل النقل، أو الروضات في بلدية معينة.'
-            : 'Je suis là pour vous aider à trouver les meilleurs services pour vos enfants à Rawdati. Vous pouvez me poser des questions sur un jardin spécifique, des services comme le transport, ou les jardins d\'enfants dans une commune précise.';
+            ? 'أنا هنا لمساعدتك في العثور على أفضل الخدمات لأطفالك في روضتي. يمكنك سؤالي عن روضة معينة، أو خدمات مثل النقل، أو الروضات في بلدية معينة.'
+            : 'Je suis là pour vous aider à trouver les meilleurs services pour vos enfants à روضتي. Vous pouvez me poser des questions sur un jardin spécifique, des services comme le transport, ou les jardins d\'enfants dans une commune précise.';
     };
 
     const handleSend = () => {

@@ -429,7 +429,7 @@ const ParentSettings = () => {
 
                 {/* App Version */}
                 <p className="text-center text-xs text-muted-foreground py-4">
-                    {language === 'ar' ? 'روضتي - الإصدار' : language === 'fr' ? 'Rawdati - Version' : 'Rawdati - Version'} 1.0.0
+                    {language === 'ar' ? 'روضتي - الإصدار' : language === 'fr' ? 'روضتي - Version' : 'روضتي - Version'} 1.0.0
                 </p>
             </main>
 

@@ -478,8 +478,7 @@ const Auth = () => {
             </div>
             <div className="flex flex-col text-right">
               <span className="font-bold text-2xl">
-                <span className="text-primary">Rawdati</span>
-                <span className="text-emerald-600"> Connect</span>
+                <span className="text-pink-500 font-arabic">روضتي</span>
               </span>
             </div>
           </Link>

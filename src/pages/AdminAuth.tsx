@@ -517,7 +517,7 @@ const AdminAuth = () => {
                                         <Input
                                             id="signup-email"
                                             type="email"
-                                            placeholder="admin@rawdati.com"
+                                            placeholder="admin@روضتي.com"
                                             className="pr-10 bg-slate-700 border-slate-600 text-white placeholder:text-gray-500"
                                             dir="ltr"
                                             required
@@ -569,7 +569,7 @@ const AdminAuth = () => {
                                         <Input
                                             id="reset-email"
                                             type="email"
-                                            placeholder="admin@rawdati.com"
+                                            placeholder="admin@روضتي.com"
                                             className="pr-10 bg-slate-700 border-slate-600 text-white placeholder:text-gray-500"
                                             dir="ltr"
                                             required

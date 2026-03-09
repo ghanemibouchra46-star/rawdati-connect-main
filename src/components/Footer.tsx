@@ -11,21 +11,20 @@ const Footer = () => {
           <div className="md:col-span-1">
             <Link to="/" className="flex items-center gap-3 mb-6">
               <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-lg border-2 border-primary-foreground/20">
-                <img src={logoIcon} alt="Rawdati Connect" className="w-full h-full object-cover" />
+                <img src={logoIcon} alt="روضتي" className="w-full h-full object-cover" />
               </div>
               <div className="flex flex-col">
                 <span className="font-extrabold text-xl leading-tight">
-                  <span className="text-primary">Rawdati</span>
-                  <span className="text-emerald-400"> Connect</span>
+                  <span className="text-pink-500 font-arabic">روضتي</span>
                 </span>
               </div>
             </Link>
             <p className="text-sm text-primary-foreground/70 mb-6 leading-relaxed">
-              منصتك الموثوقة للعثور على أفضل روضات الأطفال في Rawdati. 🎈
+              منصتك الموثوقة للعثور على أفضل روضات الأطفال في روضتي. 🎈
             </p>
             <div className="flex gap-3">
               <a
-                href="https://www.facebook.com/rawdati.mascara"
+                href="https://www.facebook.com/روضتي.mascara"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-11 h-11 rounded-xl bg-primary/20 flex items-center justify-center hover:bg-primary/40 transition-all duration-300 hover:scale-110"
@@ -34,7 +33,7 @@ const Footer = () => {
                 <Facebook className="w-5 h-5" />
               </a>
               <a
-                href="https://www.instagram.com/rawdati.mascara"
+                href="https://www.instagram.com/روضتي.mascara"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-11 h-11 rounded-xl bg-coral/20 flex items-center justify-center hover:bg-coral/40 transition-all duration-300 hover:scale-110"
@@ -43,7 +42,7 @@ const Footer = () => {
                 <Instagram className="w-5 h-5" />
               </a>
               <a
-                href="https://www.x.com/rawdati_mascara"
+                href="https://www.x.com/روضتي_mascara"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-11 h-11 rounded-xl bg-sky-light/20 flex items-center justify-center hover:bg-sky-light/40 transition-all duration-300 hover:scale-110"
@@ -84,7 +83,7 @@ const Footer = () => {
                 <div className="w-9 h-9 rounded-lg bg-primary/20 flex items-center justify-center">
                   <MapPin className="w-4 h-4 text-primary-foreground" />
                 </div>
-                <span>Rawdati، الجزائر 🇩🇿</span>
+                <span>روضتي، الجزائر 🇩🇿</span>
               </li>
               <li className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-secondary/20 flex items-center justify-center">
@@ -96,7 +95,7 @@ const Footer = () => {
                 <div className="w-9 h-9 rounded-lg bg-coral/20 flex items-center justify-center">
                   <Mail className="w-4 h-4 text-primary-foreground" />
                 </div>
-                <span>contact@rawdati.dz</span>
+                <span>contact@روضتي.dz</span>
               </li>
             </ul>
           </div>
@@ -105,7 +104,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="border-t border-primary-foreground/10 mt-10 pt-8 text-center">
           <p className="text-sm text-primary-foreground/50">
-            © {new Date().getFullYear()} Rawdati Connect. جميع الحقوق محفوظة 💕
+            © {new Date().getFullYear()} روضتي. جميع الحقوق محفوظة 💕
           </p>
         </div>
       </div>

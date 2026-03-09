@@ -13,8 +13,8 @@ const translations: Record<Language, Record<string, string>> = {
     ar: {
         // Welcome & General
         'welcome': 'مرحباً بكم',
-        'welcome.subtitle': 'منصة Rawdati Connect',
-        'platform.name': 'Rawdati Connect',
+        'welcome.subtitle': 'منصة روضتي',
+        'platform.name': 'روضتي',
         'mascara': 'معسكر',
 
         // Navigation
@@ -245,7 +245,7 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Admin Dashboard
         'admin.title': 'لوحة تحكم الأدمين',
-        'admin.subtitle': 'روضتي - Rawdati',
+        'admin.subtitle': 'روضتي - روضتي',
         'admin.totalUsers': 'إجمالي المستخدمين',
         'admin.pending': 'في الانتظار',
         'admin.approved': 'موافق عليهم',
@@ -328,8 +328,8 @@ const translations: Record<Language, Record<string, string>> = {
     fr: {
         // Welcome & General
         'welcome': 'Bienvenue',
-        'welcome.subtitle': 'Plateforme Rawdati - Rawdati',
-        'platform.name': 'Rawdati Connect',
+        'welcome.subtitle': 'Plateforme روضتي',
+        'platform.name': 'روضتي',
         'mascara': 'Mascara',
 
         // Navigation
@@ -350,7 +350,7 @@ const translations: Record<Language, Record<string, string>> = {
         'hero.aboutUs': 'À propos de nous',
 
         // Features
-        'features.title': 'Pourquoi Rawdati?',
+        'features.title': 'لماذا روضتي؟',
         'features.subtitle': 'Nous vous fournissons tout ce dont vous avez besoin pour prendre la bonne décision',
         'features.certified': 'Jardins certifiés',
         'features.certifiedDesc': 'Tous les jardins sont agréés et suivent les normes de qualité éducative',
@@ -384,7 +384,7 @@ const translations: Record<Language, Record<string, string>> = {
 
         // CTA
         'cta.ownerTitle': 'Êtes-vous propriétaire d\'un jardin d\'enfants?',
-        'cta.ownerDesc': 'Rejoignez la plateforme Rawdati et atteignez des milliers de parents à la recherche des meilleures options',
+        'cta.ownerDesc': 'Rejoignez la plateforme روضتي et atteignez des milliers de parents à la recherche des meilleures options',
         'cta.register': 'Inscrivez votre jardin maintenant',
 
         // Language Selector
@@ -395,11 +395,11 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Footer
         'footer.rights': 'Tous droits réservés',
-        'footer.description': 'Plateforme numérique pour aider les parents à trouver les meilleurs services pour leurs enfants à Rawdati',
+        'footer.description': 'Plateforme numérique pour aider les parents à trouver les meilleurs services pour leurs enfants à روضتي',
 
         // Kindergartens Page
-        'kindergartens.pageTitle': 'Jardins d\'enfants à Rawdati',
-        'kindergartens.pageSubtitle': 'Choisissez parmi les meilleurs jardins d\'enfants à Rawdati, avec des informations sur les prix, services et avis',
+        'kindergartens.pageTitle': 'Jardins d\'enfants à روضتي',
+        'kindergartens.pageSubtitle': 'Choisissez parmi les meilleurs jardins d\'enfants à روضتي, avec des informations sur les prix, services et avis',
         'kindergartens.searchPlaceholder': 'Chercher un jardin...',
         'kindergartens.count': 'Affichage de {count} jardin(s)',
         'kindergartens.noResults': 'Aucun résultat',
@@ -464,8 +464,8 @@ const translations: Record<Language, Record<string, string>> = {
         'registration.allergyDetails': 'Détails des allergies alimentaires',
 
         // Doctors Page
-        'doctors.pageTitle': 'Pédiatres à Rawdati',
-        'doctors.pageSubtitle': 'Une liste complète des meilleurs pédiatres de la wilaya de Rawdati',
+        'doctors.pageTitle': 'Pédiatres à روضتي',
+        'doctors.pageSubtitle': 'Une liste complète des meilleurs pédiatres de la wilaya de روضتي',
         'doctors.find': 'Trouvez un pédiatre de confiance',
         'doctors.searchPlaceholder': 'Rechercher par nom ou spécialité...',
         'doctors.experience': '{years} ans d\'expérience',
@@ -480,14 +480,14 @@ const translations: Record<Language, Record<string, string>> = {
         'details.partnerStore': 'Magasins partenaires',
 
         // Speech Therapy Page
-        'speech.pageTitle': 'Orthophonistes à Rawdati',
-        'speech.pageSubtitle': 'Une liste complète des meilleurs orthophonistes de la wilaya de Rawdati',
+        'speech.pageTitle': 'Orthophonistes à روضتي',
+        'speech.pageSubtitle': 'Une liste complète des meilleurs orthophonistes de la wilaya de روضتي',
         'speech.find': 'Trouvez un orthophoniste expert',
         'speech.searchPlaceholder': 'Rechercher par nom ou spécialité...',
 
         // Clothing Stores Page
-        'clothing.pageTitle': 'Magasins de vêtements pour enfants à Rawdati',
-        'clothing.pageSubtitle': 'Découvrez les meilleurs magasins de vêtements pour enfants à Rawdati',
+        'clothing.pageTitle': 'Magasins de vêtements pour enfants à روضتي',
+        'clothing.pageSubtitle': 'Découvrez les meilleurs magasins de vêtements pour enfants à روضتي',
         'clothing.find': 'Découvrez les meilleurs magasins de vêtements',
         'clothing.searchPlaceholder': 'Rechercher par nom ou ville...',
         'clothing.priceRange': 'Tranche de prix',
@@ -568,7 +568,7 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Admin Dashboard
         'admin.title': 'Tableau de bord Admin',
-        'admin.subtitle': 'Rawdati - Rawdati',
+        'admin.subtitle': 'روضتي - روضتي',
         'admin.totalUsers': 'Total Utilisateurs',
         'admin.pending': 'En attente',
         'admin.approved': 'Approuvés',
@@ -638,7 +638,7 @@ const translations: Record<Language, Record<string, string>> = {
         'auth.error.notAdmin': 'Vous n\'avez pas les droits d\'administrateur',
 
         // Chatbot
-        'chatbot.welcome': 'Bonjour, je suis l\'assistant IA de "Rawdati". Comment puis-je vous aider ?',
+        'chatbot.welcome': 'Bonjour, je suis l\'assistant IA de "روضتي". Comment puis-je vous aider ?',
         'chatbot.placeholder': 'Écrivez votre question ici...',
         'chatbot.send': 'Envoyer',
         'chatbot.title': 'Assistant IA',
@@ -648,8 +648,8 @@ const translations: Record<Language, Record<string, string>> = {
     en: {
         // Welcome & General
         'welcome': 'Welcome',
-        'welcome.subtitle': 'Rawdati Platform - Rawdati',
-        'platform.name': 'Rawdati Connect',
+        'welcome.subtitle': 'روضتي Platform',
+        'platform.name': 'روضتي',
         'mascara': 'Mascara',
 
         // Navigation
@@ -670,7 +670,7 @@ const translations: Record<Language, Record<string, string>> = {
         'hero.aboutUs': 'About Us',
 
         // Features
-        'features.title': 'Why Rawdati?',
+        'features.title': 'Why روضتي?',
         'features.subtitle': 'We provide you with everything you need to make the right decision',
         'features.certified': 'Certified Kindergartens',
         'features.certifiedDesc': 'All kindergartens are licensed and follow educational quality standards',
@@ -700,7 +700,7 @@ const translations: Record<Language, Record<string, string>> = {
 
         // CTA
         'cta.ownerTitle': 'Are you a kindergarten owner?',
-        'cta.ownerDesc': 'Join Rawdati platform and reach thousands of parents looking for the best options',
+        'cta.ownerDesc': 'Join روضتي platform and reach thousands of parents looking for the best options',
         'cta.register': 'Register your kindergarten now',
 
         // Language Selector
@@ -711,11 +711,11 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Footer
         'footer.rights': 'All rights reserved',
-        'footer.description': 'Digital platform to help parents find the best services for their children in Rawdati',
+        'footer.description': 'Digital platform to help parents find the best services for their children in روضتي',
 
         // Kindergartens Page
-        'kindergartens.pageTitle': 'Kindergartens in Rawdati',
-        'kindergartens.pageSubtitle': 'Choose from the best kindergartens in Rawdati, with info on prices, services, and reviews',
+        'kindergartens.pageTitle': 'Kindergartens in روضتي',
+        'kindergartens.pageSubtitle': 'Choose from the best kindergartens in روضتي, with info on prices, services, and reviews',
         'kindergartens.searchPlaceholder': 'Search kindergarten...',
         'kindergartens.count': 'Showing {count} kindergarten(s)',
         'kindergartens.noResults': 'No results found',
@@ -803,8 +803,8 @@ const translations: Record<Language, Record<string, string>> = {
         'owner.markAbsence': 'Mark Absent',
 
         // Doctors Page
-        'doctors.pageTitle': 'Pediatricians in Rawdati',
-        'doctors.pageSubtitle': 'A comprehensive list of the best pediatricians in Rawdati province',
+        'doctors.pageTitle': 'Pediatricians in روضتي',
+        'doctors.pageSubtitle': 'A comprehensive list of the best pediatricians in روضتي province',
         'doctors.find': 'Find a Trusted Pediatrician',
         'doctors.searchPlaceholder': 'Search by name or specialty...',
         'doctors.experience': '{years} years experience',
@@ -819,14 +819,14 @@ const translations: Record<Language, Record<string, string>> = {
         'details.partnerStore': 'Partner Stores',
 
         // Speech Therapy Page
-        'speech.pageTitle': 'Speech Therapists in Rawdati',
-        'speech.pageSubtitle': 'A comprehensive list of the best speech therapists in Rawdati',
+        'speech.pageTitle': 'Speech Therapists in روضتي',
+        'speech.pageSubtitle': 'A comprehensive list of the best speech therapists in روضتي',
         'speech.find': 'Find an Expert Speech Therapist',
         'speech.searchPlaceholder': 'Search by name or specialty...',
 
         // Clothing Stores Page
-        'clothing.pageTitle': 'Children\'s Clothing Stores in Rawdati',
-        'clothing.pageSubtitle': 'Discover the best children\'s clothing stores in Rawdati',
+        'clothing.pageTitle': 'Children\'s Clothing Stores in روضتي',
+        'clothing.pageSubtitle': 'Discover the best children\'s clothing stores in روضتي',
         'clothing.find': 'Discover the best clothing stores',
         'clothing.searchPlaceholder': 'Search by store name or city...',
         'clothing.priceRange': 'Price Range',
@@ -901,7 +901,7 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Admin Dashboard
         'admin.title': 'Admin Dashboard',
-        'admin.subtitle': 'Rawdati - Rawdati',
+        'admin.subtitle': 'روضتي - روضتي',
         'admin.totalUsers': 'Total Users',
         'admin.pending': 'Pending',
         'admin.approved': 'Approved',
@@ -954,7 +954,7 @@ const translations: Record<Language, Record<string, string>> = {
         'auth.error.notAdmin': 'You do not have admin privileges',
 
         // Chatbot
-        'chatbot.welcome': 'Hello, I am the AI assistant of "Rawdati". How can I help you?',
+        'chatbot.welcome': 'Hello, I am the AI assistant of "روضتي". How can I help you?',
         'chatbot.placeholder': 'Type your question here...',
         'chatbot.send': 'Send',
         'chatbot.title': 'AI Assistant',

@@ -72,8 +72,7 @@ const Welcome = () => {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-black mb-4 tracking-tight">
-            <span className="text-primary">Rawdati</span>
-            <span className="text-emerald-400"> Connect</span>
+            <span className="text-pink-500 font-arabic">روضتي</span>
           </h1>
 
           <p className="text-lg md:text-xl text-gray-300 max-w-md mx-auto">
@@ -125,7 +124,7 @@ const Welcome = () => {
             Algeria 🇩🇿
           </p>
           <p className="text-gray-600 text-xs mt-2">
-            © 2024 Rawdati Connect
+            © 2024 روضتي
           </p>
         </div>
       </div>
