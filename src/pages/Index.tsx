@@ -6,7 +6,7 @@ import KindergartenCard from '@/components/KindergartenCard';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { GraduationCap, ArrowLeft, ArrowRight, Star, MapPin, Users, Baby, Search, Home } from 'lucide-react';
+import { GraduationCap, ArrowLeft, ArrowRight, Star, MapPin, Users, Search, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import childrenPlaying from '@/assets/children-playing.png';
@@ -124,33 +124,6 @@ const Index = () => {
                   {t('hero.aboutUs')}
                 </Button>
               </Link>
-            </div>
-
-            {/* CTA */}
-            <div className="mt-8 max-w-md mx-auto">
-              <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl p-6 border border-primary/20 backdrop-blur-sm">
-                <div className="text-center mb-4">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center">
-                    <Baby className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="text-lg font-bold text-foreground mb-2">
-                    {language === 'ar' ? 'انضم إلينا' : language === 'fr' ? 'Rejoignez-nous' : 'Join Us'}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {language === 'ar' 
-                      ? 'ابدأ رحلتك في العثور على الروضة المثالية لطفلك' 
-                      : language === 'fr' 
-                      ? 'Commencez votre voyage pour trouver la crèche parfaite pour votre enfant'
-                      : 'Start your journey to find the perfect kindergarten for your child'
-                    }
-                  </p>
-                </div>
-                <Link to="/auth">
-                  <Button size="lg" className="w-full">
-                    {language === 'ar' ? 'ابدأ الآن' : language === 'fr' ? 'Commencer maintenant' : 'Get Started'}
-                  </Button>
-                </Link>
-              </div>
             </div>
           </div>
         </div>
