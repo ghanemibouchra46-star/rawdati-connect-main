@@ -71,10 +71,9 @@ const Welcome = () => {
             <Baby className="w-12 h-12 text-white" />
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-black text-white mb-4 tracking-tight">
-            <span className="bg-gradient-to-r from-primary via-pink-400 to-accent bg-clip-text text-transparent">
-              روضتي
-            </span>
+          <h1 className="text-5xl md:text-7xl font-black mb-4 tracking-tight">
+            <span className="text-primary">Rawdati</span>
+            <span className="text-emerald-400"> Connect</span>
           </h1>
 
           <p className="text-lg md:text-xl text-gray-300 max-w-md mx-auto">
@@ -126,7 +125,7 @@ const Welcome = () => {
             Algeria 🇩🇿
           </p>
           <p className="text-gray-600 text-xs mt-2">
-            © 2024 Rawdati - روضتي
+            © 2024 Rawdati Connect
           </p>
         </div>
       </div>

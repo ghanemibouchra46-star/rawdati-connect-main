@@ -477,8 +477,10 @@ const Auth = () => {
               <Baby className="w-7 h-7 text-primary-foreground" />
             </div>
             <div className="flex flex-col text-right">
-              <span className="font-bold text-2xl text-foreground">{t('platform.name')}</span>
-              <span className="text-sm text-muted-foreground">Rawdati</span>
+              <span className="font-bold text-2xl">
+                <span className="text-primary">Rawdati</span>
+                <span className="text-emerald-600"> Connect</span>
+              </span>
             </div>
           </Link>
         </div>

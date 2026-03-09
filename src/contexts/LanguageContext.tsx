@@ -13,8 +13,8 @@ const translations: Record<Language, Record<string, string>> = {
     ar: {
         // Welcome & General
         'welcome': 'مرحباً بكم',
-        'welcome.subtitle': 'منصة روضتي - Rawdati',
-        'platform.name': 'روضتي',
+        'welcome.subtitle': 'منصة Rawdati Connect',
+        'platform.name': 'Rawdati Connect',
         'mascara': 'معسكر',
 
         // Navigation
@@ -329,7 +329,7 @@ const translations: Record<Language, Record<string, string>> = {
         // Welcome & General
         'welcome': 'Bienvenue',
         'welcome.subtitle': 'Plateforme Rawdati - Rawdati',
-        'platform.name': 'Rawdati',
+        'platform.name': 'Rawdati Connect',
         'mascara': 'Mascara',
 
         // Navigation
@@ -649,7 +649,7 @@ const translations: Record<Language, Record<string, string>> = {
         // Welcome & General
         'welcome': 'Welcome',
         'welcome.subtitle': 'Rawdati Platform - Rawdati',
-        'platform.name': 'Rawdati',
+        'platform.name': 'Rawdati Connect',
         'mascara': 'Mascara',
 
         // Navigation

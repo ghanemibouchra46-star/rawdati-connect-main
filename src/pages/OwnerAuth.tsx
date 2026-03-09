@@ -418,7 +418,10 @@ const OwnerAuth = () => {
               <Building2 className="w-6 h-6 text-secondary-foreground" />
             </div>
             <div className="flex flex-col text-right">
-              <span className="font-bold text-xl text-foreground leading-tight">روضتي</span>
+              <span className="font-bold text-xl leading-tight">
+                <span className="text-primary">Rawdati</span>
+                <span className="text-emerald-600"> Connect</span>
+              </span>
               <span className="text-sm text-muted-foreground leading-tight">مساحة المديرين</span>
             </div>
           </Link>

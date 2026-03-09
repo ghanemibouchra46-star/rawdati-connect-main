@@ -11,11 +11,13 @@ const Footer = () => {
           <div className="md:col-span-1">
             <Link to="/" className="flex items-center gap-3 mb-6">
               <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-lg border-2 border-primary-foreground/20">
-                <img src={logoIcon} alt="روضتي Rawdati" className="w-full h-full object-cover" />
+                <img src={logoIcon} alt="Rawdati Connect" className="w-full h-full object-cover" />
               </div>
               <div className="flex flex-col">
-                <span className="font-extrabold text-xl leading-tight text-primary-foreground">روضتي</span>
-                <span className="text-sm font-semibold text-primary-foreground/70 leading-tight">Rawdati</span>
+                <span className="font-extrabold text-xl leading-tight">
+                  <span className="text-primary">Rawdati</span>
+                  <span className="text-emerald-400"> Connect</span>
+                </span>
               </div>
             </Link>
             <p className="text-sm text-primary-foreground/70 mb-6 leading-relaxed">
@@ -103,7 +105,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="border-t border-primary-foreground/10 mt-10 pt-8 text-center">
           <p className="text-sm text-primary-foreground/50">
-            © {new Date().getFullYear()} روضتي Rawdati. جميع الحقوق محفوظة 💕
+            © {new Date().getFullYear()} Rawdati Connect. جميع الحقوق محفوظة 💕
           </p>
         </div>
       </div>
