@@ -9,8 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Mail, Lock, Eye, EyeOff, Eye, User, Baby } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
 
 const Auth = () => {
   const { t, dir, language } = useLanguage();
@@ -72,11 +70,11 @@ const Auth = () => {
         const role = roleData?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
 
         if (role === 'admin') {
-          navigate('/admin');
+          navigate('/admin-dashboard');
         } else if (role === 'owner') {
-          navigate('/owner');
+          navigate('/owner-dashboard');
         } else {
-          navigate('/parent');
+          navigate('/parent-dashboard');
         }
       }
     };
@@ -155,11 +153,11 @@ const Auth = () => {
             { user_id: data.user.id, role: 'admin' },
             { onConflict: 'user_id,role' }
           );
-          navigate('/admin');
+          navigate('/admin-dashboard');
         } else if (role === 'owner') {
-          navigate('/owner');
+          navigate('/owner-dashboard');
         } else {
-          navigate('/parent');
+          navigate('/parent-dashboard');
         }
       }
     }
@@ -191,7 +189,7 @@ const Auth = () => {
     const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
     const isAdminEmail = adminEmails.includes(emailLower);
 
-    if (isAdminEmail && signupRole !== 'admin') {
+    if (isAdminEmail && signupRole === 'admin') {
       toast({
         title: t('common.error'),
         description: language === 'ar'
@@ -204,7 +202,7 @@ const Auth = () => {
       return false;
     }
 
-    if (!isAdminEmail && signupRole === 'admin') {
+    if (!isAdminEmail && signupRole !== 'admin') {
       toast({
         title: t('common.error'),
         description: language === 'ar'
@@ -495,7 +493,14 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             {!showForgotPassword && (
-              <form onSubmit={handleLogin} className="space-y-4">
+              <Tabs defaultValue="login" className="w-full">
+                <TabsList className="grid w-full mb-6">
+                  <TabsTrigger value="login">{t('auth.login')}</TabsTrigger>
+                  <TabsTrigger value="signup">{t('auth.signup')}</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="login">
+                  <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="login-email">{t('auth.email')}</Label>
                       <div className="relative">
