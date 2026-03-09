@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Mail, Lock, Eye, EyeOff, Eye, User, Baby } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Auth = () => {
   const { t, dir, language } = useLanguage();
@@ -493,14 +495,7 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             {!showForgotPassword && (
-              <Tabs defaultValue="login" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="login">{t('auth.login')}</TabsTrigger>
-                  <TabsTrigger value="signup">{t('auth.signup')}</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="login">
-                  <form onSubmit={handleLogin} className="space-y-4">
+              <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="login-email">{t('auth.email')}</Label>
                       <div className="relative">
@@ -635,7 +630,7 @@ const Auth = () => {
                         <Input
                           id="signup-password"
                           type={showSignupPassword ? "text" : "password"}
-                          placeholder="••••••••"
+                          placeholder="•••••"
                           className="pr-10"
                           required
                           minLength={6}
@@ -838,7 +833,6 @@ const Auth = () => {
                 className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
               >
                 <ArrowRight className="w-4 h-4" />
-                {t('auth.backHome')}
               </Link>
             </div>
           </CardContent>
