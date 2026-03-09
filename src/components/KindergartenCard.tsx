@@ -36,9 +36,9 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
     sports: t('filter.sports') || 'Sports',
   };
 
-  const name = language === 'ar' ? kindergarten?.nameAr : kindergarten?.nameFr;
-  const address = language === 'ar' ? kindergarten?.addressAr : kindergarten?.addressFr;
-  const municipality = language === 'ar' ? kindergarten?.municipalityAr : kindergarten?.municipalityFr;
+  const name = language === 'ar' ? kindergarten?.name_ar : kindergarten?.nameFr;
+  const address = language === 'ar' ? kindergarten?.address_ar : kindergarten?.addressFr;
+  const municipality = language === 'ar' ? kindergarten?.municipality_ar : kindergarten?.municipalityFr;
 
   return (
     <>
