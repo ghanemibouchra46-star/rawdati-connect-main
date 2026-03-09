@@ -82,7 +82,7 @@ const SearchAutocomplete = ({ onSearch, className }: SearchAutocompleteProps) =>
                         <Button
                             onClick={() => handleSelect('manual', inputValue)}
                             className={cn(
-                                "absolute top-1.5 h-11 px-6 gradient-accent border-0 rounded-xl shadow-soft hover:shadow-hover transition-all duration-300 text-primary-foreground font-bold",
+                                "absolute top-1.5 h-11 px-6 bg-gradient-to-r from-primary to-sky-500 border-0 rounded-xl shadow-soft hover:shadow-hover transition-all duration-300 text-white font-bold",
                                 dir === 'rtl' ? 'left-1.5' : 'right-1.5'
                             )}
                         >

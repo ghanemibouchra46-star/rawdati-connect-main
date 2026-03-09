@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, User, LogOut } from 'lucide-react';
+import { Search, Menu, X, User, LogOut, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -37,11 +37,11 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-soft group-hover:shadow-hover transition-all duration-300 group-hover:scale-105 border-2 border-primary/20">
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="w-12 h-12 rounded-full overflow-hidden shadow-soft group-hover:shadow-hover transition-all duration-300 group-hover:scale-105 border-2 border-primary">
               <img src={logoIcon} alt={t('platform.name')} className="w-full h-full object-cover" />
             </div>
-            <span className="font-bold text-xl text-foreground">
+            <span className="font-bold text-xl text-primary">
               {t('platform.name')}
             </span>
           </Link>
@@ -90,15 +90,18 @@ const Navbar = () => {
               </div>
             </form>
 
-            {/* Language Toggle */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleLanguage}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              {language === 'ar' ? 'FR' : 'AR'}
-            </Button>
+            {/* Language Toggle + Shield */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleLanguage}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                {language === 'ar' ? 'FR' : 'AR'}
+              </Button>
+              <Shield className="w-4 h-4 text-muted-foreground" />
+            </div>
 
             {/* User Menu */}
             {user ? (
@@ -142,12 +145,12 @@ const Navbar = () => {
             ) : (
               <div className="flex items-center gap-3">
                 <Link to="/auth">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="border-primary/50 bg-primary/5 text-primary hover:bg-primary/10 hover:text-primary">
                     {language === 'ar' ? 'تسجيل الدخول' : 'Connexion'}
                   </Button>
                 </Link>
                 <Link to="/auth">
-                  <Button size="sm">
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                     {language === 'ar' ? 'سجل الآن' : 'S\'inscrire'}
                   </Button>
                 </Link>
@@ -245,7 +248,7 @@ const Navbar = () => {
                     className="block text-center"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button variant="outline" size="sm" className="w-full border-primary/50 bg-primary/5 text-primary hover:bg-primary/10">
                       {language === 'ar' ? 'تسجيل الدخول' : 'Connexion'}
                     </Button>
                   </Link>
@@ -254,7 +257,7 @@ const Navbar = () => {
                     className="block text-center"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <Button size="sm" className="w-full">
+                    <Button size="sm" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                       {language === 'ar' ? 'سجل الآن' : 'S\'inscrire'}
                     </Button>
                   </Link>

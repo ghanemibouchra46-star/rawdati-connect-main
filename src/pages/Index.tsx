@@ -6,7 +6,7 @@ import KindergartenCard from '@/components/KindergartenCard';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { GraduationCap, ArrowLeft, ArrowRight, Star, MapPin, Users, Baby, Search } from 'lucide-react';
+import { GraduationCap, ArrowLeft, ArrowRight, Star, MapPin, Users, Baby, Search, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import childrenPlaying from '@/assets/children-playing.png';
@@ -99,9 +99,11 @@ const Index = () => {
               </span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-foreground/80 mb-10 max-w-2xl mx-auto leading-relaxed font-medium drop-shadow-sm">
+            <p className="text-xl md:text-2xl text-foreground/80 mb-10 max-w-2xl mx-auto leading-relaxed font-medium drop-shadow-sm inline-flex flex-wrap items-center justify-center gap-2">
               {t('hero.description')}
-              <span className="inline-block mx-2">🏫</span>
+              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary">
+                <Home className="w-4 h-4" />
+              </span>
             </p>
 
             <div className="max-w-2xl mx-auto mb-12">

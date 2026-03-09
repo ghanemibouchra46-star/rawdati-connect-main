@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Send, Bot, Baby, Stethoscope, Shirt, MapPin } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, Baby, Stethoscope, Shirt, MapPin, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -184,7 +184,7 @@ const AIChatbot = () => {
     };
 
     return (
-        <div className={cn("fixed bottom-6 z-[100] transition-all duration-300", dir === 'rtl' ? 'left-6' : 'right-6')}>
+        <div className="fixed bottom-6 left-6 z-[100] transition-all duration-300">
             {/* Chat Window */}
             {isOpen && (
                 <Card className="mb-4 w-[350px] sm:w-[400px] h-[500px] shadow-2xl overflow-hidden flex flex-col border-2 border-primary/20 animate-scale-in">
@@ -265,15 +265,15 @@ const AIChatbot = () => {
                 </Card>
             )}
 
-            {/* Floating Toggle Button */}
+            {/* Floating Toggle Button - bottom left, purple-to-blue gradient, video icon */}
             <Button
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
-                    "w-16 h-16 rounded-full shadow-2xl gradient-accent border-0 flex items-center justify-center hover:scale-110 transition-all duration-300 animate-bounce-slow",
+                    "w-16 h-16 rounded-full shadow-2xl bg-gradient-to-br from-violet-500 to-blue-500 border-0 flex items-center justify-center hover:scale-110 transition-all duration-300 animate-bounce-slow text-white",
                     isOpen && "opacity-0 pointer-events-none"
                 )}
             >
-                <Bot className="w-8 h-8 text-primary-foreground" />
+                <Video className="w-8 h-8 text-white" />
             </Button>
         </div>
     );
