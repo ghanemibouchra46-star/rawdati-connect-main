@@ -56,10 +56,10 @@ const Index = () => {
   const services = [
     {
       icon: GraduationCap,
-      title: t('services.kindergartens'),
-      description: t('services.kindergartensDesc'),
+      title: 'روضتي بالوردي',
+      description: 'اكتشف أفضل الروضات في منطقتك',
       link: '/kindergartens',
-      color: 'from-primary to-primary/80'
+      color: 'from-purple-500 to-purple-600'
     }
   ];
 
@@ -85,23 +85,23 @@ const Index = () => {
         <div className="container mx-auto px-4 relative z-10 pt-20">
           <div className="text-center max-w-4xl mx-auto">
             {/* Welcome Banner */}
-            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary/20 to-accent/20 backdrop-blur-sm rounded-full shadow-lg mb-8 border border-primary/30">
-              <span className="text-2xl font-bold text-primary">{t('welcome')}</span>
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600/20 to-emerald-600/20 backdrop-blur-sm rounded-full shadow-lg mb-8 border border-purple-600/30">
+              <span className="text-2xl font-bold text-purple-600">مرحباً بك في</span>
               <span className="text-xl">👋</span>
             </div>
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight drop-shadow-lg">
               <span className="block mb-3 text-foreground">
-                {t('hero.title1')}
+                روضتي
               </span>
-              <span className="block text-transparent bg-gradient-to-r from-primary via-primary to-accent bg-clip-text drop-shadow-none">
-                {t('hero.title2')}
+              <span className="block text-transparent bg-gradient-to-r from-purple-600 via-purple-600 to-emerald-600 bg-clip-text drop-shadow-none">
+                بالوردي
               </span>
             </h1>
 
             <p className="text-xl md:text-2xl text-foreground/80 mb-10 max-w-2xl mx-auto leading-relaxed font-medium drop-shadow-sm inline-flex flex-wrap items-center justify-center gap-2">
-              {t('hero.description')}
-              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary">
+              منصتك الأولى للعثور على أفضل الروضات في منطقتك
+              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-purple-600/20 text-purple-600">
                 <Home className="w-4 h-4" />
               </span>
             </p>
@@ -248,23 +248,26 @@ const Index = () => {
           </div>
 
           <div className="flex flex-wrap justify-center gap-6">
-            {services.map((service, index) => (
-              <Link key={index} to={service.link}>
+            <div className="relative">
+              <Link to="/kindergartens">
                 <Card className="h-full border-0 shadow-soft hover:shadow-hover transition-all duration-300 group cursor-pointer overflow-hidden">
                   <CardContent className="p-0">
-                    <div className={`h-32 bg-gradient-to-br ${service.color} flex items-center justify-center`}>
-                      <service.icon className="w-16 h-16 text-white/90" />
+                    <div className="h-32 bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                      <GraduationCap className="w-16 h-16 text-white/90" />
                     </div>
                     <div className="p-6">
                       <h3 className="font-bold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
-                        {service.title}
+                        {services[0].title}
                       </h3>
-                      <p className="text-muted-foreground text-sm">{service.description}</p>
+                      <p className="text-muted-foreground text-sm">{services[0].description}</p>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
-            ))}
+              <div className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs px-2 py-1 rounded-full">
+                جديد
+              </div>
+            </div>
           </div>
         </div>
       </section>
