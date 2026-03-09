@@ -13,7 +13,7 @@ const translations: Record<Language, Record<string, string>> = {
     ar: {
         // Welcome & General
         'welcome': 'مرحباً بكم',
-        'welcome.subtitle': 'منصة روضتي',
+        'welcome.subtitle': 'منصة روضتي - Rawdati',
         'platform.name': 'روضتي',
         'mascara': 'معسكر',
 

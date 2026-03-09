@@ -85,14 +85,9 @@ const Index = () => {
         <div className="container mx-auto px-4 relative z-10 pt-20">
           <div className="text-center max-w-4xl mx-auto">
             {/* Welcome Banner */}
-            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary/20 to-accent/20 backdrop-blur-sm rounded-full shadow-lg mb-4 border border-primary/30">
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary/20 to-accent/20 backdrop-blur-sm rounded-full shadow-lg mb-8 border border-primary/30">
               <span className="text-2xl font-bold text-primary">{t('welcome')}</span>
               <span className="text-xl">👋</span>
-            </div>
-
-            {/* Platform name badge (منصة روضتي بدون معسكر) */}
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-card/90 backdrop-blur-sm rounded-full shadow-soft mb-8 border border-primary/20">
-              <span className="text-base font-bold text-foreground">✨ {t('welcome.subtitle')}</span>
             </div>
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight drop-shadow-lg">
