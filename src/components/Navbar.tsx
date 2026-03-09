@@ -146,9 +146,9 @@ const Navbar = () => {
                     {language === 'ar' ? 'تسجيل الدخول' : 'Connexion'}
                   </Button>
                 </Link>
-                <Link to="/owner-auth">
+                <Link to="/auth">
                   <Button size="sm">
-                    {t('nav.ownerLogin')}
+                    {language === 'ar' ? 'سجل الآن' : 'S\'inscrire'}
                   </Button>
                 </Link>
               </div>
@@ -250,12 +250,12 @@ const Navbar = () => {
                     </Button>
                   </Link>
                   <Link
-                    to="/owner-auth"
+                    to="/auth"
                     className="block text-center"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <Button size="sm" className="w-full">
-                      {t('nav.ownerLogin')}
+                      {language === 'ar' ? 'سجل الآن' : 'S\'inscrire'}
                     </Button>
                   </Link>
                 </div>
