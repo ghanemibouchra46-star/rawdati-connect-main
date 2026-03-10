@@ -60,13 +60,13 @@ const normalizeServiceName = (serviceId: string): string => {
   if (!serviceId) return '';
   const lower = serviceId.toLowerCase().trim();
 
-  // Map IDs to Arabic names
-  if (lower === 'bus' || serviceId.includes('نقل') || lower.includes('transport')) return 'نقل مدرسي';
-  if (lower === 'meals' || serviceId.includes('وجبات') || lower.includes('repas')) return 'وجبات غذائية';
-  if (lower === 'mental-math' || serviceId.includes('حساب') || lower.includes('calcul')) return 'الحساب الذهني';
-  if (lower === 'languages' || serviceId.includes('لغات') || lower.includes('langue')) return 'لغات أجنبية';
-  if (lower === 'quran' || serviceId.includes('قرآن') || lower.includes('coran')) return 'تحفيظ القرآن';
-  if (lower === 'sports' || serviceId.includes('رياضي') || lower.includes('sport')) return 'أنشطة رياضية';
+  // Map IDs and Arabic names to internal service IDs
+  if (lower === 'bus' || serviceId.includes('نقل') || lower.includes('transport')) return 'bus';
+  if (lower === 'meals' || serviceId.includes('وجبات') || lower.includes('repas')) return 'meals';
+  if (lower === 'mental-math' || serviceId.includes('حساب') || lower.includes('calcul')) return 'mental-math';
+  if (lower === 'languages' || serviceId.includes('لغات') || lower.includes('langue')) return 'languages';
+  if (lower === 'quran' || serviceId.includes('قرآن') || lower.includes('coran')) return 'quran';
+  if (lower === 'sports' || serviceId.includes('رياضي') || lower.includes('sport')) return 'sports';
 
   // If already Arabic name, return as-is
   return serviceId;
@@ -180,7 +180,7 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     address_ar: row?.address_ar || '',
     addressFr: row?.address_fr || '',
     phone: row?.phone || '',
-    pricePerMonth: row?.price_per_month || 0,
+    pricePerMonth: Number(row?.price_per_month) || 0,
     ageRange: { min: row?.age_min || 3, max: row?.age_max || 6 },
     workingHours: { open: row?.working_hours_open || '07:30', close: row?.working_hours_close || '17:00' },
     rating: Number(row?.rating) || 0,

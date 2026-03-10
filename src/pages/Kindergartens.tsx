@@ -68,14 +68,17 @@ const Kindergartens = () => {
     console.log("Selected municipality:", selectedMunicipality);
     
     const filtered = kindergartens.filter((k) => {
-      const name = language === 'ar' ? k?.name_ar : k?.nameFr;
-      if (searchQuery && !name?.toLowerCase().includes(searchQuery.toLowerCase())) {
+      const searchStr = `${k?.name_ar || ''} ${k?.nameFr || ''} ${k?.municipality_ar || ''} ${k?.municipalityFr || ''}`.toLowerCase();
+      if (searchQuery && !searchStr.includes(searchQuery.toLowerCase().trim())) {
         return false;
       }
       if (selectedMunicipality && k?.municipality !== selectedMunicipality) {
         return false;
       }
-      if (k?.pricePerMonth < priceRange[0] || k?.pricePerMonth > priceRange[1]) {
+      const price = k?.pricePerMonth || 0;
+      const minPrice = priceRange[0];
+      const maxPrice = priceRange[1] >= 15000 ? Infinity : priceRange[1];
+      if (price < minPrice || price > maxPrice) {
         return false;
       }
       if (selectedServices.length > 0 && !selectedServices.every((s) => k?.services?.includes(s))) {
