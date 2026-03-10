@@ -386,7 +386,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                 {(kindergarten?.activities || []).slice(0, 6).map((activity) => (
                   <ActivityCard key={activity.id} activity={{
                     ...activity,
-                    nameAr: language === 'ar' ? activity?.name_ar : activity?.nameFr
+                    name_ar: language === 'ar' ? activity?.name_ar : activity?.nameFr
                   }} />
                 ))}
 

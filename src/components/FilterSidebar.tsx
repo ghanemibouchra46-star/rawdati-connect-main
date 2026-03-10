@@ -100,7 +100,7 @@ const FilterSidebar = ({
                 : 'bg-muted hover:bg-muted/80 text-foreground'
                 }`}
             >
-              {language === 'ar' ? muni.nameAr : muni.nameFr}
+              {language === 'ar' ? muni.name_ar : muni.nameFr}
             </button>
           ))}
         </div>
@@ -165,7 +165,7 @@ const FilterSidebar = ({
                 className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
               />
               <span className="text-lg">{service.icon}</span>
-              <span className="text-sm text-foreground">{language === 'ar' ? service.nameAr : service.nameFr}</span>
+              <span className="text-sm text-foreground">{language === 'ar' ? service.name_ar : service.nameFr}</span>
             </label>
           ))}
         </div>
@@ -189,7 +189,7 @@ const FilterSidebar = ({
                 className="border-border data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
               />
               <span className="text-lg">{activity.icon}</span>
-              <span className="text-sm text-foreground">{language === 'ar' ? activity.nameAr : activity.nameFr}</span>
+              <span className="text-sm text-foreground">{language === 'ar' ? activity.name_ar : activity.nameFr}</span>
             </label>
           ))}
         </div>

@@ -2,7 +2,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Activity {
   id: string;
-  nameAr: string;
+  name_ar: string;
   nameFr: string;
   descriptionAr?: string;
   descriptionFr?: string;
@@ -18,7 +18,7 @@ interface ActivityCardProps {
 const ActivityCard = ({ activity }: ActivityCardProps) => {
   const { language, dir } = useLanguage();
 
-  const name = language === 'ar' ? activity.nameAr : activity.nameFr;
+  const name = language === 'ar' ? activity.name_ar : activity.nameFr;
   // Fallback for description if localized fields aren't present yet in all data
   const description = (language === 'ar' ? activity.descriptionAr : activity.descriptionFr) || activity.description;
 

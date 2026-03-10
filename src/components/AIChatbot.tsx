@@ -49,12 +49,12 @@ const AIChatbot = () => {
         // Find specific kindergarten mentioned
         const specificKg = kindergartens.find(k =>
             text.includes(k.name.toLowerCase()) ||
-            text.includes(k.nameAr.toLowerCase()) ||
+            text.includes(k.name_ar.toLowerCase()) ||
             text.includes(k.nameFr.toLowerCase())
         );
 
         if (specificKg) {
-            const name = language === 'ar' ? specificKg.nameAr : specificKg.nameFr;
+            const name = language === 'ar' ? specificKg.name_ar : specificKg.nameFr;
             const address = language === 'ar' ? specificKg.addressAr : specificKg.addressFr;
             const price = specificKg.pricePerMonth;
             const phone = specificKg.phone;
@@ -69,15 +69,15 @@ const AIChatbot = () => {
 
         // Check for municipalities
         const mun = municipalities.find(m =>
-            text.includes(m.nameAr.toLowerCase()) ||
+            text.includes(m.name_ar.toLowerCase()) ||
             text.includes(m.nameFr.toLowerCase()) ||
             text.includes(m.id.toLowerCase())
         );
 
         if (mun) {
-            const munName = language === 'ar' ? mun.nameAr : mun.nameFr;
+            const munName = language === 'ar' ? mun.name_ar : mun.nameFr;
             const kgsInMun = kindergartens.filter(k => k.municipality === mun.id);
-            const kgsNames = kgsInMun.map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
+            const kgsNames = kgsInMun.map(k => language === 'ar' ? k.name_ar : k.nameFr).join('، ');
 
             if (kgsInMun.length > 0) {
                 return language === 'ar'
@@ -92,7 +92,7 @@ const AIChatbot = () => {
 
         // Check for specific services/features
         if (text.includes('حافلة') || text.includes('نقل') || text.includes('bus') || text.includes('transport')) {
-            const busKgs = kindergartens.filter(k => (k.services || []).includes('bus')).map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
+            const busKgs = kindergartens.filter(k => (k.services || []).includes('bus')).map(k => language === 'ar' ? k.name_ar : k.nameFr).join('، ');
             if (!busKgs) {
                 return language === 'ar' ? 'حالياً لا توجد روضات مسجلة توفر خدمة النقل.' : 'Aucun jardin d\'enfants avec transport enregistré pour le moment.';
             }
@@ -102,7 +102,7 @@ const AIChatbot = () => {
         }
 
         if (text.includes('وجبات') || text.includes('أكل') || text.includes('meals') || text.includes('repas') || text.includes('restauration')) {
-            const mealsKgs = kindergartens.filter(k => (k.services || []).includes('meals')).map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
+            const mealsKgs = kindergartens.filter(k => (k.services || []).includes('meals')).map(k => language === 'ar' ? k.name_ar : k.nameFr).join('، ');
             if (!mealsKgs) {
                 return language === 'ar' ? 'حالياً لا توجد روضات مسجلة توفر الوجبات.' : 'Aucun jardin d\'enfants avec repas enregistré pour le moment.';
             }
@@ -112,7 +112,7 @@ const AIChatbot = () => {
         }
 
         if (text.includes('توحد') || text.includes('autisme') || text.includes('autism')) {
-            const autismKgs = kindergartens.filter(k => k.hasAutismWing).map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
+            const autismKgs = kindergartens.filter(k => k.hasAutismWing).map(k => language === 'ar' ? k.name_ar : k.nameFr).join('، ');
             if (!autismKgs) {
                 return language === 'ar' ? 'حالياً لا توجد روضات مسجلة بجناح توحد.' : 'Aucun jardin d\'enfants avec aile autisme enregistré pour le moment.';
             }
@@ -129,7 +129,7 @@ const AIChatbot = () => {
 
         // Default response context-aware
         if (text.includes('روضة') || text.includes('jardin') || text.includes('kindergarten')) {
-            const topKgs = kindergartens.slice(0, 5).map(k => language === 'ar' ? k.nameAr : k.nameFr).join('، ');
+            const topKgs = kindergartens.slice(0, 5).map(k => language === 'ar' ? k.name_ar : k.nameFr).join('، ');
             if (kindergartens.length === 0) {
                 return language === 'ar'
                     ? 'حالياً لا توجد روضات مسجلة في المنصة. يمكنك متابعة التحديثات لاحقاً.'

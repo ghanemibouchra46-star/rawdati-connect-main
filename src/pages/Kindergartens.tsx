@@ -28,7 +28,7 @@ const kindergartenMatchesActivity = (k: Kindergarten, activityFilterId: string):
   const keywords = activityKeywords[activityFilterId];
   if (!keywords) return false;
   return k?.activities?.some(act => {
-    const name = ((act?.nameAr || '') + ' ' + (act?.nameFr || '')).toLowerCase();
+    const name = ((act?.name_ar || '') + ' ' + (act?.nameFr || '')).toLowerCase();
     return keywords.some(kw => name.includes(kw.toLowerCase()));
   });
 };
@@ -68,7 +68,7 @@ const Kindergartens = () => {
     console.log("Selected municipality:", selectedMunicipality);
     
     const filtered = kindergartens.filter((k) => {
-      const name = language === 'ar' ? k?.nameAr : k?.nameFr;
+      const name = language === 'ar' ? k?.name_ar : k?.nameFr;
       if (searchQuery && !name?.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }

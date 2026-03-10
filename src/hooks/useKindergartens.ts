@@ -120,7 +120,7 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     if (typeof act === 'string') {
       return {
         id: `act-${row.id}-${i}`,
-        nameAr: act,
+        name_ar: act,
         nameFr: act,
         description: '',
         schedule: '',
@@ -130,7 +130,7 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
 
     // Also assign icon if act is an object but has no icon
     if (act && typeof act === 'object' && !act.icon) {
-      act.icon = getActivityIcon(act.nameAr || act.nameFr || '');
+      act.icon = getActivityIcon(act.name_ar || act.nameFr || '');
     }
 
     return act;

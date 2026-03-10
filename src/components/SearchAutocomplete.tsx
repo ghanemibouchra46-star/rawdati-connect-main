@@ -30,8 +30,8 @@ const SearchAutocomplete = ({ onSearch, className }: SearchAutocompleteProps) =>
     const filteredItems = useMemo(() => {
         if (!inputValue) return [];
         return kindergartens.filter((k) => {
-            const name = language === 'ar' ? k.nameAr : k.nameFr;
-            const municipality = language === 'ar' ? k.municipalityAr : k.municipalityFr;
+            const name = language === 'ar' ? k.name_ar : k.nameFr;
+            const municipality = language === 'ar' ? k.municipality_ar : k.municipalityFr;
             return (
                 name.toLowerCase().includes(inputValue.toLowerCase()) ||
                 municipality.toLowerCase().includes(inputValue.toLowerCase())
@@ -104,8 +104,8 @@ const SearchAutocomplete = ({ onSearch, className }: SearchAutocompleteProps) =>
                             ) : (
                                 <CommandGroup heading={language === 'ar' ? 'النتائج المقترحة' : 'Suggestions'}>
                                     {filteredItems.map((k) => {
-                                        const name = language === 'ar' ? k.nameAr : k.nameFr;
-                                        const muni = language === 'ar' ? k.municipalityAr : k.municipalityFr;
+                                        const name = language === 'ar' ? k.name_ar : k.nameFr;
+                                        const muni = language === 'ar' ? k.municipality_ar : k.municipalityFr;
                                         return (
                                             <CommandItem
                                                 key={k.id}
