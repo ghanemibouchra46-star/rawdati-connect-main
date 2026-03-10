@@ -18,6 +18,9 @@ interface BookingModalProps {
 
 const BookingModal = ({ isOpen, onClose, kindergarten, onBook }: BookingModalProps) => {
   const { language } = useLanguage();
+
+  if (!kindergarten) return null;
+
   const [formData, setFormData] = useState({
     parentName: '',
     parentEmail: '',
