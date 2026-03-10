@@ -157,15 +157,17 @@ const FilterSidebar = ({
           {services.map((service) => (
             <label
               key={service.id}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-all ${dir === 'rtl' ? 'flex-row' : 'flex-row-reverse'}`}
+              className={`flex items-center justify-between px-4 py-3 rounded-2xl bg-[#faf9f4] hover:bg-[#f0efea] cursor-pointer transition-all ${dir === 'rtl' ? 'flex-row' : 'flex-row-reverse'}`}
             >
+              <div className={`flex items-center gap-3 ${dir === 'rtl' ? 'flex-row' : 'flex-row-reverse'}`}>
+                <span className="text-xl bg-white p-1.5 rounded-lg shadow-sm">{service.icon}</span>
+                <span className="text-sm font-medium text-foreground">{language === 'ar' ? service.name_ar : service.nameFr}</span>
+              </div>
               <Checkbox
                 checked={selectedServices.includes(service.id)}
                 onCheckedChange={() => handleServiceToggle(service.id)}
-                className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                className="border-primary/20 rounded-full w-5 h-5 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
               />
-              <span className="text-lg">{service.icon}</span>
-              <span className="text-sm text-foreground">{language === 'ar' ? service.name_ar : service.nameFr}</span>
             </label>
           ))}
         </div>
@@ -181,15 +183,17 @@ const FilterSidebar = ({
           {filterableActivities.map((activity) => (
             <label
               key={activity.id}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-all ${dir === 'rtl' ? 'flex-row' : 'flex-row-reverse'}`}
+              className={`flex items-center justify-between px-4 py-3 rounded-2xl bg-[#f4fbfa] hover:bg-[#eaf5f4] cursor-pointer transition-all ${dir === 'rtl' ? 'flex-row' : 'flex-row-reverse'}`}
             >
+              <div className={`flex items-center gap-3 ${dir === 'rtl' ? 'flex-row' : 'flex-row-reverse'}`}>
+                <span className="text-xl bg-white p-1.5 rounded-lg shadow-sm">{activity.icon}</span>
+                <span className="text-sm font-medium text-foreground">{language === 'ar' ? activity.name_ar : activity.nameFr}</span>
+              </div>
               <Checkbox
                 checked={selectedActivities.includes(activity.id)}
                 onCheckedChange={() => handleActivityToggle(activity.id)}
-                className="border-border data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
+                className="border-purple-500/20 rounded-full w-5 h-5 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
               />
-              <span className="text-lg">{activity.icon}</span>
-              <span className="text-sm text-foreground">{language === 'ar' ? activity.name_ar : activity.nameFr}</span>
             </label>
           ))}
         </div>

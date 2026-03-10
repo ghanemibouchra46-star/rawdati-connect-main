@@ -31,8 +31,9 @@ const Navbar = () => {
             <div className="w-12 h-12 rounded-full overflow-hidden shadow-soft group-hover:shadow-hover transition-all duration-300 group-hover:scale-105 border-2 border-primary">
               <img src={logoIcon} alt={t('platform.name')} className="w-full h-full object-cover" />
             </div>
-            <span className="font-bold text-xl">
-              <span className="text-pink-500 font-arabic">روضتي</span>
+            <span className="font-bold text-xl flex items-center gap-1.5 pt-1">
+              <span className="text-[#e82c84] font-arabic text-2xl tracking-wide">روضتي</span>
+              <span className="text-[#00b050] font-fredoka text-xl tracking-tight mt-1">Rawdati</span>
             </span>
           </Link>
 
