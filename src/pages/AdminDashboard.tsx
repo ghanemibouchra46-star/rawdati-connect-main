@@ -4,7 +4,7 @@ import {
     Shield, Users, UserCheck, UserX, Clock, LogOut, Home,
     Building2, LayoutDashboard, Settings as SettingsIcon,
     Search, Filter, CheckCircle2, XCircle, Info, ChevronRight,
-    TrendingUp, Baby, Star, CreditCard, Calendar, Check, X, MapPin
+    TrendingUp, Baby, Star, CreditCard, Calendar, Check, X, MapPin, Crown, FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -19,7 +19,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import { Separator } from '@/components/ui/separator';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
-
+import { useAllSubscriptionRequests } from '@/hooks/useSubscriptionRequests';
+import { useAllPlatformSubscriptions, useUpdatePlatformSubscription } from '@/hooks/usePlatformSubscription';
 interface UserProfile {
     id: string;
     full_name: string | null;
@@ -28,7 +29,6 @@ interface UserProfile {
     status: string | null;
     email?: string;
     role?: string;
-    updated_at: string;
 }
 
 interface Kindergarten {
@@ -62,26 +62,46 @@ interface RegistrationRequest {
 const mockRegistrations: RegistrationRequest[] = [];
 
 // Adapter to convert local kindergarten data to admin format
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function adaptKindergarten(kg: any): Kindergarten {
+function adaptKindergarten(kg: typeof localKindergartens[0]): Kindergarten {
     return {
         id: kg.id,
-        name_ar: kg.name_ar,
+        name_ar: kg.nameAr,
         name_fr: kg.nameFr,
-        address_ar: kg.address_ar,
+        address_ar: kg.addressAr,
         address_fr: kg.addressFr,
         municipality: kg.municipality,
-        municipality_ar: kg.municipality_ar,
+        municipality_ar: kg.municipalityAr,
         municipality_fr: kg.municipalityFr,
         status: 'approved',
-        created_at: kg.created_at || new Date().toISOString(),
+        created_at: new Date().toISOString(),
     };
+}
+
+interface RegistrationRequest {
+    id: string;
+    kindergarten_id: string;
+    parent_name: string;
+    phone: string;
+    email: string | null;
+    child_name: string;
+    child_age: number;
+    message: string | null;
+    status: 'pending' | 'approved' | 'rejected';
+    created_at: string;
+    user_id?: string;
 }
 
 const AdminDashboard = () => {
     const { t, dir, language } = useLanguage();
     const navigate = useNavigate();
     const { toast } = useToast();
+    
+    // Hooks for subscription requests
+    const { requests: subscriptionRequests, isLoading: loadingSubscriptions, error: subscriptionError, approveRequest, rejectRequest } = useAllSubscriptionRequests();
+    
+    // Hooks for platform subscriptions
+    const { subscriptionRequests: platformSubscriptions, isLoading: loadingPlatformSubs } = useAllPlatformSubscriptions();
+    const { approveSubscription, rejectSubscription } = useUpdatePlatformSubscription();
 
     const [isLoading, setIsLoading] = useState(true);
     const [users, setUsers] = useState<UserProfile[]>([]);
@@ -105,7 +125,6 @@ const AdminDashboard = () => {
             }
         };
         init();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const checkAdminAccess = async () => {
@@ -141,287 +160,871 @@ const AdminDashboard = () => {
         }
 
         // التأكد من وجود سطر الأدمن في user_roles حتى تسمح RLS برؤية كل المستخدمين (أولياء الأمور، إلخ)
-        if (!roleData && isAdminEmail) {
-            const { error } = await supabase
-                .from('user_roles')
-                .insert({
-                    user_id: session.user.id,
-                    role: 'admin',
-                    created_at: new Date().toISOString()
-                });
-            if (error && error.code !== '23505') { // Ignore duplicate key error
-                console.error('Error creating admin role:', error);
-            }
+        if (!roleData && (isAdminEmail || hasAdminMetadata)) {
+            await supabase.from('user_roles').upsert(
+                { user_id: session.user.id, role: 'admin' },
+                { onConflict: 'user_id,role' }
+            );
         }
-
         return true;
     };
 
     const fetchData = async () => {
+        setIsLoading(true);
         try {
-            setIsLoading(true);
+            let rawKgData: any[] = [];
+            try {
+                const { data, error } = await supabase
+                    .from('kindergartens')
+                    .select('*');
+                if (error) {
+                    toast({ title: "KG fetch error", description: error.message, variant: "destructive" });
+                    throw error;
+                }
+                rawKgData = data || [];
+            } catch (e: any) {
+                console.error("KG fetch error:", e);
+                toast({ title: t('common.error'), description: e.message || "Failed to load kindergartens", variant: 'destructive' });
+            }
 
-            // Fetch users
-            const { data: usersData, error: usersError } = await supabase
-                .from('profiles')
-                .select('*')
-                .order('created_at', { ascending: false });
+            let finalKGs: Kindergarten[] = [];
+            finalKGs = localKindergartens.map(adaptKindergarten);
 
-            if (usersError) throw usersError;
+            if (rawKgData && rawKgData.length > 0) {
+                const dbKGs = rawKgData.map(kg => ({
+                    id: kg.id,
+                    name_ar: kg.name_ar || kg.nameAr || kg.name || 'N/A',
+                    name_fr: kg.name_fr || kg.nameFr || kg.name || 'N/A',
+                    address_ar: kg.address_ar || kg.addressAr || kg.address || 'N/A',
+                    address_fr: kg.address_fr || kg.addressFr || kg.address || 'N/A',
+                    municipality: kg.municipality || kg.city || 'N/A',
+                    municipality_ar: kg.municipality_ar || kg.city_ar || kg.municipality || 'N/A',
+                    municipality_fr: kg.municipality_fr || kg.city_fr || kg.municipality || 'N/A',
+                    status: kg.status || 'pending',
+                    created_at: kg.created_at || new Date().toISOString(),
+                }));
+                // Use only Database Kindergartens if there's any, else fallback OR combine?
+                // Let's replace the local data if we found DB items:
+                finalKGs = dbKGs;
+            } else {
+                console.log("No DB kindergartens, using local data");
+            }
 
-            // Fetch kindergartens
-            const { data: kindergartensData, error: kindergartensError } = await supabase
-                .from('kindergartens')
-                .select('*')
-                .order('created_at', { ascending: false });
+            // 2. Fetch Profiles and Roles: نفضل RPC (تعمل حتى بدون سياسات RLS)، وإلا الطريقة العادية
+            let usersWithRoles: any[] = [];
+            try {
+                const { data: rpcData, error: rpcError } = await supabase.rpc('get_profiles_with_roles_for_admin');
+                const rpcList = Array.isArray(rpcData) ? rpcData : (rpcData ? [rpcData] : []);
+                if (!rpcError) {
+                    usersWithRoles = rpcList.map((row: any) => ({
+                        id: row.id,
+                        full_name: row.full_name,
+                        phone: row.phone,
+                        status: row.status,
+                        created_at: row.created_at,
+                        updated_at: row.updated_at,
+                        role: row.role || 'parent'
+                    }));
+                }
+                if (usersWithRoles.length === 0 && (rpcError || !rpcData)) {
+                    const [pRes, rRes] = await Promise.all([
+                        supabase.from('profiles').select('*'),
+                        supabase.from('user_roles').select('*')
+                    ]);
+                    if (pRes.error) {
+                        console.error("Profiles fetch error:", pRes.error);
+                        toast({ title: t('common.error'), description: language === 'ar' ? 'تعذر تحميل قائمة المستخدمين' : 'Could not load users', variant: 'destructive' });
+                    }
+                    const profiles = pRes.data || [];
+                    const roles = rRes.data || [];
+                    usersWithRoles = profiles.map((profile: any) => ({
+                        ...profile,
+                        role: roles.find((r: any) => r.user_id === profile.id)?.role || 'parent'
+                    }));
+                }
+            } catch (e) {
+                console.error("Profiles/Roles fetch error:", e);
+            }
 
-            if (kindergartensError) throw kindergartensError;
+            // 3. Fetch Registrations
+            let regData: any[] = [];
+            try {
+                const { data } = await supabase
+                    .from('registration_requests')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                regData = data || [];
+            } catch (e) {
+                console.error("Registration fetch error:", e);
+            }
 
-            setUsers(usersData || []);
-            setKindergartens(kindergartensData?.map(adaptKindergarten) || localKindergartens.map(adaptKindergarten));
+            // Attempt to link emails if they exist in metadata or profiles
+            // (In a real app, you might join with auth.users if you are a superuser)
 
-            // Calculate stats
-            const totalUsers = usersData?.length || 0;
-            const activeParents = usersData?.filter((u: { role: string }) => u.role === 'parent').length || 0;
-            const activeOwners = usersData?.filter((u: { role: string }) => u.role === 'owner').length || 0;
+            // Update all states
+            setUsers(usersWithRoles);
+            setKindergartens(finalKGs);
+
+            if (regData && regData.length > 0) {
+                setRegistrationRequests(regData);
+            } else {
+                setRegistrationRequests(localMockRegs);
+            }
+
+            const activeOwners = usersWithRoles.filter(u => u.role === 'owner').length;
+            const activeParents = usersWithRoles.filter(u => u.role === 'parent').length;
+            const pendingKGs = finalKGs.filter(kg => kg.status === 'pending').length;
+            const pendingRegs = (regData && regData.length > 0 ? regData : localMockRegs)
+                .filter(reg => reg.status === 'pending').length;
 
             setStats({
-                totalUsers,
-                totalKindergartens: kindergartensData?.length || localKindergartens.length,
-                pendingApprovals: 0,
-                activeParents,
-                activeOwners
+                totalUsers: usersWithRoles.length,
+                totalKindergartens: finalKGs.length,
+                pendingApprovals: pendingKGs + pendingRegs,
+                activeParents: activeParents,
+                activeOwners: activeOwners
             });
 
         } catch (error) {
-            console.error('Error fetching data:', error);
-            toast({
-                title: language === 'ar' ? 'خطأ' : 'Error',
-                description: language === 'ar' ? 'فشل في تحميل البيانات' : 'Failed to load data',
-                variant: 'destructive',
-            });
-        } finally {
-            setIsLoading(false);
+            console.error('Fetch error:', error);
+            // Even on error, we still have local data from initial state
         }
+        setIsLoading(false);
+    };
+
+    const updateUserStatus = async (userId: string, status: 'approved' | 'rejected') => {
+        const { error } = await supabase
+            .from('profiles')
+            .update({ status: status as any })
+            .eq('id', userId);
+
+        if (error) {
+            console.error('Update user status error:', error);
+            toast({
+                title: `${t('common.error')}: ${error.message}`,
+                variant: 'destructive'
+            });
+            return;
+        }
+
+        toast({ title: t('common.updated') });
+        fetchData();
+    };
+
+    const updateKGStatus = async (kgId: string, status: 'approved' | 'rejected') => {
+        const { error } = await supabase
+            .from('kindergartens')
+            .update({ status: status } as any)
+            .eq('id', kgId);
+
+        if (error) {
+            console.error('Update KG status error:', error);
+            toast({
+                title: `${t('common.error')}: ${error.message}`,
+                variant: 'destructive'
+            });
+            return;
+        }
+
+        toast({ title: t('common.updated') });
+        fetchData();
+    };
+
+    const updateRegistrationStatus = async (regId: string, status: 'approved' | 'rejected') => {
+        // Handle mock data persistence
+        if (regId.startsWith('reg-')) {
+            const updated = localMockRegs.map(r => r.id === regId ? { ...r, status } : r);
+            setLocalMockRegs(updated);
+            setRegistrationRequests(updated);
+            toast({ title: t('common.updated') });
+            return;
+        }
+
+        const { error } = await supabase
+            .from('registration_requests')
+            .update({ status: status })
+            .eq('id', regId);
+
+        if (error) {
+            console.error('Update registration status error:', error);
+            toast({
+                title: t('common.error'),
+                description: error.message,
+                variant: 'destructive'
+            });
+            return;
+        }
+
+        toast({ title: t('common.updated') });
+        fetchData();
     };
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
-        navigate('/admin-auth');
+        try {
+            await supabase.auth.signOut();
+            // Clear local storage items just in case
+            Object.keys(localStorage).forEach(key => {
+                if (key.includes('supabase-auth-token')) localStorage.removeItem(key);
+            });
+            navigate('/admin-auth', { replace: true });
+        } catch (error) {
+            console.error('Logout error:', error);
+            navigate('/admin-auth', { replace: true });
+        }
     };
 
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+                <div className="text-center">
+                    <Shield className="w-12 h-12 text-red-500 mx-auto animate-pulse" />
+                    <p className="mt-4 text-slate-400">{t('auth.loading')}</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" dir={dir}>
-            {/* Header */}
-            <header className="border-b border-white/10 bg-black/20 backdrop-blur-sm">
+        <div className="min-h-screen bg-[#0f172a] text-slate-200" dir={dir}>
+            {/* Sidebar / Topbar for Admin */}
+            <header className="bg-slate-900/80 backdrop-blur-md border-b border-white/5 sticky top-0 z-50">
                 <div className="container mx-auto px-4 py-4">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <Shield className="w-8 h-8 text-blue-400" />
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg shadow-red-500/20">
+                                <Shield className="w-5 h-5 text-white" />
+                            </div>
                             <div>
-                                <h1 className="text-xl font-bold text-white">
-                                    {language === 'ar' ? 'لوحة تحكم الأدمن' : 'Admin Dashboard'}
-                                </h1>
-                                <p className="text-sm text-slate-400">
-                                    {language === 'ar' ? 'إدارة المنصة' : 'Platform Management'}
-                                </p>
+                                <h1 className="font-bold text-lg text-white leading-tight">Rawdati <span className="text-red-500">Admin</span></h1>
+                                <p className="text-[10px] text-slate-400 uppercase tracking-widest">{language === 'ar' ? 'لوحة التحكم المركزية' : 'Central Control Panel'}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
                             <LanguageSelector />
-                            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
-                                <LogOut className="w-4 h-4" />
-                                {language === 'ar' ? 'خروج' : 'Logout'}
+                            <Separator orientation="vertical" className="h-6 bg-white/10" />
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => navigate('/')}
+                                className="text-slate-400 hover:text-white hover:bg-white/5"
+                            >
+                                <Home className="w-5 h-5" />
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={handleLogout}
+                                className="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20"
+                            >
+                                <LogOut className="w-4 h-4 mx-2" />
+                                {t('admin.logout')}
                             </Button>
                         </div>
                     </div>
                 </div>
             </header>
 
-            {/* Main Content */}
-            <main className="container mx-auto px-4 py-8">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                    <TabsList className="grid w-full grid-cols-4 bg-white/5">
-                        <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600">
+            <main className="container mx-auto px-4 py-8 max-w-7xl">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    {[
+                        { label: t('admin.totalUsers'), value: stats.totalUsers, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+                        { label: language === 'ar' ? 'الروضات' : 'Kindergartens', value: stats.totalKindergartens, icon: Building2, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+                        { label: language === 'ar' ? 'طلبات قيد الانتظار' : 'Pending Requests', value: stats.pendingApprovals, icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
+                        { label: language === 'ar' ? 'أولياء الأمور' : 'Parents', value: stats.activeParents, icon: Baby, color: 'text-green-500', bg: 'bg-green-500/10' },
+                    ].map((stat, i) => (
+                        <Card key={i} className="bg-slate-900 border-white/5 overflow-hidden relative group hover:border-red-500/30 transition-colors">
+                            <CardContent className="p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-slate-400">{stat.label}</p>
+                                        <h3 className="text-3xl font-bold mt-1 text-white">{stat.value}</h3>
+                                    </div>
+                                    <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
+                                        <stat.icon className="w-6 h-6" />
+                                    </div>
+                                </div>
+                                <div className="mt-4 flex items-center gap-1 text-[10px] text-green-500 font-medium">
+                                    <TrendingUp className="w-3 h-3" />
+                                    <span>+12% {language === 'ar' ? 'هذا الشهر' : 'this month'}</span>
+                                </div>
+                            </CardContent>
+                            <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-transparent via-red-500/20 to-transparent w-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </Card>
+                    ))}
+                </div>
+
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" dir={dir}>
+                    <TabsList className="bg-slate-900 border border-white/5 p-1">
+                        <TabsTrigger value="overview" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
+                            <LayoutDashboard className="w-4 h-4 mx-2" />
                             {language === 'ar' ? 'نظرة عامة' : 'Overview'}
                         </TabsTrigger>
-                        <TabsTrigger value="users" className="data-[state=active]:bg-blue-600">
-                            {language === 'ar' ? 'المستخدمون' : 'Users'}
+                        <TabsTrigger value="kindergartens" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
+                            <Building2 className="w-4 h-4 mx-2" />
+                            {language === 'ar' ? 'الروضات' : 'Crèches'}
                         </TabsTrigger>
-                        <TabsTrigger value="kindergartens" className="data-[state=active]:bg-blue-600">
-                            {language === 'ar' ? 'الروضات' : 'Kindergartens'}
+                        <TabsTrigger value="users" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
+                            <Users className="w-4 h-4 mx-2" />
+                            {language === 'ar' ? 'المستخدمون' : 'Utilisateurs'}
                         </TabsTrigger>
-                        <TabsTrigger value="settings" className="data-[state=active]:bg-blue-600">
+                        <TabsTrigger value="registrations" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
+                            <Baby className="w-4 h-4 mx-2" />
+                            {language === 'ar' ? 'تسجيلات' : 'Inscriptions'}
+                        </TabsTrigger>
+                        <TabsTrigger value="subscriptions" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
+                            <FileText className="w-4 h-4 mx-2" />
+                            {language === 'ar' ? 'طلبات الروضات' : 'Demandes crèches'}
+                        </TabsTrigger>
+                        <TabsTrigger value="platform-subscriptions" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
+                            <Crown className="w-4 h-4 mx-2" />
+                            {language === 'ar' ? 'اشتراكات المنصة' : 'Abonnements plateforme'}
+                        </TabsTrigger>
+                        <TabsTrigger value="settings" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
+                            <SettingsIcon className="w-4 h-4 mx-2" />
                             {language === 'ar' ? 'الإعدادات' : 'Settings'}
                         </TabsTrigger>
                     </TabsList>
 
-                    {/* Overview Tab */}
-                    <TabsContent value="overview" className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <Card className="bg-slate-800 border-white/10">
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium text-slate-300">
-                                        {language === 'ar' ? 'إجمالي المستخدمين' : 'Total Users'}
-                                    </CardTitle>
-                                    <Users className="h-4 w-4 text-slate-400" />
+                    <TabsContent value="overview">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <Card className="bg-slate-900 border-white/5">
+                                <CardHeader>
+                                    <CardTitle className="text-white text-lg">{language === 'ar' ? 'الطلبات الأخيرة' : 'Recent Activity'}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold text-white">{stats.totalUsers}</div>
+                                    <div className="space-y-4">
+                                        {[...kindergartens.slice(0, 3), ...registrationRequests.slice(0, 2)]
+                                            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                                            .slice(0, 5)
+                                            .map((item: any) => {
+                                                const isKG = 'name_ar' in item;
+                                                return (
+                                                    <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`w-10 h-10 rounded-lg ${isKG ? 'bg-red-500/10' : 'bg-blue-500/10'} flex items-center justify-center`}>
+                                                                {isKG ? <Building2 className="w-5 h-5 text-red-500" /> : <Baby className="w-5 h-5 text-blue-500" />}
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-medium text-white">
+                                                                    {isKG ? (language === 'ar' ? item.name_ar : item.name_fr) : item.child_name}
+                                                                </p>
+                                                                <p className="text-xs text-slate-400">
+                                                                    {isKG ? (language === 'ar' ? item.municipality_ar : item.municipality_fr) : `${language === 'ar' ? 'طلب تسجيل من' : 'Registration from'} ${item.parent_name}`}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-1">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className={item.status === 'approved' ? 'text-green-500 bg-green-500/10' : 'text-slate-500 hover:text-green-500 hover:bg-green-500/10'}
+                                                                onClick={() => {
+                                                                    if (isKG) updateKGStatus(item.id, 'approved');
+                                                                    else updateRegistrationStatus(item.id, 'approved');
+                                                                }}
+                                                            >
+                                                                <CheckCircle2 className="w-4 h-4" />
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className={item.status === 'rejected' ? 'text-red-500 bg-red-500/10' : 'text-slate-500 hover:text-red-500 hover:bg-red-500/10'}
+                                                                onClick={() => {
+                                                                    if (isKG) updateKGStatus(item.id, 'rejected');
+                                                                    else updateRegistrationStatus(item.id, 'rejected');
+                                                                }}
+                                                            >
+                                                                <XCircle className="w-4 h-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                    </div>
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full mt-4 text-slate-400 text-xs hover:text-white"
+                                        onClick={() => setActiveTab('kindergartens')}
+                                    >
+                                        {language === 'ar' ? 'عرض الكل' : 'View All'}
+                                        <ChevronRight className="w-3 h-3 mx-1" />
+                                    </Button>
                                 </CardContent>
                             </Card>
 
-                            <Card className="bg-slate-800 border-white/10">
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium text-slate-300">
-                                        {language === 'ar' ? 'الروضات' : 'Kindergartens'}
-                                    </CardTitle>
-                                    <Building2 className="h-4 w-4 text-slate-400" />
+                            <Card className="bg-slate-900 border-white/5">
+                                <CardHeader>
+                                    <CardTitle className="text-white text-lg">{language === 'ar' ? 'توزع المستخدمين' : 'User Distribution'}</CardTitle>
                                 </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-white">{stats.totalKindergartens}</div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="bg-slate-800 border-white/10">
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium text-slate-300">
-                                        {language === 'ar' ? 'أولياء الأمور' : 'Parents'}
-                                    </CardTitle>
-                                    <UserCheck className="h-4 w-4 text-slate-400" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-white">{stats.activeParents}</div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="bg-slate-800 border-white/10">
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium text-slate-300">
-                                        {language === 'ar' ? 'أصحاب الروضات' : 'Owners'}
-                                    </CardTitle>
-                                    <UserX className="h-4 w-4 text-slate-400" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold text-white">{stats.activeOwners}</div>
+                                <CardContent className="h-[300px] flex items-center justify-center">
+                                    <div className="flex flex-col items-center gap-4">
+                                        <div className="relative w-40 h-40">
+                                            <svg className="w-full h-full" viewBox="0 0 36 36">
+                                                <path className="text-slate-800" strokeDasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
+                                                <path className="text-red-500" strokeDasharray={`${stats.totalUsers > 0 ? (stats.activeOwners / stats.totalUsers) * 100 : 0}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
+                                            </svg>
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                                                <span className="text-2xl font-bold text-white">{stats.totalUsers}</span>
+                                                <span className="text-[10px] text-slate-400 uppercase tracking-tighter">{language === 'ar' ? 'مستخدم' : 'Users'}</span>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4 text-xs">
+                                            <div className="flex items-center gap-2 text-slate-400">
+                                                <div className="w-2 h-2 rounded-full bg-red-500" />
+                                                {language === 'ar' ? 'أصحاب الروضات' : 'Owners'} ({stats.totalUsers > 0 ? Math.round((stats.activeOwners / stats.totalUsers) * 100) : 0}%)
+                                            </div>
+                                            <div className="flex items-center gap-2 text-slate-400">
+                                                <div className="w-2 h-2 rounded-full bg-slate-700" />
+                                                {language === 'ar' ? 'أولياء الأمور' : 'Parents'} ({stats.totalUsers > 0 ? Math.round((stats.activeParents / stats.totalUsers) * 100) : 0}%)
+                                            </div>
+                                        </div>
+                                    </div>
                                 </CardContent>
                             </Card>
                         </div>
                     </TabsContent>
 
-                    {/* Users Tab */}
-                    <TabsContent value="users" className="space-y-6">
-                        <Card className="bg-slate-800 border-white/10">
-                            <CardHeader>
-                                <CardTitle className="text-white">{language === 'ar' ? 'المستخدمون' : 'Users'}</CardTitle>
-                                <CardDescription className="text-slate-400">
-                                    {language === 'ar' ? 'إدارة مستخدمي المنصة' : 'Manage platform users'}
-                                </CardDescription>
+                    <TabsContent value="kindergartens">
+                        <Card className="bg-slate-900 border-white/5">
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <div>
+                                    <CardTitle className="text-white">{language === 'ar' ? 'إدارة الروضات' : 'Manage Kindergartens'}</CardTitle>
+                                    <CardDescription>{language === 'ar' ? 'مراجعة وتوثيق الروضات المسجلة' : 'Review and verify registered kindergartens'}</CardDescription>
+                                </div>
+                                <div className="flex gap-2">
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                        <Input className="bg-slate-800 border-white/5 pl-9 w-64" placeholder={language === 'ar' ? 'بحث...' : 'Search...'} />
+                                    </div>
+                                    <Button variant="outline" size="icon" className="bg-slate-800 border-white/5"><Filter className="w-4 h-4" /></Button>
+                                </div>
                             </CardHeader>
                             <CardContent>
-                                {isLoading ? (
-                                    <div className="text-center py-12">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                                        <p className="text-slate-400">{language === 'ar' ? 'جاري التحميل...' : 'Loading...'}</p>
-                                    </div>
-                                ) : users.length === 0 ? (
-                                    <div className="text-center py-12">
-                                        <Users className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                                        <p className="text-slate-400">{language === 'ar' ? 'لا يوجد مستخدمون' : 'No users found'}</p>
-                                    </div>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <Table>
-                                            <TableHeader className="bg-white/5">
-                                                <TableRow className="border-white/5">
-                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'الاسم' : 'Name'}</TableHead>
-                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</TableHead>
-                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'الهاتف' : 'Phone'}</TableHead>
-                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'الدور' : 'Role'}</TableHead>
-                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'تاريخ التسجيل' : 'Registration Date'}</TableHead>
+                                <div className="overflow-x-auto">
+                                    <Table>
+                                        <TableHeader className="bg-white/5">
+                                            <TableRow className="border-white/5">
+                                                <TableHead className="text-slate-400">{language === 'ar' ? 'الاسم' : 'Name'}</TableHead>
+                                                <TableHead className="text-slate-400">{language === 'ar' ? 'العنوان' : 'Address'}</TableHead>
+                                                <TableHead className="text-slate-400">{language === 'ar' ? 'المدينة' : 'City'}</TableHead>
+                                                <TableHead className="text-slate-400">{language === 'ar' ? 'الحالة' : 'Status'}</TableHead>
+                                                <TableHead className="text-slate-400 text-left">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {kindergartens.length === 0 ? (
+                                                <TableRow>
+                                                    <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                                                        {language === 'ar' ? 'لا توجد روضات' : 'No kindergartens found'}
+                                                    </TableCell>
                                                 </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {users.map((user) => (
-                                                    <TableRow key={user.id} className="border-white/5">
-                                                        <TableCell className="text-white">{user.full_name || 'N/A'}</TableCell>
-                                                        <TableCell className="text-white">{user.email || 'N/A'}</TableCell>
-                                                        <TableCell className="text-white">{user.phone || 'N/A'}</TableCell>
-                                                        <TableCell className="text-white">
-                                                            <Badge variant="secondary" className="bg-blue-500/20 text-blue-300">
-                                                                {user.role || 'user'}
+                                            ) : (
+                                                kindergartens.map((kg) => (
+                                                    <TableRow key={kg.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                                                        <TableCell className="font-medium text-white">{language === 'ar' ? kg.name_ar : kg.name_fr}</TableCell>
+                                                        <TableCell className="text-slate-400 text-sm max-w-[200px] truncate">{language === 'ar' ? kg.address_ar : kg.address_fr}</TableCell>
+                                                        <TableCell className="text-slate-400">{language === 'ar' ? kg.municipality_ar : kg.municipality_fr}</TableCell>
+                                                        <TableCell>
+                                                            <Badge
+                                                                className={
+                                                                    kg.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                                                        kg.status === 'rejected' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                                                                            'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                                                                }
+                                                            >
+                                                                {kg.status}
                                                             </Badge>
                                                         </TableCell>
-                                                        <TableCell className="text-white">
-                                                            {new Date(user.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}
+                                                        <TableCell>
+                                                            <div className="flex gap-2">
+                                                                {kg.status !== 'approved' && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        className="bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white border-green-500/20"
+                                                                        onClick={() => updateKGStatus(kg.id, 'approved')}
+                                                                    >
+                                                                        <CheckCircle2 className="w-4 h-4" />
+                                                                    </Button>
+                                                                )}
+                                                                {kg.status !== 'rejected' && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        className="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border-red-500/20"
+                                                                        onClick={() => updateKGStatus(kg.id, 'rejected')}
+                                                                    >
+                                                                        <XCircle className="w-4 h-4" />
+                                                                    </Button>
+                                                                )}
+                                                                <Button size="sm" variant="ghost" className="text-slate-400"><Info className="w-4 h-4" /></Button>
+                                                            </div>
                                                         </TableCell>
                                                     </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                )}
+                                                ))
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </div>
                             </CardContent>
                         </Card>
                     </TabsContent>
 
-                    {/* Kindergartens Tab */}
-                    <TabsContent value="kindergartens" className="space-y-6">
-                        <Card className="bg-slate-800 border-white/10">
+                    <TabsContent value="registrations">
+                        <Card className="bg-slate-900 border-white/5">
                             <CardHeader>
-                                <CardTitle className="text-white">{language === 'ar' ? 'الروضات' : 'Kindergartens'}</CardTitle>
-                                <CardDescription className="text-slate-400">
-                                    {language === 'ar' ? 'إدارة روضات الأطفال' : 'Manage kindergartens'}
-                                </CardDescription>
+                                <CardTitle className="text-white">{language === 'ar' ? 'طلبات تسجيل الأطفال' : 'Child Registration Requests'}</CardTitle>
+                                <CardDescription>{language === 'ar' ? 'متابعة طلبات التسجيل المرسلة من الأولياء' : 'Monitor registration requests sent by parents'}</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                {isLoading ? (
-                                    <div className="text-center py-12">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                                        <p className="text-slate-400">{language === 'ar' ? 'جاري التحميل...' : 'Loading...'}</p>
+                                <div className="overflow-x-auto">
+                                    <Table>
+                                        <TableHeader className="bg-white/5">
+                                            <TableRow className="border-white/5">
+                                                <TableHead className="text-slate-400">{language === 'ar' ? 'الطفل' : 'Child'}</TableHead>
+                                                <TableHead className="text-slate-400">{language === 'ar' ? 'ولي الأمر' : 'Parent'}</TableHead>
+                                                <TableHead className="text-slate-400">{language === 'ar' ? 'الروضة' : 'Kindergarten'}</TableHead>
+                                                <TableHead className="text-slate-400">{language === 'ar' ? 'التوجيه' : 'Status'}</TableHead>
+                                                <TableHead className="text-slate-400">{language === 'ar' ? 'التاريخ' : 'Date'}</TableHead>
+                                                <TableHead className="text-slate-400 text-left">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {registrationRequests.length === 0 ? (
+                                                <TableRow>
+                                                    <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                                                        {language === 'ar' ? 'لا توجد طلبات تسجيل' : 'No registration requests found'}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ) : (
+                                                registrationRequests.map((reg) => {
+                                                    const kg = kindergartens.find(k => k.id === reg.kindergarten_id);
+                                                    return (
+                                                        <TableRow key={reg.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                                                            <TableCell>
+                                                                <div className="font-medium text-white">{reg.child_name}</div>
+                                                                <div className="text-xs text-slate-500">{reg.child_age} {language === 'ar' ? 'سنوات' : 'years'}</div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div className="text-white">{reg.parent_name}</div>
+                                                                <div className="text-xs text-slate-500">{reg.phone}</div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div className="text-white">{kindergartens.find(k => k.id === reg.kindergarten_id)?.[language === 'ar' ? 'name_ar' : 'name_fr'] || reg.kindergarten_id}</div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Badge
+                                                                    className={
+                                                                        reg.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                                                            reg.status === 'rejected' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                                                                                'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                                                                    }
+                                                                >
+                                                                    {reg.status}
+                                                                </Badge>
+                                                            </TableCell>
+                                                            <TableCell className="text-slate-400 text-sm">
+                                                                {new Date(reg.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div className="flex gap-2">
+                                                                    {reg.status !== 'approved' && (
+                                                                        <Button
+                                                                            size="sm"
+                                                                            className="bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white border-green-500/20"
+                                                                            onClick={() => updateRegistrationStatus(reg.id, 'approved')}
+                                                                        >
+                                                                            <CheckCircle2 className="w-4 h-4" />
+                                                                        </Button>
+                                                                    )}
+                                                                    {reg.status !== 'rejected' && (
+                                                                        <Button
+                                                                            size="sm"
+                                                                            className="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border-red-500/20"
+                                                                            onClick={() => updateRegistrationStatus(reg.id, 'rejected')}
+                                                                        >
+                                                                            <XCircle className="w-4 h-4" />
+                                                                        </Button>
+                                                                    )}
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="users">
+                        <Card className="bg-slate-900 border-white/5">
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <div>
+                                    <CardTitle className="text-white">{language === 'ar' ? 'إدارة أصحاب الروضات' : 'Kindergarten Owners'}</CardTitle>
+                                    <CardDescription>{language === 'ar' ? 'إدارة حسابات أصحاب الروضات وتوثيقها' : 'Manage and verify kindergarten owner accounts'}</CardDescription>
+                                </div>
+                                <div className="flex gap-2">
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                        <Input className="bg-slate-800 border-white/5 pl-9 w-64" placeholder={language === 'ar' ? 'بحث...' : 'Search...'} />
                                     </div>
-                                ) : kindergartens.length === 0 ? (
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-4">
+                                    {users.filter(u => u.role === 'owner').length === 0 ? (
+                                        <div className="text-center py-8 text-slate-500">
+                                            {language === 'ar' ? 'لا يوجد أصحاب روضات حالياً' : 'No kindergarten owners found'}
+                                        </div>
+                                    ) : (
+                                        users.filter(u => u.role === 'owner').map(user => (
+                                            <div key={user.id} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:border-red-500/30 transition-all">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 font-bold border border-red-500/10 uppercase text-lg">
+                                                        {(user.full_name || 'O').charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-white">{user.full_name || 'Anonymous Owner'}</p>
+                                                        <div className="flex flex-col sm:flex-row sm:gap-4">
+                                                            <p className="text-xs text-slate-500">{user.phone || t('common.noPhone')}</p>
+                                                            {user.email && <p className="text-xs text-slate-500 underline decoration-slate-700">{user.email}</p>}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-6">
+                                                    <div className="text-right hidden sm:block">
+                                                        <p className="text-[10px] text-slate-500 uppercase tracking-wider">{language === 'ar' ? 'الحالة' : 'Status'}</p>
+                                                        <Badge
+                                                            variant="outline"
+                                                            className={
+                                                                user.status === 'approved' ? 'text-green-500 border-green-500/20 bg-green-500/5' :
+                                                                    user.status === 'rejected' ? 'text-red-500 border-red-500/20 bg-red-500/5' :
+                                                                        'text-yellow-500 border-yellow-500/20 bg-yellow-500/5'
+                                                            }
+                                                        >
+                                                            {user.status || 'pending'}
+                                                        </Badge>
+                                                    </div>
+
+                                                    <div className="flex gap-1">
+                                                        {user.status !== 'approved' && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="text-green-500 hover:text-green-400 hover:bg-green-500/10"
+                                                                onClick={() => updateUserStatus(user.id, 'approved')}
+                                                            >
+                                                                <UserCheck className="w-4 h-4" />
+                                                            </Button>
+                                                        )}
+                                                        {user.status !== 'rejected' && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                                                                onClick={() => updateUserStatus(user.id, 'rejected')}
+                                                            >
+                                                                <UserX className="w-4 h-4" />
+                                                            </Button>
+                                                        )}
+                                                        <Button variant="ghost" size="icon" className="text-slate-500 hover:text-white"><ChevronRight className="w-5 h-5" /></Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="parents">
+                        <Card className="bg-slate-900 border-white/5">
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <div>
+                                    <CardTitle className="text-white">{language === 'ar' ? 'إدارة أولياء الأمور' : 'Manage Parents'}</CardTitle>
+                                    <CardDescription>{language === 'ar' ? 'عرض والبحث في قائمة أولياء الأمور المسجلين' : 'View and search registered parents'}</CardDescription>
+                                </div>
+                                <div className="flex gap-2">
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                        <Input className="bg-slate-800 border-white/5 pl-9 w-64" placeholder={language === 'ar' ? 'بحث باسم الولي...' : 'Search by parent name...'} />
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-4">
+                                    {users.filter(u => u.role === 'parent').length === 0 ? (
+                                        <div className="text-center py-12 bg-white/5 rounded-2xl border border-dashed border-white/10">
+                                            <Baby className="w-12 h-12 text-slate-700 mx-auto mb-4" />
+                                            <p className="text-slate-500">{language === 'ar' ? 'لا يوجد أولياء أمور مسجلين حالياً' : 'No registered parents yet'}</p>
+                                        </div>
+                                    ) : (
+                                        users.filter(u => u.role === 'parent').map(user => (
+                                            <div key={user.id} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:border-blue-500/30 transition-all group">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 font-bold border border-blue-500/10 uppercase text-lg group-hover:scale-110 transition-transform">
+                                                        {(user.full_name || 'P').charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">{user.full_name || 'Anonymous Parent'}</p>
+                                                        <div className="flex flex-col sm:flex-row sm:gap-4">
+                                                            <p className="text-xs text-slate-500 flex items-center gap-1">
+                                                                <span className="opacity-50 text-[10px]">TEL:</span> {user.phone || t('common.noPhone')}
+                                                            </p>
+                                                            {user.email && (
+                                                                <p className="text-xs text-slate-500 flex items-center gap-1">
+                                                                    <span className="opacity-50 text-[10px]">MAIL:</span> {user.email}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-6">
+                                                    <div className="text-right hidden sm:block">
+                                                        <p className="text-[10px] text-slate-500 uppercase tracking-wider">{language === 'ar' ? 'تاريخ الانضمام' : 'Joined Date'}</p>
+                                                        <p className="text-xs text-slate-300">{new Date(user.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}</p>
+                                                    </div>
+                                                    <Button variant="ghost" size="icon" className="text-slate-500 hover:text-blue-500 hover:bg-blue-500/10 transition-all rounded-full">
+                                                        <ChevronRight className="w-5 h-5" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="subscriptions">
+                        <Card className="bg-slate-900 border-white/5">
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <div>
+                                    <CardTitle className="text-white">{language === 'ar' ? 'طلبات الاشتراك' : 'Subscription Requests'}</CardTitle>
+                                    <CardDescription>{language === 'ar' ? 'إدارة طلبات الاشتراك في الروضات' : 'Manage kindergarten subscription requests'}</CardDescription>
+                                </div>
+                                <div className="flex gap-2">
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                        <Input 
+                                            className="bg-slate-800 border-white/5 pl-9 w-64" 
+                                            placeholder={language === 'ar' ? 'بحث في الطلبات...' : 'Search requests...'} 
+                                        />
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                {loadingSubscriptions ? (
                                     <div className="text-center py-12">
-                                        <Building2 className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                                        <p className="text-slate-400">{language === 'ar' ? 'لا توجد روضات' : 'No kindergartens found'}</p>
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto mb-4"></div>
+                                        <p className="text-slate-500">{language === 'ar' ? 'جاري التحميل...' : 'Loading...'}</p>
+                                    </div>
+                                ) : !subscriptionRequests || subscriptionRequests.length === 0 ? (
+                                    <div className="text-center py-12 bg-white/5 rounded-2xl border border-dashed border-white/10">
+                                        <CreditCard className="w-12 h-12 text-slate-700 mx-auto mb-4" />
+                                        <p className="text-slate-500">{language === 'ar' ? 'لا توجد طلبات اشتراك حالياً' : 'No subscription requests yet'}</p>
                                     </div>
                                 ) : (
                                     <div className="overflow-x-auto">
                                         <Table>
-                                            <TableHeader className="bg-white/5">
-                                                <TableRow className="border-white/5">
-                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'الاسم' : 'Name'}</TableHead>
-                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'العنوان' : 'Address'}</TableHead>
-                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'البلدية' : 'Municipality'}</TableHead>
-                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'الحالة' : 'Status'}</TableHead>
-                                                    <TableHead className="text-slate-400">{language === 'ar' ? 'تاريخ الإنشاء' : 'Created Date'}</TableHead>
+                                            <TableHeader>
+                                                <TableRow className="border-white/10">
+                                                    <TableHead className="text-white">{language === 'ar' ? 'التاريخ' : 'Date'}</TableHead>
+                                                    <TableHead className="text-white">{language === 'ar' ? 'الروضة' : 'Kindergarten'}</TableHead>
+                                                    <TableHead className="text-white">{language === 'ar' ? 'ولي الأمر' : 'Parent'}</TableHead>
+                                                    <TableHead className="text-white">{language === 'ar' ? 'الطفل' : 'Child'}</TableHead>
+                                                    <TableHead className="text-white">{language === 'ar' ? 'الهاتف' : 'Phone'}</TableHead>
+                                                    <TableHead className="text-white">{language === 'ar' ? 'CCP' : 'CCP'}</TableHead>
+                                                    <TableHead className="text-white">{language === 'ar' ? 'الحالة' : 'Status'}</TableHead>
+                                                    <TableHead className="text-white">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
-                                                {kindergartens.map((kg) => (
-                                                    <TableRow key={kg.id} className="border-white/5">
+                                                {subscriptionRequests.map((request) => (
+                                                    <TableRow key={request.id} className="border-white/5 hover:bg-white/5 transition-colors">
                                                         <TableCell className="text-white">
-                                                            {language === 'ar' ? kg.name_ar : kg.name_fr}
+                                                            <div className="flex items-center gap-2">
+                                                                <Calendar className="w-4 h-4 text-slate-400" />
+                                                                <span className="text-sm">
+                                                                    {new Date(request.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}
+                                                                </span>
+                                                            </div>
                                                         </TableCell>
                                                         <TableCell className="text-white">
-                                                            {language === 'ar' ? kg.address_ar : kg.address_fr}
+                                                            <div>
+                                                                <p className="text-sm font-medium">
+                                                                    {(() => {
+                                                                        const kg = localKindergartens.find(k => k.id === request.kindergarten_id);
+                                                                        return language === 'ar' ? kg?.nameAr : kg?.nameFr;
+                                                                    })()}
+                                                                </p>
+                                                                <p className="text-xs text-slate-400">
+                                                                    {(() => {
+                                                                        const kg = localKindergartens.find(k => k.id === request.kindergarten_id);
+                                                                        return language === 'ar' ? kg?.municipalityAr : kg?.municipalityFr;
+                                                                    })()}
+                                                                </p>
+                                                            </div>
                                                         </TableCell>
                                                         <TableCell className="text-white">
-                                                            {language === 'ar' ? kg.municipality_ar : kg.municipality_fr}
+                                                            <div>
+                                                                <p className="text-sm font-medium">
+                                                                    {`${request.first_name} ${request.last_name}`}
+                                                                </p>
+                                                                <p className="text-xs text-slate-400">{request.email}</p>
+                                                            </div>
                                                         </TableCell>
                                                         <TableCell className="text-white">
-                                                            <Badge className={
-                                                                kg.status === 'approved' ? 'bg-green-500 text-white' :
-                                                                kg.status === 'rejected' ? 'bg-red-500 text-white' :
-                                                                'bg-yellow-500 text-white'
-                                                            }>
-                                                                {kg.status === 'approved' ? (language === 'ar' ? 'مقبول' : 'Approved') :
-                                                                 kg.status === 'rejected' ? (language === 'ar' ? 'مرفوض' : 'Rejected') :
+                                                            <div>
+                                                                <p className="text-sm font-medium">{request.child_name}</p>
+                                                                <p className="text-xs text-slate-400">{request.child_age} {language === 'ar' ? 'سنوات' : 'ans'}</p>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-white text-sm">{request.phone}</TableCell>
+                                                        <TableCell className="text-white text-sm font-mono">{request.ccp}</TableCell>
+                                                        <TableCell className="text-white">
+                                                            <Badge 
+                                                                variant={request.status === 'approved' ? 'default' : request.status === 'rejected' ? 'destructive' : 'secondary'}
+                                                                className={
+                                                                    request.status === 'approved' ? 'bg-green-500 text-white' :
+                                                                    request.status === 'rejected' ? 'bg-red-500 text-white' :
+                                                                    'bg-yellow-500 text-white'
+                                                                }
+                                                            >
+                                                                {request.status === 'approved' ? (language === 'ar' ? 'مقبول' : 'Approved') :
+                                                                 request.status === 'rejected' ? (language === 'ar' ? 'مرفوض' : 'Rejected') :
                                                                  (language === 'ar' ? 'في الانتظار' : 'Pending')}
                                                             </Badge>
                                                         </TableCell>
                                                         <TableCell className="text-white">
-                                                            {new Date(kg.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}
+                                                            <div className="flex items-center gap-2">
+                                                                {request.status === 'pending' && (
+                                                                    <>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            className="text-green-500 hover:text-green-400 hover:bg-green-500/10"
+                                                                            onClick={() => approveRequest(request.id)}
+                                                                        >
+                                                                            <UserCheck className="w-4 h-4" />
+                                                                        </Button>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                                                                            onClick={() => rejectRequest(request.id)}
+                                                                        >
+                                                                            <UserX className="w-4 h-4" />
+                                                                        </Button>
+                                                                    </>
+                                                                )}
+                                                                <Button variant="ghost" size="sm" className="text-slate-500 hover:text-white">
+                                                                    <ChevronRight className="w-5 h-5" />
+                                                                </Button>
+                                                            </div>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))}
@@ -433,30 +1036,40 @@ const AdminDashboard = () => {
                         </Card>
                     </TabsContent>
 
-                    {/* Settings Tab */}
-                    <TabsContent value="settings" className="space-y-6">
-                        <Card className="bg-slate-800 border-white/10">
+                    <TabsContent value="settings">
+                        <Card className="bg-slate-900 border-white/5">
                             <CardHeader>
                                 <CardTitle className="text-white">{language === 'ar' ? 'إعدادات المنصة' : 'Platform Settings'}</CardTitle>
-                                <CardDescription className="text-slate-400">
-                                    {language === 'ar' ? 'إدارة إعدادات المنصة' : 'Manage platform settings'}
-                                </CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="space-y-4">
-                                    <div>
-                                        <Label className="text-white">{language === 'ar' ? 'اللغة الافتراضية' : 'Default Language'}</Label>
-                                        <p className="text-sm text-slate-400 mt-1">
-                                            {language === 'ar' ? 'العربية / الفرنسية' : 'Arabic / French'}
-                                        </p>
+                            <CardContent className="space-y-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="space-y-4">
+                                        <h4 className="text-sm font-bold text-red-500 uppercase tracking-widest">{language === 'ar' ? 'العامة' : 'General'}</h4>
+                                        <div className="space-y-2">
+                                            <Label>{language === 'ar' ? 'اسم المنصة' : 'Platform Name'}</Label>
+                                            <Input className="bg-slate-800 border-white/5" defaultValue="Rawdati Connect" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>{language === 'ar' ? 'البريد الإلكتروني للدعم' : 'Support Email'}</Label>
+                                            <Input className="bg-slate-800 border-white/5" defaultValue="support@rawdati.com" />
+                                        </div>
                                     </div>
-                                    <Separator className="bg-white/10" />
-                                    <div>
-                                        <Label className="text-white">{language === 'ar' ? 'حالة المنصة' : 'Platform Status'}</Label>
-                                        <p className="text-sm text-slate-400 mt-1">
-                                            {language === 'ar' ? 'نشطة' : 'Active'}
-                                        </p>
+                                    <div className="space-y-4">
+                                        <h4 className="text-sm font-bold text-red-500 uppercase tracking-widest">{language === 'ar' ? 'الأمان' : 'Security'}</h4>
+                                        <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5">
+                                            <div>
+                                                <p className="text-sm font-medium text-white">{language === 'ar' ? 'توثيق الروضات' : 'Kindergarten Verification'}</p>
+                                                <p className="text-xs text-slate-500">{language === 'ar' ? 'طلب الموافقة اليدوية لجميع الروضات الجديدة' : 'Require manual approval for all new kindergartens'}</p>
+                                            </div>
+                                            <Badge className="bg-green-500/10 text-green-500 border-green-500/20">Active</Badge>
+                                        </div>
                                     </div>
+                                </div>
+                                <Separator className="bg-white/5" />
+                                <div className="flex justify-end">
+                                    <Button className="bg-red-500 hover:bg-red-600 text-white px-8">
+                                        {language === 'ar' ? 'حفظ التغييرات' : 'Save Changes'}
+                                    </Button>
                                 </div>
                             </CardContent>
                         </Card>
