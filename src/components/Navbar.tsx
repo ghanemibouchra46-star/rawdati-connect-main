@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, User, LogOut, Shield } from 'lucide-react';
+import { Menu, X, User, LogOut, Shield, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -70,7 +70,11 @@ const Navbar = () => {
               >
                 {language === 'ar' ? 'FR' : 'AR'}
               </Button>
-              <Shield className="w-4 h-4 text-muted-foreground" />
+              <Link to="/admin-auth">
+                <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-500/10 hover:text-red-500 transition-all duration-300" title={language === 'ar' ? 'لوحة الأدمين' : 'Admin Panel'}>
+                  <Shield className="w-5 h-5 text-red-500" />
+                </Button>
+              </Link>
             </div>
 
             {/* User Menu */}
@@ -115,13 +119,15 @@ const Navbar = () => {
             ) : (
               <div className="flex items-center gap-3">
                 <Link to="/auth">
-                  <Button variant="outline" size="sm" className="border-primary/50 bg-primary/5 text-primary hover:bg-primary/10 hover:text-primary">
-                    {language === 'ar' ? 'تسجيل الدخول' : 'Connexion'}
+                  <Button variant="ghost" size="sm" className="gap-2 rounded-full font-bold hover:bg-primary/10 hover:text-primary transition-all duration-300">
+                    <User className="w-4 h-4" />
+                    <span className="hidden lg:inline">{language === 'ar' ? 'تسجيل الدخول' : 'Connexion'}</span>
                   </Button>
                 </Link>
-                <Link to="/auth">
-                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                    {language === 'ar' ? 'سجل الآن' : 'S\'inscrire'}
+                <Link to="/owner-auth">
+                  <Button size="sm" className="gap-2 gradient-accent border-0 rounded-full shadow-soft hover:shadow-hover transition-all duration-300 text-primary-foreground font-bold hover:scale-105">
+                    <Building2 className="w-4 h-4" />
+                    <span className="hidden lg:inline">{language === 'ar' ? 'دخول الملاك' : 'Espace crèche'}</span>
                   </Button>
                 </Link>
               </div>
@@ -193,12 +199,13 @@ const Navbar = () => {
               ) : (
                 <div className="space-y-3 pt-4 border-t border-border">
                   <Link
-                    to="/auth"
+                    to="/admin-auth"
                     className="block text-center"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <Button variant="outline" size="sm" className="w-full border-primary/50 bg-primary/5 text-primary hover:bg-primary/10">
-                      {language === 'ar' ? 'تسجيل الدخول' : 'Connexion'}
+                    <Button variant="ghost" className="justify-start gap-2 w-full rounded-2xl font-bold py-6 text-red-500 hover:bg-red-500/10 hover:text-red-600 border border-red-100">
+                      <Shield className="w-5 h-5" />
+                      {language === 'ar' ? 'لوحة الأدمين' : 'Tableau de bord admin'}
                     </Button>
                   </Link>
                   <Link
@@ -206,8 +213,19 @@ const Navbar = () => {
                     className="block text-center"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <Button size="sm" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                      {language === 'ar' ? 'سجل الآن' : 'S\'inscrire'}
+                    <Button variant="outline" className="justify-start gap-2 w-full rounded-2xl font-bold py-6 border-primary/50 bg-primary/5 text-primary hover:bg-primary/10">
+                      <User className="w-5 h-5" />
+                      {language === 'ar' ? 'تسجيل الدخول' : 'Connexion'}
+                    </Button>
+                  </Link>
+                  <Link
+                    to="/owner-auth"
+                    className="block text-center"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Button className="justify-start gap-2 gradient-accent border-0 w-full rounded-2xl font-bold py-6 text-primary-foreground">
+                      <Building2 className="w-5 h-5" />
+                      {language === 'ar' ? 'دخول الملاك' : 'Espace propriétaire'}
                     </Button>
                   </Link>
                 </div>
