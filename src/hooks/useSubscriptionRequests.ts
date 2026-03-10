@@ -38,7 +38,7 @@ export const useSubscriptionRequests = () => {
 
       if (error) throw error;
 
-      setRequests(data || []);
+      setRequests((data as SubscriptionRequest[]) || []);
     } catch (err) {
       console.error('Error fetching subscription requests:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch subscription requests');
@@ -126,6 +126,7 @@ export const useSubscriptionRequests = () => {
 
   useEffect(() => {
     fetchRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

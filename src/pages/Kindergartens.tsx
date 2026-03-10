@@ -92,7 +92,7 @@ const Kindergartens = () => {
     
     console.log("Filtered kindergartens:", filtered.length);
     return filtered;
-  }, [searchQuery, selectedMunicipality, priceRange, selectedServices, selectedActivities, hasAutismWing, language]);
+  }, [searchQuery, selectedMunicipality, priceRange, selectedServices, selectedActivities, hasAutismWing, language, kindergartens]);
 
   const handleClearFilters = () => {
     setSelectedMunicipality('');

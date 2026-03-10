@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Baby, Bell, ArrowRight, CheckCircle, Info, AlertTriangle, Calendar, MessageCircle, Star } from 'lucide-react';

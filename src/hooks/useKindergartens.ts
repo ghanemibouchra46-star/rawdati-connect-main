@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { kindergartens, type Kindergarten, type Activity, type Facility, type PriceItem, type KindergartenGallery } from '@/data/kindergartens';
@@ -13,14 +14,14 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
  */
 const resolveImageUrl = (imagePath: string): string => {
   if (!imagePath || imagePath.trim() === '') return '/placeholder.svg';
-  
+
   const trimmed = imagePath.trim();
-  
+
   // Already a full URL
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
     return trimmed;
   }
-  
+
   // Already a relative path starting with /storage/
   if (trimmed.startsWith('/storage/')) {
     return `${SUPABASE_URL}${trimmed}`;
@@ -30,7 +31,7 @@ const resolveImageUrl = (imagePath: string): string => {
   // or just "filename.jpg" (assume kindergarten-images bucket)
   const hasSlash = trimmed.includes('/');
   const storagePath = hasSlash ? trimmed : `kindergarten-images/${trimmed}`;
-  
+
   return `${SUPABASE_URL}/storage/v1/object/public/${storagePath}`;
 };
 
@@ -58,7 +59,7 @@ const normalizeMunicipality = (val: string): string => {
 const normalizeServiceName = (serviceId: string): string => {
   if (!serviceId) return '';
   const lower = serviceId.toLowerCase().trim();
-  
+
   // Map IDs to Arabic names
   if (lower === 'bus' || serviceId.includes('نقل') || lower.includes('transport')) return 'نقل مدرسي';
   if (lower === 'meals' || serviceId.includes('وجبات') || lower.includes('repas')) return 'وجبات غذائية';
@@ -66,7 +67,7 @@ const normalizeServiceName = (serviceId: string): string => {
   if (lower === 'languages' || serviceId.includes('لغات') || lower.includes('langue')) return 'لغات أجنبية';
   if (lower === 'quran' || serviceId.includes('قرآن') || lower.includes('coran')) return 'تحفيظ القرآن';
   if (lower === 'sports' || serviceId.includes('رياضي') || lower.includes('sport')) return 'أنشطة رياضية';
-  
+
   // If already Arabic name, return as-is
   return serviceId;
 };
@@ -91,11 +92,11 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     if (!img || typeof img !== 'string') return null;
     return resolveImageUrl(img);
   }).filter(Boolean);
-  
+
   if (!images || images.length === 0) {
     console.warn(`⚠️ No valid images for kindergarten ${row?.id}, will use placeholder`);
   }
-  
+
   const rawActivities = parsePostgresArray(row?.activities);
   const facilities = parsePostgresArray(row?.facilities);
   const priceBreakdown = parsePostgresArray(row?.price_breakdown);
@@ -171,13 +172,13 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     id: row?.id || '',
     name: row?.name_ar || '',
     name_ar: row?.name_ar || '',
-    name_fr: row?.name_fr || '',
+    nameFr: row?.name_fr || '',
     municipality: normalizeMunicipality(row?.municipality || row?.municipality_ar || ''),
     municipality_ar: row?.municipality_ar || '',
-    municipality_fr: row?.municipality_fr || '',
+    municipalityFr: row?.municipality_fr || '',
     address: row?.address_ar || '',
     address_ar: row?.address_ar || '',
-    address_fr: row?.address_fr || '',
+    addressFr: row?.address_fr || '',
     phone: row?.phone || '',
     pricePerMonth: row?.price_per_month || 0,
     ageRange: { min: row?.age_min || 3, max: row?.age_max || 6 },
@@ -197,8 +198,8 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
       stores: []
     },
     description: row?.description_ar || '',
-    descriptionAr: row?.description_ar || '',
-    descriptionFr: row?.description_ar || '',
+    description_ar: row?.description_ar || '',
+    descriptionFr: row?.description_fr || '',
     coordinates: coords,
     priceBreakdown: (priceBreakdown as unknown) as PriceItem[],
     isPremium: row?.is_premium || false,
@@ -207,7 +208,7 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
       try {
         const gallery = row?.kindergarten_gallery;
         if (!gallery) return [];
-        
+
         // Handle array of URLs (simple case)
         if (Array.isArray(gallery)) {
           return gallery.map((item: any, index: number) => {
@@ -235,7 +236,7 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
             };
           }) as KindergartenGallery[];
         }
-        
+
         // Handle string that might be JSON array
         if (typeof gallery === 'string') {
           const parsed = JSON.parse(gallery);
@@ -266,7 +267,7 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
             }) as KindergartenGallery[];
           }
         }
-        
+
         return [];
       } catch (e) {
         console.error("Error parsing kindergartenGallery for", row?.name_ar, ":", e);

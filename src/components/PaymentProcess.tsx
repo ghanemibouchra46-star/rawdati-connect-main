@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { CreditCard, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';

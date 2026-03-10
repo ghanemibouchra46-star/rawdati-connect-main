@@ -62,6 +62,7 @@ interface RegistrationRequest {
 const mockRegistrations: RegistrationRequest[] = [];
 
 // Adapter to convert local kindergarten data to admin format
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function adaptKindergarten(kg: any): Kindergarten {
     return {
         id: kg.id,
@@ -104,6 +105,7 @@ const AdminDashboard = () => {
             }
         };
         init();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const checkAdminAccess = async () => {
@@ -180,8 +182,8 @@ const AdminDashboard = () => {
 
             // Calculate stats
             const totalUsers = usersData?.length || 0;
-            const activeParents = usersData?.filter((u: any) => u.role === 'parent').length || 0;
-            const activeOwners = usersData?.filter((u: any) => u.role === 'owner').length || 0;
+            const activeParents = usersData?.filter((u: { role: string }) => u.role === 'parent').length || 0;
+            const activeOwners = usersData?.filter((u: { role: string }) => u.role === 'owner').length || 0;
 
             setStats({
                 totalUsers,

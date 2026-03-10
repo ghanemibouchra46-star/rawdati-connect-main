@@ -420,7 +420,7 @@ const Auth = () => {
         description: t('auth.resetEmailSent'),
       });
     }
-  }, [t]);
+  }, [t, toast]);
 
   if (showVerification) {
     return (

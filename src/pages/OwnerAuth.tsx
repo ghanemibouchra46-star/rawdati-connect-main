@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Building2, Mail, Lock, ArrowRight, Loader2, Eye, EyeOff, User, Phone, Info, CheckCircle } from 'lucide-react';

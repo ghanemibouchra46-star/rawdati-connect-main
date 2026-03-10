@@ -66,6 +66,7 @@ const ParentDashboard = () => {
 
     useEffect(() => {
         checkAuth();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const checkAuth = async () => {
@@ -108,11 +109,13 @@ const ParentDashboard = () => {
             const childIds = mappedChildren.map(c => c.id);
             if (childIds.length > 0) {
                 const { data: paymentData } = await supabase
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     .from('payments' as any)
                     .select('*')
                     .in('child_id', childIds);
 
                 if (paymentData) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     setPayments(paymentData as any);
                 }
             }
@@ -167,6 +170,7 @@ const ParentDashboard = () => {
         if (!activePayment) return;
 
         try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const { error } = await (supabase.from('payments' as any)).insert({
                 child_id: activePayment.childId,
                 kindergarten_id: activePayment.kindergartenId,
@@ -188,6 +192,7 @@ const ParentDashboard = () => {
 
             setActivePayment(null);
             checkAuth(); // Refresh data
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error('Payment save error:', error);
             toast({

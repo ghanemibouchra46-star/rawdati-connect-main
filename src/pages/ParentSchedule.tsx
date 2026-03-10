@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Baby, Calendar, ArrowRight, Clock, BookOpen, Utensils, Moon, Music, Palette, Users, ChevronLeft, ChevronRight } from 'lucide-react';
