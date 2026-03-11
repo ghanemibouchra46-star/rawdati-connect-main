@@ -12,7 +12,8 @@ import { GraduationCap, Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import SearchAutocomplete from '@/components/SearchAutocomplete';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Map activity filter IDs to keywords for fuzzy matching against activity names
 const activityKeywords: Record<string, string[]> = {
@@ -35,6 +36,8 @@ const kindergartenMatchesActivity = (k: Kindergarten, activityFilterId: string):
 
 const Kindergartens = () => {
   const { t, language } = useLanguage();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const { data: supabaseKindergartens, isLoading: isLoadingKg } = useKindergartens();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlSearchQuery = searchParams.get('search') || '';
@@ -119,11 +122,19 @@ const Kindergartens = () => {
   };
 
   const handleRegister = (id: string) => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
     const kg = kindergartens.find((k) => k?.id === id);
     if (kg) setRegisterModalKindergarten(kg);
   };
 
   const handleBooking = (id: string) => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
     const kg = kindergartens.find((k) => k?.id === id);
     if (kg) setBookingModalKindergarten(kg);
   };
@@ -239,14 +250,16 @@ const Kindergartens = () => {
           setDetailModalKindergarten(null);
         }}
         onRegister={() => {
-          console.log("Register from detail modal");
-          setRegisterModalKindergarten(detailModalKindergarten);
-          setDetailModalKindergarten(null);
+          if (detailModalKindergarten) {
+            handleRegister(detailModalKindergarten.id);
+            setDetailModalKindergarten(null);
+          }
         }}
         onBook={() => {
-          console.log("Book from detail modal");
-          setBookingModalKindergarten(detailModalKindergarten);
-          setDetailModalKindergarten(null);
+          if (detailModalKindergarten) {
+            handleBooking(detailModalKindergarten.id);
+            setDetailModalKindergarten(null);
+          }
         }}
       />
 

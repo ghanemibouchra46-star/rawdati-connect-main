@@ -23,7 +23,9 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
     email: '',
     childName: '',
     childAge: '',
-    message: ''
+    message: '',
+    medicalCondition: '',
+    foodAllergies: ''
   });
 
   if (!isOpen || !kindergarten) return null;
@@ -45,6 +47,8 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
           phone: formData.phone,
           email: formData.email || null,
           message: formData.message || null,
+          medical_condition: formData.medicalCondition || null,
+          food_allergies: formData.foodAllergies || null,
           user_id: user?.id || null,
           status: 'pending'
         });
@@ -62,7 +66,9 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
         email: '',
         childName: '',
         childAge: '',
-        message: ''
+        message: '',
+        medicalCondition: '',
+        foodAllergies: ''
       });
     } catch (error: any) {
       console.error('Registration error:', error);
@@ -161,6 +167,26 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
                 className={`h-12 bg-muted/50 border-border rounded-xl ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t('registration.hasDisease')}</label>
+            <Input
+              value={formData.medicalCondition}
+              onChange={(e) => setFormData({ ...formData, medicalCondition: e.target.value })}
+              placeholder={t('registration.diseaseDetails')}
+              className={`h-12 bg-muted/50 border-border rounded-xl ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t('registration.hasAllergy')}</label>
+            <Input
+              value={formData.foodAllergies}
+              onChange={(e) => setFormData({ ...formData, foodAllergies: e.target.value })}
+              placeholder={t('registration.allergyDetails')}
+              className={`h-12 bg-muted/50 border-border rounded-xl ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
+            />
           </div>
 
           <div className="space-y-2">
