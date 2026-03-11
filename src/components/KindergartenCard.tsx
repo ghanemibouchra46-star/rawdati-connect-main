@@ -1,9 +1,8 @@
-import { Star, MapPin, Clock, Users, Bus, Utensils, Calculator, Globe, BookOpen, Dumbbell, Stethoscope, CreditCard } from 'lucide-react';
+import { Star, MapPin, Clock, Users, Bus, Utensils, Calculator, Globe, BookOpen, Dumbbell, Stethoscope, Calendar } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Kindergarten } from '@/data/kindergartens';
-import PaymentModal from '@/components/PaymentModal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useState } from 'react';
 
@@ -25,7 +24,6 @@ const serviceIcons: Record<string, React.ReactNode> = {
 
 const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: KindergartenCardProps) => {
   const { t, language, dir } = useLanguage();
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const serviceNames: Record<string, string> = {
     bus: t('filter.transport'),
@@ -129,48 +127,33 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
           </div>
 
           {/* Actions */}
-          <div className={`flex gap-2 ${kindergarten?.isPremium ? 'grid grid-cols-2' : ''}`}>
-            <Button
-              variant="outline"
-              className={`${kindergarten.isPremium ? 'col-span-2' : 'flex-1'} rounded-xl border-border hover:bg-muted font-bold`}
-              onClick={() => onViewDetails(kindergarten?.id)}
-            >
-              {t('card.viewDetails')}
-            </Button>
-            {!kindergarten?.isPremium && (
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1 rounded-xl border-border hover:bg-muted font-bold"
+                onClick={() => onViewDetails(kindergarten?.id)}
+              >
+                {t('card.viewDetails')}
+              </Button>
               <Button
                 variant="secondary"
-                className="flex-1 rounded-xl font-bold bg-purple-100 text-purple-700 hover:bg-purple-200"
+                className="flex-1 rounded-xl font-bold bg-purple-100 text-purple-700 hover:bg-purple-200 flex items-center justify-center gap-2"
                 onClick={() => onBook(kindergarten?.id)}
               >
+                <Calendar className="w-4 h-4" />
                 {language === 'ar' ? 'حجز زيارة' : 'Réserver'}
               </Button>
-            )}
+            </div>
             <Button
-              className={`${kindergarten?.isPremium ? 'col-span-2' : 'flex-1'} rounded-xl gradient-accent border-0 shadow-soft hover:shadow-hover transition-all duration-300 text-primary-foreground font-bold`}
+              className="w-full rounded-xl gradient-accent border-0 shadow-soft hover:shadow-hover transition-all duration-300 text-primary-foreground font-bold"
               onClick={() => onRegister(kindergarten?.id)}
             >
               {t('card.register')}
             </Button>
-            {kindergarten.isPremium && (
-              <Button
-                className="col-span-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 border-0 shadow-soft hover:shadow-hover transition-all duration-300 text-white font-bold flex items-center justify-center gap-2"
-                onClick={() => setShowPaymentModal(true)}
-              >
-                <CreditCard className="w-4 h-4" />
-                {language === 'ar' ? 'اشتراك' : 'S\'abonner'}
-              </Button>
-            )}
           </div>
         </CardContent>
       </Card>
-
-      {/* Payment Modal */}
-      <PaymentModal
-        kindergarten={kindergarten}
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-      />
     </>
   );
 };

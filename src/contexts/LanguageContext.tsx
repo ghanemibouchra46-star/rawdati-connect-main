@@ -142,6 +142,8 @@ const translations: Record<Language, Record<string, string>> = {
         'registration.diseaseDetails': 'تفاصيل المرض أو الحالة الصحية',
         'registration.hasAllergy': 'هل يعاني طفلك من أي حساسية غذائية؟',
         'registration.allergyDetails': 'تفاصيل الحساسية الغذائية',
+        'registration.nationalId': 'رقم البطاقة الوطنية',
+        'registration.ccp': 'الدفع الالكتروني CCP',
 
         // Doctors Page
         'doctors.pageTitle': 'أطباء الأطفال',
@@ -462,6 +464,8 @@ const translations: Record<Language, Record<string, string>> = {
         'registration.diseaseDetails': 'Détails de la maladie ou condition médicale',
         'registration.hasAllergy': 'Votre enfant a-t-il des allergies alimentaires ?',
         'registration.allergyDetails': 'Détails des allergies alimentaires',
+        'registration.nationalId': 'Numéro de Carte Nationale',
+        'registration.ccp': 'Paiement électronique CCP',
 
         // Doctors Page
         'doctors.pageTitle': 'Pédiatres à روضتي',

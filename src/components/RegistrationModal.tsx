@@ -25,7 +25,9 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
     childAge: '',
     message: '',
     medicalCondition: '',
-    foodAllergies: ''
+    foodAllergies: '',
+    nationalId: '',
+    ccp: ''
   });
 
   if (!isOpen || !kindergarten) return null;
@@ -49,6 +51,8 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
           message: formData.message || null,
           medical_condition: formData.medicalCondition || null,
           food_allergies: formData.foodAllergies || null,
+          national_id: formData.nationalId || null,
+          ccp: formData.ccp || null,
           user_id: user?.id || null,
           status: 'pending'
         });
@@ -68,7 +72,9 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
         childAge: '',
         message: '',
         medicalCondition: '',
-        foodAllergies: ''
+        foodAllergies: '',
+        nationalId: '',
+        ccp: ''
       });
     } catch (error: any) {
       console.error('Registration error:', error);
@@ -138,6 +144,26 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="email@example.com"
+                className={`h-12 bg-muted/50 border-border rounded-xl ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t('registration.nationalId')}</label>
+              <Input
+                value={formData.nationalId}
+                onChange={(e) => setFormData({ ...formData, nationalId: e.target.value })}
+                placeholder={t('registration.nationalId')}
+                className={`h-12 bg-muted/50 border-border rounded-xl ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t('registration.ccp')}</label>
+              <Input
+                value={formData.ccp}
+                onChange={(e) => setFormData({ ...formData, ccp: e.target.value })}
+                placeholder={t('registration.ccp')}
                 className={`h-12 bg-muted/50 border-border rounded-xl ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
               />
             </div>
