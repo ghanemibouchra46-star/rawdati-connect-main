@@ -1,241 +1,151 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
-import { X, Calendar, Clock, User } from 'lucide-react';
+import { X, Calendar, Clock, User, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import { Kindergarten } from '@/data/kindergartens';
+import { format } from 'date-fns';
+import { arDZ, fr } from 'date-fns/locale';
 
 interface BookingModalProps {
+  kindergarten: Kindergarten | null;
   isOpen: boolean;
   onClose: () => void;
-  kindergarten: Kindergarten;
-  onBook?: (bookingData: any) => void;
 }
 
-const BookingModal = ({ isOpen, onClose, kindergarten, onBook }: BookingModalProps) => {
-  const { language } = useLanguage();
+const BookingModal = ({ kindergarten, isOpen, onClose }: BookingModalProps) => {
+  const { t, language, dir } = useLanguage();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [date, setDate] = useState<string>('');
+  const [selectedTime, setSelectedTime] = useState<string>('');
 
-  if (!kindergarten) return null;
+  if (!isOpen || !kindergarten) return null;
 
-  const [formData, setFormData] = useState({
-    parentName: '',
-    parentEmail: '',
-    parentPhone: '',
-    childName: '',
-    childAge: '',
-    bookingDate: '',
-    bookingTime: '',
-    notes: ''
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  const timeSlots = [
+    "09:00", "10:00", "11:00", "14:00", "15:00", "16:00"
+  ];
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  const handleSubmit = async () => {
+    if (!date || !selectedTime) {
+      toast.error(language === 'ar' ? 'يرجى اختيار التاريخ والوقت' : 'Veuillez choisir la date et l\'heure');
+      return;
+    }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     try {
-      // Simulate booking process
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const { data: { user } } = await supabase.auth.getUser();
 
-      const bookingData = {
-        ...formData,
-        kindergartenId: kindergarten.id,
-        status: 'pending',
-        createdAt: new Date().toISOString()
-      };
+      const { error } = await supabase
+        .from('notifications')
+        .insert({
+          user_id: user?.id || null,
+          title: language === 'ar' ? 'طلب حجز موعد' : 'Demande de rendez-vous',
+          message: language === 'ar' 
+            ? `طلب حجز موعد لزيارة روضة ${kindergarten.name_ar} يوم ${date} على الساعة ${selectedTime}`
+            : `Demande de rendez-vous pour visiter ${kindergarten.nameFr} le ${date} à ${selectedTime}`,
+          type: 'booking',
+          related_id: kindergarten.id
+        });
 
-      onBook?.(bookingData);
+      if (error) throw error;
 
-      // Reset form
-      setFormData({
-        parentName: '',
-        parentEmail: '',
-        parentPhone: '',
-        childName: '',
-        childAge: '',
-        bookingDate: '',
-        bookingTime: '',
-        notes: ''
+      toast.success(t('booking.success'), {
+        description: t('booking.successDesc')
       });
-
+      
       onClose();
-    } catch (error) {
+      setDate('');
+      setSelectedTime('');
+    } catch (error: any) {
       console.error('Booking error:', error);
+      toast.error(t('common.error'));
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            {language === 'ar' ? 'حجز موعد' : 'Réserver un rendez-vous'}
-          </DialogTitle>
-        </DialogHeader>
+  const name = language === 'ar' ? kindergarten.name_ar : kindergarten.nameFr;
 
-        <div className="space-y-4">
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-semibold">{kindergarten.name}</h3>
-            <p className="text-sm text-muted-foreground">
-              {language === 'ar' ? 'احجز موعد لزيارة الروضة' : 'Réserver une visite de la crèche'}
-            </p>
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      <div 
+        className="absolute inset-0 bg-foreground/50 backdrop-blur-sm animate-fade-in" 
+        onClick={onClose} 
+      />
+      
+      <div className="relative bg-card rounded-3xl shadow-card max-w-md w-full p-6 md:p-8 animate-scale-in" dir={dir}>
+        <button
+          onClick={onClose}
+          className={`absolute top-4 ${dir === 'rtl' ? 'left-4' : 'right-4'} p-2 hover:bg-muted rounded-full transition-colors`}
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Calendar className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">
+            {t('booking.title')}
+          </h2>
+          <p className="text-muted-foreground mt-1">
+            {language === 'ar' ? `حجز زيارة لـ ${name}` : `Réserver une visite pour ${name}`}
+          </p>
+        </div>
+
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
+              {language === 'ar' ? 'اختر التاريخ' : 'Choisir la date'}
+            </label>
+            <Input
+              type="date"
+              min={format(new Date(), 'yyyy-MM-dd')}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="h-12 bg-muted/50 border-border rounded-xl"
+            />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="parentName">
-                  {language === 'ar' ? 'اسم ولي الأمر' : 'Nom du parent'}
-                </Label>
-                <Input
-                  id="parentName"
-                  value={formData.parentName}
-                  onChange={(e) => handleInputChange('parentName', e.target.value)}
-                  placeholder={language === 'ar' ? 'الاسم الكامل' : 'Nom complet'}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="parentEmail">
-                  {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
-                </Label>
-                <Input
-                  id="parentEmail"
-                  type="email"
-                  value={formData.parentEmail}
-                  onChange={(e) => handleInputChange('parentEmail', e.target.value)}
-                  placeholder={language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
-                  required
-                />
-              </div>
+          <div className="space-y-2">
+            <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
+              {language === 'ar' ? 'اختر التوقيت' : 'Choisir l\'heure'}
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {timeSlots.map((time) => (
+                <button
+                  key={time}
+                  onClick={() => setSelectedTime(time)}
+                  className={`py-3 rounded-xl border-2 transition-all font-medium ${
+                    selectedTime === time
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted'
+                  }`}
+                >
+                  {time}
+                </button>
+              ))}
             </div>
+          </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="parentPhone">
-                  {language === 'ar' ? 'رقم الهاتف' : 'Téléphone'}
-                </Label>
-                <Input
-                  id="parentPhone"
-                  value={formData.parentPhone}
-                  onChange={(e) => handleInputChange('parentPhone', e.target.value)}
-                  placeholder={language === 'ar' ? 'رقم الهاتف' : 'Téléphone'}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="childName">
-                  {language === 'ar' ? 'اسم الطفل' : 'Nom de l\'enfant'}
-                </Label>
-                <Input
-                  id="childName"
-                  value={formData.childName}
-                  onChange={(e) => handleInputChange('childName', e.target.value)}
-                  placeholder={language === 'ar' ? 'اسم الطفل' : 'Nom de l\'enfant'}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="childAge">
-                  {language === 'ar' ? 'عمر الطفل' : 'Âge de l\'enfant'}
-                </Label>
-                <Input
-                  id="childAge"
-                  value={formData.childAge}
-                  onChange={(e) => handleInputChange('childAge', e.target.value)}
-                  placeholder={language === 'ar' ? 'العمر' : 'Âge'}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="bookingDate">
-                  {language === 'ar' ? 'تاريخ الحجز' : 'Date de réservation'}
-                </Label>
-                <Input
-                  id="bookingDate"
-                  type="date"
-                  value={formData.bookingDate}
-                  onChange={(e) => handleInputChange('bookingDate', e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="bookingTime">
-                {language === 'ar' ? 'وقت الحجز' : 'Heure de réservation'}
-              </Label>
-              <Input
-                id="bookingTime"
-                type="time"
-                value={formData.bookingTime}
-                onChange={(e) => handleInputChange('bookingTime', e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="notes">
-                {language === 'ar' ? 'ملاحظات' : 'Notes'}
-              </Label>
-              <Textarea
-                id="notes"
-                value={formData.notes}
-                onChange={(e) => handleInputChange('notes', e.target.value)}
-                placeholder={language === 'ar' ? 'أي معلومات إضافية...' : 'Informations supplémentaires...'}
-                rows={3}
-              />
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="flex-1"
-                disabled={isLoading}
-              >
-                {language === 'ar' ? 'إلغاء' : 'Annuler'}
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Clock className="w-4 h-4 animate-spin mr-2" />
-                    {language === 'ar' ? 'جاري الحجز...' : 'Réservation...'}
-                  </>
-                ) : (
-                  <>
-                    <Calendar className="w-4 h-4 mr-2" />
-                    {language === 'ar' ? 'احجز الآن' : 'Réserver maintenant'}
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting || !date || !selectedTime}
+            className="w-full h-14 gradient-accent border-0 rounded-xl shadow-soft hover:shadow-hover transition-all duration-300 text-primary-foreground font-bold text-lg"
+          >
+            {isSubmitting ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              t('booking.confirm') || (language === 'ar' ? 'تأكيد الحجز' : 'Confirmer')
+            )}
+          </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };
 

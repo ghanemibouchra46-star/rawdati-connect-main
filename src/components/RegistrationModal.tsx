@@ -1,190 +1,196 @@
 import { useState } from 'react';
-import { X, User, Mail, Phone, Calendar } from 'lucide-react';
+import { X, User, Phone, Mail, Calendar, Send, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { Kindergarten } from '@/data/kindergartens';
 
 interface RegistrationModalProps {
+  kindergarten: Kindergarten | null;
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
 }
 
-const RegistrationModal = ({ isOpen, onClose, onSuccess }: RegistrationModalProps) => {
-  const { language } = useLanguage();
+const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalProps) => {
+  const { t, language, dir } = useLanguage();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
+    parentName: '',
     phone: '',
-    password: '',
-    confirmPassword: ''
+    email: '',
+    childName: '',
+    childAge: '',
+    message: ''
   });
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  if (!isOpen || !kindergarten) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     try {
-      // Validate passwords match
-      if (formData.password !== formData.confirmPassword) {
-        toast.error(language === 'ar' ? 'كلمات المرور غير متطابقة' : 'Passwords do not match');
-        return;
-      }
+      const { data: { user } } = await supabase.auth.getUser();
 
-      const { error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName,
-            phone: formData.phone
-          }
-        }
-      });
+      const { error } = await supabase
+        .from('registration_requests')
+        .insert({
+          kindergarten_id: kindergarten.id,
+          parent_name: formData.parentName,
+          child_name: formData.childName,
+          child_age: parseInt(formData.childAge),
+          phone: formData.phone,
+          email: formData.email || null,
+          message: formData.message || null,
+          user_id: user?.id || null,
+          status: 'pending'
+        });
 
       if (error) throw error;
 
-      toast.success(language === 'ar' ? 'تم إنشاء الحساب بنجاح!' : 'Account created successfully!');
-      onSuccess?.();
-      onClose();
-      
-      // Reset form
-      setFormData({
-        fullName: '',
-        email: '',
-        phone: '',
-        password: '',
-        confirmPassword: ''
+      toast.success(t('registration.successTitle'), {
+        description: t('registration.successDesc').replace('{name}', language === 'ar' ? kindergarten.name_ar : kindergarten.nameFr)
       });
-    } catch (error) {
+      
+      onClose();
+      setFormData({
+        parentName: '',
+        phone: '',
+        email: '',
+        childName: '',
+        childAge: '',
+        message: ''
+      });
+    } catch (error: any) {
       console.error('Registration error:', error);
-      toast.error(language === 'ar' ? 'فشل في إنشاء الحساب' : 'Failed to create account');
+      toast.error(t('registration.errorSubmit'));
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <User className="w-5 h-5" />
-            {language === 'ar' ? 'إنشاء حساب جديد' : 'Créer un nouveau compte'}
-          </DialogTitle>
-        </DialogHeader>
+  const name = language === 'ar' ? kindergarten.name_ar : kindergarten.nameFr;
 
-        <div className="space-y-4">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="fullName">
-                {language === 'ar' ? 'الاسم الكامل' : 'Nom complet'}
-              </Label>
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      <div 
+        className="absolute inset-0 bg-foreground/50 backdrop-blur-sm animate-fade-in" 
+        onClick={onClose} 
+      />
+      
+      <div className="relative bg-card rounded-3xl shadow-card max-w-lg w-full p-6 md:p-8 animate-scale-in overflow-y-auto max-h-[90vh]" dir={dir}>
+        <button
+          onClick={onClose}
+          className={`absolute top-4 ${dir === 'rtl' ? 'left-4' : 'right-4'} p-2 hover:bg-muted rounded-full transition-colors`}
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <User className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">
+            {t('modal.registration')}
+          </h2>
+          <p className="text-muted-foreground mt-1">
+            {language === 'ar' ? `التسجيل في ${name}` : `Inscription à ${name}`}
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t('registration.parentName')}</label>
+            <Input
+              required
+              value={formData.parentName}
+              onChange={(e) => setFormData({ ...formData, parentName: e.target.value })}
+              placeholder={t('auth.fullName')}
+              className={`h-12 bg-muted/50 border-border rounded-xl ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t('auth.phone')}</label>
               <Input
-                id="fullName"
-                value={formData.fullName}
-                onChange={(e) => handleInputChange('fullName', e.target.value)}
-                placeholder={language === 'ar' ? 'الاسم الكامل' : 'Nom complet'}
                 required
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="0XXXXXXXXX"
+                className={`h-12 bg-muted/50 border-border rounded-xl ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
               />
             </div>
-
-            <div>
-              <Label htmlFor="email">
-                {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
-              </Label>
+            <div className="space-y-2">
+              <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t('auth.email')}</label>
               <Input
-                id="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                placeholder={language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
-                required
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="email@example.com"
+                className={`h-12 bg-muted/50 border-border rounded-xl ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
               />
             </div>
+          </div>
 
-            <div>
-              <Label htmlFor="phone">
-                {language === 'ar' ? 'رقم الهاتف' : 'Téléphone'}
-              </Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t('registration.childName')}</label>
               <Input
-                id="phone"
-                value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                placeholder={language === 'ar' ? 'رقم الهاتف' : 'Téléphone'}
                 required
+                value={formData.childName}
+                onChange={(e) => setFormData({ ...formData, childName: e.target.value })}
+                placeholder={t('registration.childName')}
+                className={`h-12 bg-muted/50 border-border rounded-xl ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
               />
             </div>
-
-            <div>
-              <Label htmlFor="password">
-                {language === 'ar' ? 'كلمة المرور' : 'Mot de passe'}
-              </Label>
+            <div className="space-y-2">
+              <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t('registration.childAge')}</label>
               <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => handleInputChange('password', e.target.value)}
-                placeholder={language === 'ar' ? 'كلمة المرور' : 'Mot de passe'}
                 required
+                type="number"
+                min="1"
+                max="7"
+                value={formData.childAge}
+                onChange={(e) => setFormData({ ...formData, childAge: e.target.value })}
+                placeholder={t('parent.age')}
+                className={`h-12 bg-muted/50 border-border rounded-xl ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
               />
             </div>
+          </div>
 
-            <div>
-              <Label htmlFor="confirmPassword">
-                {language === 'ar' ? 'تأكيد كلمة المرور' : 'Confirmer le mot de passe'}
-              </Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                placeholder={language === 'ar' ? 'تأكيد كلمة المرور' : 'Confirmer le mot de passe'}
-                required
-              />
-            </div>
+          <div className="space-y-2">
+            <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t('registration.message')}</label>
+            <Textarea
+              value={formData.message}
+              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+              placeholder={t('registration.messagePlaceholder')}
+              className={`bg-muted/50 border-border rounded-xl resize-none ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
+              rows={3}
+            />
+          </div>
 
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="flex-1"
-                disabled={isLoading}
-              >
-                {language === 'ar' ? 'إلغاء' : 'Annuler'}
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Calendar className="w-4 h-4 animate-spin mr-2" />
-                    {language === 'ar' ? 'جاري الإنشاء...' : 'Creating...'}
-                  </>
-                ) : (
-                  <>
-                    <User className="w-4 h-4 mr-2" />
-                    {language === 'ar' ? 'إنشاء حساب' : 'Créer un compte'}
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </div>
-      </DialogContent>
-    </Dialog>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className={`w-full h-14 gradient-accent border-0 rounded-xl shadow-soft hover:shadow-hover transition-all duration-300 text-primary-foreground font-bold text-lg gap-2`}
+          >
+            {isSubmitting ? (
+              <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+            ) : (
+              <>
+                <Send className="w-5 h-5" />
+                {t('modal.send')}
+              </>
+            )}
+          </Button>
+        </form>
+      </div>
+    </div>
   );
 };
 
