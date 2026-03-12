@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import {
     Shield, Users, UserCheck, UserX, Clock, LogOut, Home,
     Building2, LayoutDashboard, Settings as SettingsIcon,
@@ -109,7 +110,8 @@ const AdminDashboard = () => {
     const [registrationRequests, setRegistrationRequests] = useState<RegistrationRequest[]>(mockRegistrations);
     const [localMockRegs, setLocalMockRegs] = useState<RegistrationRequest[]>(mockRegistrations);
     const [activeTab, setActiveTab] = useState('overview');
-    const [stats, setStats] = useState({
+    const { logout: authLogout } = useAuth();
+    const [stats, setStats] = useState<any>({
         totalUsers: 0,
         totalKindergartens: localKindergartens.length,
         pendingApprovals: 0,
@@ -361,11 +363,7 @@ const AdminDashboard = () => {
 
     const handleLogout = async () => {
         try {
-            await supabase.auth.signOut();
-            // Clear local storage items just in case
-            Object.keys(localStorage).forEach(key => {
-                if (key.includes('supabase-auth-token')) localStorage.removeItem(key);
-            });
+            await authLogout();
             navigate('/admin-auth', { replace: true });
         } catch (error) {
             console.error('Logout error:', error);

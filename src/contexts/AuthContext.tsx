@@ -79,8 +79,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const logout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    try {
+      await supabase.auth.signOut();
+      // Clear all possible supabase auth tokens from localStorage
+      Object.keys(localStorage).forEach(key => {
+        if (key.includes('supabase-auth-token')) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
       throw error;
     }
   };

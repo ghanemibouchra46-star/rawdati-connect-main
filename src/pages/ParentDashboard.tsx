@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useSubscriptionRequests } from '@/hooks/useSubscriptionRequests';
@@ -43,6 +44,7 @@ interface Payment {
 }
 
 const ParentDashboard = () => {
+    const { logout: authLogout } = useAuth();
     const { t, dir, language } = useLanguage();
     const { data: kindergartens = [] } = useKindergartens();
     const { requests: subscriptionRequests, isLoading: loadingSubscriptions } = useSubscriptionRequests();
@@ -129,10 +131,7 @@ const ParentDashboard = () => {
 
     const handleLogout = async () => {
         try {
-            await supabase.auth.signOut();
-            Object.keys(localStorage).forEach(key => {
-                if (key.includes('supabase-auth-token')) localStorage.removeItem(key);
-            });
+            await authLogout();
             navigate('/auth', { replace: true });
         } catch (error) {
             console.error('Logout error:', error);
@@ -239,7 +238,7 @@ const ParentDashboard = () => {
                         </div>
                         <div className="flex items-center gap-3">
                             <LanguageSelector />
-                            <Button variant="ghost" size="icon" onClick={() => navigate('/auth')} className="rounded-full">
+                            <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-full">
                                 <LogOut className="w-5 h-5" />
                             </Button>
                         </div>

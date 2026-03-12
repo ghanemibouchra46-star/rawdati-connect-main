@@ -57,6 +57,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { User as AuthUser } from '@supabase/supabase-js';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import { arDZ, fr } from 'date-fns/locale';
@@ -105,6 +106,7 @@ const mockKindergarten = {
 };
 
 const OwnerDashboard = () => {
+  const { logout: authLogout } = useAuth();
   const { t, language, dir } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -313,11 +315,7 @@ const OwnerDashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
-      // Clear local storage items just in case
-      Object.keys(localStorage).forEach(key => {
-        if (key.includes('supabase-auth-token')) localStorage.removeItem(key);
-      });
+      await authLogout();
       navigate('/auth', { replace: true });
     } catch (error) {
       console.error('Logout error:', error);
@@ -442,7 +440,7 @@ const OwnerDashboard = () => {
               {/* Platform Subscription Button */}
               <PlatformSubscriptionButton />
               
-              <Button variant="outline" size="sm" onClick={() => navigate('/owner-auth')} className="gap-2">
+              <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
                 <LogOut className="w-4 h-4" />
                 {language === 'ar' ? 'خروج' : 'Déconnexion'}
               </Button>
