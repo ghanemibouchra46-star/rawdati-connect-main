@@ -39,7 +39,7 @@ const normalizeMunicipality = (val: string): string => {
   if (!val) return '';
   const lower = val.toLowerCase().trim();
   // Direct match if already an ID
-  const validIds = ['mascara', 'sig', 'tighennif', 'mohammadia', 'ghriss'];
+  const validIds = ['mascara', 'sig', 'tighennif', 'mohammadia', 'ghriss', 'beni-shqran'];
   if (validIds.includes(lower)) return lower;
   // Map Arabic names to IDs
   if (val.includes('معسكر')) return 'mascara';
@@ -47,12 +47,14 @@ const normalizeMunicipality = (val: string): string => {
   if (val.includes('تيغنيف')) return 'tighennif';
   if (val.includes('المحمدية') || val.includes('محمدية')) return 'mohammadia';
   if (val.includes('غريس')) return 'ghriss';
+  if (val.includes('بني شقران')) return 'beni-shqran';
   // Map French names to IDs
   if (lower.includes('mascara')) return 'mascara';
   if (lower.includes('sig')) return 'sig';
   if (lower.includes('tighennif')) return 'tighennif';
   if (lower.includes('mohammadia')) return 'mohammadia';
   if (lower.includes('ghriss')) return 'ghriss';
+  if (lower.includes('beni shqran') || lower.includes('beni-shqran')) return 'beni-shqran';
   return val;
 };
 

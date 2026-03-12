@@ -77,6 +77,7 @@ export const municipalities = [
   { id: 'tighennif', name_ar: 'تيغنيف', nameFr: 'Tighennif' },
   { id: 'mohammadia', name_ar: 'المحمدية', nameFr: 'Mohammadia' },
   { id: 'ghriss', name_ar: 'غريس', nameFr: 'Ghriss' },
+  { id: 'beni-shqran', name_ar: 'بني شقران', nameFr: 'Beni Shqran' },
 ];
 
 export const services = [
