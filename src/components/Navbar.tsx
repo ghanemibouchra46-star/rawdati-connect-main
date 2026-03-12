@@ -95,13 +95,13 @@ const Navbar = () => {
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                   <div className="py-2">
                     <Link
-                      to="/dashboard"
+                      to="/parent"
                       className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
                     >
                       {language === 'ar' ? 'لوحة التحكم' : 'Tableau de bord'}
                     </Link>
                     <Link
-                      to="/profile"
+                      to="/parent/settings"
                       className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
                     >
                       {language === 'ar' ? 'الملف الشخصي' : 'Profil'}
@@ -180,7 +180,7 @@ const Navbar = () => {
                     {user.user_metadata?.full_name || user.email}
                   </div>
                   <Link
-                    to="/dashboard"
+                    to="/parent"
                     className="block text-foreground hover:text-primary transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >

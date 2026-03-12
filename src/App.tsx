@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { LanguageProvider, useLanguage } from "./contexts/LanguageContext";
@@ -116,6 +116,11 @@ const App = () => (
               <Route path="/doctors" element={<Doctors />} />
               <Route path="/speech-therapy" element={<SpeechTherapy />} />
               <Route path="/recovery" element={<Recovery />} />
+              <Route path="/dashboard" element={<Navigate to="/parent" replace />} />
+              <Route path="/admin-dashboard" element={<Navigate to="/admin" replace />} />
+              <Route path="/owner-dashboard" element={<Navigate to="/owner" replace />} />
+              <Route path="/parent-dashboard" element={<Navigate to="/parent" replace />} />
+              <Route path="/profile" element={<Navigate to="/parent/settings" replace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>

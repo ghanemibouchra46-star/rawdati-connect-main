@@ -70,11 +70,11 @@ const Auth = () => {
         const role = roleData?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
 
         if (role === 'admin') {
-          navigate('/admin-dashboard');
+          navigate('/admin');
         } else if (role === 'owner') {
-          navigate('/owner-dashboard');
+          navigate('/owner');
         } else {
-          navigate('/parent-dashboard');
+          navigate('/parent');
         }
       }
     };
@@ -153,11 +153,11 @@ const Auth = () => {
             { user_id: data.user.id, role: 'admin' },
             { onConflict: 'user_id,role' }
           );
-          navigate('/admin-dashboard');
+          navigate('/admin');
         } else if (role === 'owner') {
-          navigate('/owner-dashboard');
+          navigate('/owner');
         } else {
-          navigate('/parent-dashboard');
+          navigate('/parent');
         }
       }
     }
