@@ -290,20 +290,12 @@ export function useKindergartens() {
 
         if (error) {
           console.error("Error fetching kindergartens from Supabase:", error?.message);
-          console.log("Using local kindergartens as fallback");
-          return kindergartens;
+          return localKindergartens;
         }
-
-        if (!data) {
-          console.warn("No data returned from Supabase");
-          return kindergartens;
-        }
-
-        console.log(`Fetched ${data?.length || 0} kindergartens from Supabase`);
 
         if (!data || data.length === 0) {
-          console.log("No data from Supabase, using local kindergartens");
-          return kindergartens;
+          console.log("No approved kindergartens found in Supabase.");
+          return []; // Don't fallback to local if we have an active connection but no data
         }
 
         const mappedData = (data ?? []).map((row: any) => {

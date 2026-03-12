@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import {
     Shield, Users, UserCheck, UserX, Clock, LogOut, Home,
@@ -96,6 +97,7 @@ const AdminDashboard = () => {
     const { t, dir, language } = useLanguage();
     const navigate = useNavigate();
     const { toast } = useToast();
+    const queryClient = useQueryClient();
 
     // Hooks for subscription requests
     const { requests: subscriptionRequests, isLoading: loadingSubscriptions, error: subscriptionError, approveRequest, rejectRequest } = useAllSubscriptionRequests();

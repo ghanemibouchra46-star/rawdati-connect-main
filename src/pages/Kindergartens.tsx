@@ -42,9 +42,7 @@ const Kindergartens = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlSearchQuery = searchParams.get('search') || '';
 
-  const kindergartens = (supabaseKindergartens && supabaseKindergartens.length > 0)
-    ? supabaseKindergartens
-    : localKindergartens;
+  const kindergartens = supabaseKindergartens || [];
 
   console.log("Kindergartens.tsx - supabaseKindergartens:", supabaseKindergartens);
   console.log("Kindergartens.tsx - localKindergartens:", localKindergartens);
