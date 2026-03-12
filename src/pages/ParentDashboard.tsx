@@ -100,7 +100,7 @@ const ParentDashboard = () => {
                     name: reg.child_name,
                     age: reg.child_age,
                     photo_url: null,
-                    kindergarten_name: language === 'ar' ? (kg?.name_ar || reg.kindergarten_id) : (kg?.name_fr || reg.kindergarten_id),
+                    kindergarten_name: language === 'ar' ? (kg?.name_ar || reg.kindergarten_id) : (kg?.nameFr || reg.kindergarten_id),
                     status: reg.status
                 };
             });
@@ -312,7 +312,7 @@ const ParentDashboard = () => {
                                 p.for_year === curYear &&
                                 p.status === 'paid'
                             );
-                            const kg = kindergartens.find(k => (language === 'ar' ? k.name_ar === child.kindergarten_name : k.name_fr === child.kindergarten_name));
+                            const kg = kindergartens.find(k => (language === 'ar' ? k.name_ar === child.kindergarten_name : k.nameFr === child.kindergarten_name));
                             const price = kg?.pricePerMonth || 5000;
 
                             return (

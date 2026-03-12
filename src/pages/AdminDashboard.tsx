@@ -66,12 +66,12 @@ const mockRegistrations: RegistrationRequest[] = [];
 function adaptKindergarten(kg: typeof localKindergartens[0]): Kindergarten {
     return {
         id: kg.id,
-        name_ar: kg.nameAr,
+        name_ar: kg.name_ar,
         name_fr: kg.nameFr,
-        address_ar: kg.addressAr,
+        address_ar: kg.address_ar,
         address_fr: kg.addressFr,
         municipality: kg.municipality,
-        municipality_ar: kg.municipalityAr,
+        municipality_ar: kg.municipality_ar,
         municipality_fr: kg.municipalityFr,
         status: 'approved',
         created_at: new Date().toISOString(),
@@ -96,10 +96,10 @@ const AdminDashboard = () => {
     const { t, dir, language } = useLanguage();
     const navigate = useNavigate();
     const { toast } = useToast();
-    
+
     // Hooks for subscription requests
     const { requests: subscriptionRequests, isLoading: loadingSubscriptions, error: subscriptionError, approveRequest, rejectRequest } = useAllSubscriptionRequests();
-    
+
     // Hooks for platform subscriptions
     const { subscriptionRequests: platformSubscriptions, isLoading: loadingPlatformSubs } = useAllPlatformSubscriptions();
     const { approveSubscription, rejectSubscription } = useUpdatePlatformSubscription();
@@ -907,9 +907,9 @@ const AdminDashboard = () => {
                                 <div className="flex gap-2">
                                     <div className="relative">
                                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                        <Input 
-                                            className="bg-slate-800 border-white/5 pl-9 w-64" 
-                                            placeholder={language === 'ar' ? 'بحث في الطلبات...' : 'Search requests...'} 
+                                        <Input
+                                            className="bg-slate-800 border-white/5 pl-9 w-64"
+                                            placeholder={language === 'ar' ? 'بحث في الطلبات...' : 'Search requests...'}
                                         />
                                     </div>
                                 </div>
@@ -955,14 +955,16 @@ const AdminDashboard = () => {
                                                             <div>
                                                                 <p className="text-sm font-medium">
                                                                     {(() => {
-                                                                        const kg = localKindergartens.find(k => k.id === request.kindergarten_id);
-                                                                        return language === 'ar' ? kg?.nameAr : kg?.nameFr;
+                                                                        const targetKg = kindergartens.find(k => k.id === request.kindergarten_id) || localKindergartens.find(k => k.id === request.kindergarten_id);
+                                                                        const name = language === 'ar' ? targetKg?.name_ar : ((targetKg as any)?.name_fr || (targetKg as any)?.nameFr);
+                                                                        return name || 'N/A';
                                                                     })()}
                                                                 </p>
                                                                 <p className="text-xs text-slate-400">
                                                                     {(() => {
-                                                                        const kg = localKindergartens.find(k => k.id === request.kindergarten_id);
-                                                                        return language === 'ar' ? kg?.municipalityAr : kg?.municipalityFr;
+                                                                        const targetKg = kindergartens.find(k => k.id === request.kindergarten_id) || localKindergartens.find(k => k.id === request.kindergarten_id);
+                                                                        const mun = language === 'ar' ? targetKg?.municipality_ar : ((targetKg as any)?.municipality_fr || (targetKg as any)?.municipalityFr);
+                                                                        return mun || 'N/A';
                                                                     })()}
                                                                 </p>
                                                             </div>
@@ -984,17 +986,17 @@ const AdminDashboard = () => {
                                                         <TableCell className="text-white text-sm">{request.phone}</TableCell>
                                                         <TableCell className="text-white text-sm font-mono">{request.ccp}</TableCell>
                                                         <TableCell className="text-white">
-                                                            <Badge 
+                                                            <Badge
                                                                 variant={request.status === 'approved' ? 'default' : request.status === 'rejected' ? 'destructive' : 'secondary'}
                                                                 className={
                                                                     request.status === 'approved' ? 'bg-green-500 text-white' :
-                                                                    request.status === 'rejected' ? 'bg-red-500 text-white' :
-                                                                    'bg-yellow-500 text-white'
+                                                                        request.status === 'rejected' ? 'bg-red-500 text-white' :
+                                                                            'bg-yellow-500 text-white'
                                                                 }
                                                             >
                                                                 {request.status === 'approved' ? (language === 'ar' ? 'مقبول' : 'Approved') :
-                                                                 request.status === 'rejected' ? (language === 'ar' ? 'مرفوض' : 'Rejected') :
-                                                                 (language === 'ar' ? 'في الانتظار' : 'Pending')}
+                                                                    request.status === 'rejected' ? (language === 'ar' ? 'مرفوض' : 'Rejected') :
+                                                                        (language === 'ar' ? 'في الانتظار' : 'Pending')}
                                                             </Badge>
                                                         </TableCell>
                                                         <TableCell className="text-white">
