@@ -63,6 +63,7 @@ import { format } from 'date-fns';
 import { arDZ, fr } from 'date-fns/locale';
 import { useSubscriptionRequests } from '@/hooks/useSubscriptionRequests';
 import PlatformSubscriptionButton from '@/components/PlatformSubscriptionButton';
+import SubscriptionInterface from '@/components/SubscriptionInterface';
 
 // Types
 interface Child {
@@ -437,8 +438,14 @@ const OwnerDashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {/* Platform Subscription Button */}
-              <PlatformSubscriptionButton />
+              {/* Professional Account Subscription */}
+              <SubscriptionInterface onActivate={() => {
+                // Trigger any specific activation logic if needed
+                toast({
+                  title: language === 'ar' ? 'طلب التفعيل' : 'Demande d\'activation',
+                  description: language === 'ar' ? 'تم تحويلك لصفحة الدفع لتفعيل الحساب المهني' : 'Vous avez été redirigé vers la page de paiement',
+                });
+              }} />
               
               <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
                 <LogOut className="w-4 h-4" />

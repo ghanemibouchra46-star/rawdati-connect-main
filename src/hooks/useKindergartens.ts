@@ -290,6 +290,7 @@ export function useKindergartens() {
   const query = useQuery({
     queryKey: ['kindergartens'],
     queryFn: async () => {
+      console.log("🚀 useKindergartens - Fetching approved kindergartens...");
       try {
         const { data, error } = await supabase
           .from('kindergartens')
@@ -298,42 +299,42 @@ export function useKindergartens() {
           .order('rating', { ascending: false });
 
         if (error) {
-          console.error("Error fetching kindergartens from Supabase:", error?.message);
+          console.error("❌ Error fetching kindergartens from Supabase:", error?.message);
           return kindergartens;
         }
 
+        console.log(`📊 Found ${data?.length || 0} approved kindergartens in DB`);
+
         if (!data || data.length === 0) {
-          console.log("No approved kindergartens found in Supabase (status = 'approved').");
-          const { data: allData } = await supabase.from('kindergartens').select('id, name_ar, status');
-          console.log("All kindergartens in DB:", allData);
+          // Fallback check to see what's actually in the DB
+          const { data: allData } = await supabase.from('kindergartens').select('id, name_ar, status').limit(10);
+          console.log("🔍 Sample of ALL kindergartens in DB:", allData);
           return []; 
         }
 
         const mappedData = (data ?? []).map((row: any) => {
           if (!row?.id) {
-            console.warn("Skipping row without ID:", row);
+            console.warn("⚠️ Skipping row without ID:", row);
             return null;
           }
           try {
             const mapped = mapRowToKindergarten(row);
             if (!mapped?.name_ar) {
-              console.warn(`Skipped kindergarten with no name:`, row?.id);
+              console.warn(`⚠️ Skipped kindergarten with no name:`, row?.id);
               return null;
             }
-            console.log(`✓ Mapped: ${mapped?.name_ar} (ID: ${mapped?.id})`);
+            console.log(`✅ Mapped: ${mapped?.name_ar} (ID: ${mapped?.id}, Status: ${row.status})`);
             return mapped;
           } catch (e) {
-            console.error(`Error mapping kindergarten ${row?.id}:`, e);
+            console.error(`❌ Error mapping kindergarten ${row?.id} (${row?.name_ar}):`, e);
             return null;
           }
         }).filter(Boolean) as Kindergarten[];
 
-        console.log(`✓ Loaded ${mappedData.length} kindergartens successfully`);
+        console.log(`✨ Successfully loaded ${mappedData.length} kindergartens`);
         return mappedData;
       } catch (e) {
-        console.error("Error in useKindergartens:", e);
-        // Return local data as fallback
-        console.log("Using local kindergartens as fallback due to error");
+        console.error("❌ Global error in useKindergartens:", e);
         return kindergartens;
       }
     },

@@ -71,33 +71,51 @@ const Kindergartens = () => {
     
     const filtered = kindergartens.filter((k) => {
       const searchStr = `${k?.name_ar || ''} ${k?.nameFr || ''} ${k?.municipality_ar || ''} ${k?.municipalityFr || ''}`;
-      if (searchQuery && !arabicSearch(searchStr, searchQuery)) {
-        return false;
+      
+      const matchesSearch = !searchQuery || arabicSearch(searchStr, searchQuery);
+      const matchesMunicipality = !selectedMunicipality || k?.municipality === selectedMunicipality;
+      const maxPriceForFilter = priceRange[1] >= 15000 ? Infinity : priceRange[1];
+      const matchesPrice = (k.pricePerMonth || 0) >= priceRange[0] && (k.pricePerMonth || 0) <= maxPriceForFilter;
+      const matchesAutism = !hasAutismWing || k.hasAutismWing;
+
+      if (k?.name_ar?.includes('بني شقران') || k?.name_ar?.includes('شقران')) {
+        console.log(`🔍 Checking "Bani Shqran":`, {
+          matchesSearch,
+          matchesMunicipality,
+          matchesPrice,
+          matchesAutism,
+          k_municipality: k.municipality,
+          selectedMunicipality
+        });
       }
-      if (selectedMunicipality && k?.municipality !== selectedMunicipality) {
-        return false;
+
+      if (!matchesSearch) return false;
+      if (!matchesMunicipality) return false;
+      if (!matchesPrice) return false;
+      if (!matchesAutism) return false;
+      
+      // Services filter (AND logic)
+      if (selectedServices.length > 0) {
+        const hasAllServices = selectedServices.every((sId) => 
+          k.services?.some((ks: any) => (typeof ks === 'string' ? ks === sId : ks.id === sId))
+        );
+        if (!hasAllServices) return false;
       }
-      const price = k?.pricePerMonth || 0;
-      const minPrice = priceRange[0];
-      const maxPrice = priceRange[1] >= 15000 ? Infinity : priceRange[1];
-      if (price < minPrice || price > maxPrice) {
-        return false;
+      
+      // Activities filter (AND logic)
+      if (selectedActivities.length > 0) {
+        const hasAllActivities = selectedActivities.every((aId) => 
+          k.activities?.some((ka: any) => (typeof ka === 'string' ? ka === aId : ka.id === aId))
+        );
+        if (!hasAllActivities) return false;
       }
-      if (selectedServices.length > 0 && !selectedServices.every((s) => k?.services?.includes(s))) {
-        return false;
-      }
-      if (selectedActivities.length > 0 && !selectedActivities.every((a) => kindergartenMatchesActivity(k, a))) {
-        return false;
-      }
-      if (hasAutismWing && !k?.hasAutismWing) {
-        return false;
-      }
+      
       return true;
     });
-    
-    console.log("Filtered kindergartens:", filtered.length);
+
+    console.log(`✅ Filtered ${filtered.length} out of ${kindergartens.length} kindergartens`);
     return filtered;
-  }, [searchQuery, selectedMunicipality, priceRange, selectedServices, selectedActivities, hasAutismWing, language, kindergartens]);
+  }, [kindergartens, searchQuery, selectedMunicipality, priceRange, selectedServices, selectedActivities, hasAutismWing]);
 
   const handleClearFilters = () => {
     setSelectedMunicipality('');

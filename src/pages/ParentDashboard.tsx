@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Baby, LogOut, Home, Bell, User, Calendar, Clock, Image, Settings, ChevronLeft, CreditCard, DollarSign } from 'lucide-react';
 import PaymentProcess from '@/components/PaymentProcess';
+import SubscriptionInterface from '@/components/SubscriptionInterface';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -246,7 +247,17 @@ const ParentDashboard = () => {
                 </div>
             </header>
 
-            <main className="container mx-auto px-4 py-6 space-y-6">
+            <main className="container mx-auto px-4 py-6 space-y-8">
+                {/* Daily Follow-up Subscription */}
+                <div className="flex justify-center md:justify-start">
+                    <SubscriptionInterface onActivate={() => {
+                        toast({
+                            title: language === 'ar' ? 'طلب التفعيل' : 'Demande d\'activation',
+                            description: language === 'ar' ? 'تم تحويلك لصفحة الدفع لتفعيل خدمة المتابعة اليومية' : 'Vous avez été redirigé vers la page de paiement',
+                        });
+                    }} />
+                </div>
+
                 {/* Children Section */}
                 <section>
                     <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">

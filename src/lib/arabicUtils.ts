@@ -10,10 +10,12 @@ export const normalizeArabic = (text: string): string => {
     .replace(/[\u064B-\u0652]/g, '')
     // Normalize Alif
     .replace(/[\u0622\u0623\u0625]/g, '\u0627')
+    // Normalize Ya/Alef Maksura
+    .replace(/[\u0649\u064A\u06CC]/g, '\u064A')
     // Normalize Teh Marbuta to Heh
     .replace(/\u0629/g, '\u0647')
-    // Normalize Ya to Alef Maksura (optional, depends on need, but often helpful for search)
-    // .replace(/\u064A/g, '\u0649')
+    // Remove extra spaces
+    .replace(/\s+/g, ' ')
     .trim();
 };
 

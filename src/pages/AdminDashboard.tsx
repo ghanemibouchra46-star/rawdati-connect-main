@@ -304,14 +304,15 @@ const AdminDashboard = () => {
 
         if (error) {
             console.error('Update user status error:', error);
+            const errorMsg = error.message;
             toast({
-                title: `${t('common.error')}: ${error.message}`,
+                title: language === 'ar' ? `خطأ: ${errorMsg}` : `Error: ${errorMsg}`,
                 variant: 'destructive'
             });
             return;
         }
 
-        toast({ title: t('common.updated') });
+        toast({ title: language === 'ar' ? 'تم التحديث' : 'Updated successfully' });
         fetchData();
     };
 
@@ -323,15 +324,18 @@ const AdminDashboard = () => {
 
         if (error) {
             console.error('Update KG status error:', error);
+            const errorMsg = error.message;
             toast({
-                title: `${t('common.error')}: ${error.message}`,
+                title: language === 'ar' ? `خطأ: ${errorMsg}` : `Error: ${errorMsg}`,
                 variant: 'destructive'
             });
             return;
         }
 
-        toast({ title: t('common.updated') });
+        toast({ title: language === 'ar' ? 'تم التحديث' : 'Updated successfully' });
         fetchData();
+        // Invalidate kindergartens query to refresh other pages
+        queryClient.invalidateQueries({ queryKey: ['kindergartens'] });
     };
 
     const updateRegistrationStatus = async (regId: string, status: 'approved' | 'rejected') => {
@@ -340,7 +344,7 @@ const AdminDashboard = () => {
             const updated = localMockRegs.map(r => r.id === regId ? { ...r, status } : r);
             setLocalMockRegs(updated);
             setRegistrationRequests(updated);
-            toast({ title: t('common.updated') });
+            toast({ title: language === 'ar' ? 'تم التحديث' : 'Updated successfully' });
             return;
         }
 
@@ -352,14 +356,14 @@ const AdminDashboard = () => {
         if (error) {
             console.error('Update registration status error:', error);
             toast({
-                title: t('common.error'),
+                title: language === 'ar' ? 'خطأ' : 'Error',
                 description: error.message,
                 variant: 'destructive'
             });
             return;
         }
 
-        toast({ title: t('common.updated') });
+        toast({ title: language === 'ar' ? 'تم التحديث' : 'Updated successfully' });
         fetchData();
     };
 
@@ -1049,7 +1053,7 @@ const AdminDashboard = () => {
                                         <h4 className="text-sm font-bold text-red-500 uppercase tracking-widest">{language === 'ar' ? 'العامة' : 'General'}</h4>
                                         <div className="space-y-2">
                                             <Label>{language === 'ar' ? 'اسم المنصة' : 'Platform Name'}</Label>
-                                            <Input className="bg-slate-800 border-white/5" defaultValue="Rawdati Connect" />
+                                            <Input className="bg-slate-800 border-white/5" defaultValue="Rawdati" />
                                         </div>
                                         <div className="space-y-2">
                                             <Label>{language === 'ar' ? 'البريد الإلكتروني للدعم' : 'Support Email'}</Label>
