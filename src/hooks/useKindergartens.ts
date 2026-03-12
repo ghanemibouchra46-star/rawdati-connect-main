@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { kindergartens, type Kindergarten, type Activity, type Facility, type PriceItem, type KindergartenGallery } from '@/data/kindergartens';
+import { normalizeArabic } from '@/lib/arabicUtils';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
@@ -37,17 +38,22 @@ const resolveImageUrl = (imagePath: string): string => {
 
 const normalizeMunicipality = (val: string): string => {
   if (!val) return '';
+  const normalizedVal = normalizeArabic(val);
   const lower = val.toLowerCase().trim();
+  const normalizedLower = normalizedVal.toLowerCase().trim();
+
   // Direct match if already an ID
   const validIds = ['mascara', 'sig', 'tighennif', 'mohammadia', 'ghriss', 'beni-shqran'];
   if (validIds.includes(lower)) return lower;
+
   // Map Arabic names to IDs
-  if (val.includes('معسكر')) return 'mascara';
-  if (val.includes('سيق')) return 'sig';
-  if (val.includes('تيغنيف')) return 'tighennif';
-  if (val.includes('المحمدية') || val.includes('محمدية')) return 'mohammadia';
-  if (val.includes('غريس')) return 'ghriss';
-  if (val.includes('بني شقران')) return 'beni-shqran';
+  if (normalizedVal.includes('معسكر')) return 'mascara';
+  if (normalizedVal.includes('سيق')) return 'sig';
+  if (normalizedVal.includes('تيغنيف')) return 'tighennif';
+  if (normalizedVal.includes('المحمدية') || normalizedVal.includes('محمدية')) return 'mohammadia';
+  if (normalizedVal.includes('غريس')) return 'ghriss';
+  if (normalizedVal.includes('بني شقران')) return 'beni-shqran';
+
   // Map French names to IDs
   if (lower.includes('mascara')) return 'mascara';
   if (lower.includes('sig')) return 'sig';
@@ -55,6 +61,7 @@ const normalizeMunicipality = (val: string): string => {
   if (lower.includes('mohammadia')) return 'mohammadia';
   if (lower.includes('ghriss')) return 'ghriss';
   if (lower.includes('beni shqran') || lower.includes('beni-shqran')) return 'beni-shqran';
+
   return val;
 };
 

@@ -8,6 +8,7 @@ import { kindergartens as localKindergartens, Kindergarten } from '@/data/kinder
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { arabicSearch } from '@/lib/arabicUtils';
 
 interface SearchAutocompleteProps {
     onSearch?: (query: string) => void;
@@ -33,8 +34,8 @@ const SearchAutocomplete = ({ onSearch, className }: SearchAutocompleteProps) =>
             const name = language === 'ar' ? k.name_ar : k.nameFr;
             const municipality = language === 'ar' ? k.municipality_ar : k.municipalityFr;
             return (
-                name.toLowerCase().includes(inputValue.toLowerCase()) ||
-                municipality.toLowerCase().includes(inputValue.toLowerCase())
+                arabicSearch(name, inputValue) ||
+                arabicSearch(municipality, inputValue)
             );
         }).slice(0, 5);
     }, [kindergartens, inputValue, language]);

@@ -12,6 +12,7 @@ import { GraduationCap, Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import SearchAutocomplete from '@/components/SearchAutocomplete';
+import { arabicSearch } from '@/lib/arabicUtils';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -69,8 +70,8 @@ const Kindergartens = () => {
     console.log("Selected municipality:", selectedMunicipality);
     
     const filtered = kindergartens.filter((k) => {
-      const searchStr = `${k?.name_ar || ''} ${k?.nameFr || ''} ${k?.municipality_ar || ''} ${k?.municipalityFr || ''}`.toLowerCase();
-      if (searchQuery && !searchStr.includes(searchQuery.toLowerCase().trim())) {
+      const searchStr = `${k?.name_ar || ''} ${k?.nameFr || ''} ${k?.municipality_ar || ''} ${k?.municipalityFr || ''}`;
+      if (searchQuery && !arabicSearch(searchStr, searchQuery)) {
         return false;
       }
       if (selectedMunicipality && k?.municipality !== selectedMunicipality) {
