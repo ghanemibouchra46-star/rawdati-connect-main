@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { X, User, Phone, Mail, Calendar, Send, AlertCircle } from 'lucide-react';
+import { X, User, Phone, Mail, Calendar, Send, AlertCircle, FileText } from 'lucide-react';
+import PaymentOrder from './PaymentOrder';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,10 +26,9 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
     childAge: '',
     message: '',
     medicalCondition: '',
-    foodAllergies: '',
-    nationalId: '',
-    ccp: ''
+    foodAllergies: ''
   });
+  const [submittedRequest, setSubmittedRequest] = useState<any>(null);
 
   if (!isOpen || !kindergarten) return null;
 
@@ -39,7 +39,7 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('registration_requests')
         .insert({
           kindergarten_id: kindergarten.id,
@@ -51,19 +51,18 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
           message: formData.message || null,
           medical_condition: formData.medicalCondition || null,
           food_allergies: formData.foodAllergies || null,
-          national_id: formData.nationalId || null,
-          ccp: formData.ccp || null,
           user_id: user?.id || null,
           status: 'pending'
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
-      toast.success(t('registration.successTitle'), {
-        description: t('registration.successDesc').replace('{name}', language === 'ar' ? kindergarten.name_ar : kindergarten.nameFr)
-      });
+      setSubmittedRequest(data);
       
-      onClose();
+      toast.success(t('registration.successTitle'));
+      
       setFormData({
         parentName: '',
         phone: '',
@@ -72,9 +71,7 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
         childAge: '',
         message: '',
         medicalCondition: '',
-        foodAllergies: '',
-        nationalId: '',
-        ccp: ''
+        foodAllergies: ''
       });
     } catch (error: any) {
       console.error('Registration error:', error);
@@ -103,17 +100,31 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
 
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <User className="w-8 h-8 text-primary" />
+            {submittedRequest ? (
+              <FileText className="w-8 h-8 text-primary" />
+            ) : (
+              <User className="w-8 h-8 text-primary" />
+            )}
           </div>
           <h2 className="text-2xl font-bold text-foreground">
-            {t('modal.registration')}
+            {submittedRequest ? t('payment.orderTitle') : t('modal.registration')}
           </h2>
           <p className="text-muted-foreground mt-1">
-            {language === 'ar' ? `التسجيل في ${name}` : `Inscription à ${name}`}
+            {language === 'ar' ? `الروضة: ${name}` : `Crèche: ${name}`}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {submittedRequest ? (
+          <PaymentOrder 
+            orderId={submittedRequest.id}
+            date={submittedRequest.created_at}
+            amount={kindergarten.pricePerMonth || 0}
+            status={submittedRequest.status}
+            kindergarten={kindergarten}
+            onClose={onClose}
+          />
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t('registration.parentName')}</label>
             <Input
@@ -144,26 +155,6 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="email@example.com"
-                className={`h-12 bg-muted/50 border-border rounded-xl ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t('registration.nationalId')}</label>
-              <Input
-                value={formData.nationalId}
-                onChange={(e) => setFormData({ ...formData, nationalId: e.target.value })}
-                placeholder={t('registration.nationalId')}
-                className={`h-12 bg-muted/50 border-border rounded-xl ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t('registration.ccp')}</label>
-              <Input
-                value={formData.ccp}
-                onChange={(e) => setFormData({ ...formData, ccp: e.target.value })}
-                placeholder={t('registration.ccp')}
                 className={`h-12 bg-muted/50 border-border rounded-xl ${dir === 'rtl' ? 'text-right' : 'text-left'}`}
               />
             </div>
@@ -241,9 +232,10 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
             )}
           </Button>
         </form>
-      </div>
+      )}
     </div>
-  );
+  </div>
+);
 };
 
 export default RegistrationModal;

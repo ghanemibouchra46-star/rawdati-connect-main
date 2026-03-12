@@ -326,6 +326,18 @@ const translations: Record<Language, Record<string, string>> = {
         'chatbot.title': 'المساعد الذكي',
         'chatbot.typing': 'جاري الكتابة...',
         'chatbot.error': 'عذراً، حدث خطأ ما. حاول مرة أخرى.',
+
+        // Payment Order
+        'payment.orderTitle': 'أمر بالدفع',
+        'payment.orderNumber': 'رقم الطلب',
+        'payment.date': 'التاريخ',
+        'payment.status': 'حالة الدفع',
+        'payment.amount': 'المبلغ',
+        'payment.method': 'خيار الدفع',
+        'payment.edahabia': 'البطاقة الذهبية',
+        'payment.baridimob': 'بريدي موب (Baridi Mob)',
+        'payment.payNow': 'ادفع الآن',
+        'payment.pending': 'في الانتظار',
     },
     fr: {
         // Welcome & General
@@ -648,6 +660,18 @@ const translations: Record<Language, Record<string, string>> = {
         'chatbot.title': 'Assistant IA',
         'chatbot.typing': 'En train d\'écrire...',
         'chatbot.error': 'Désolé, une erreur s\'est produite. Réessayez.',
+
+        // Payment Order
+        'payment.orderTitle': 'Ordre de Paiement',
+        'payment.orderNumber': 'N° de Commande',
+        'payment.date': 'Date',
+        'payment.status': 'Statut de Paiement',
+        'payment.amount': 'Montant',
+        'payment.method': 'Option de Paiement',
+        'payment.edahabia': 'Carte Edahabia',
+        'payment.baridimob': 'Baridi Mob',
+        'payment.payNow': 'Payer Maintenant',
+        'payment.pending': 'En attente',
     },
     en: {
         // Welcome & General
