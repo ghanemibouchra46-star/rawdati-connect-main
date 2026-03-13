@@ -4,18 +4,31 @@ import { Menu, X, User, LogOut, Shield, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import logoIcon from '@/assets/logo-icon.png';
 
 const Navbar = () => {
   const { language, dir, setLanguage, t } = useLanguage();
   const { user, logout } = useAuth();
+  const { toast } = useToast();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await logout();
-    navigate('/');
+    try {
+      toast({
+        title: language === 'ar' ? 'جاري تسجيل الخروج...' : 'Déconnexion en cours...',
+      });
+      await logout();
+      // Use window.location as a more robust way to ensure a fresh state
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Fallback: force clear and redirect
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = '/';
+    }
   };
 
   const toggleLanguage = () => {
@@ -109,9 +122,9 @@ const Navbar = () => {
                     <hr className="my-2" />
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2"
+                      className="w-full text-start px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2"
                     >
-                      <LogOut className="w-4 h-4" />
+                      <LogOut className="w-4 h-4 ml-2" />
                       {language === 'ar' ? 'تسجيل الخروج' : 'Déconnexion'}
                     </button>
                   </div>

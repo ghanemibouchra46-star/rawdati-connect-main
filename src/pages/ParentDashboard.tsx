@@ -132,11 +132,14 @@ const ParentDashboard = () => {
 
     const handleLogout = async () => {
         try {
+            toast({
+                title: language === 'ar' ? 'جاري تسجيل الخروج...' : 'Déconnexion en cours...',
+            });
             await authLogout();
-            navigate('/auth', { replace: true });
+            window.location.href = '/auth';
         } catch (error) {
             console.error('Logout error:', error);
-            navigate('/auth', { replace: true });
+            window.location.href = '/auth';
         }
     };
 

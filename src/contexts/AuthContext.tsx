@@ -114,18 +114,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = async () => {
     try {
       setLoading(true);
-      await supabase.auth.signOut();
+      
+      // Clear local state first to ensure UI updates immediately
       setUser(null);
       setSession(null);
       setProfile(null);
-      
-      // Intensive cleanup for local storage
       localStorage.clear(); 
       sessionStorage.clear();
+
+      // Then attempt to notify Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) console.warn('Supabase signOut error (logged out locally anyway):', error);
       
     } catch (error) {
-      console.error('Logout error:', error);
-      throw error;
+      console.error('Logout exception:', error);
+      // Even if it fails, our local state is already cleared
     } finally {
       setLoading(false);
     }
