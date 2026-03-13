@@ -58,6 +58,7 @@ import { useToast } from '@/hooks/use-toast';
 import { User as AuthUser } from '@supabase/supabase-js';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import { arDZ, fr } from 'date-fns/locale';
@@ -350,16 +351,7 @@ const OwnerDashboard = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">جاري التحقق من الصلاحيات...</p>
-        </div>
-      </div>
-    );
-  }
+  if (!isAuthorized && !authLoading) return null;
 
   if (!isAuthorized) return null;
 
@@ -506,7 +498,9 @@ const OwnerDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">{language === 'ar' ? 'إجمالي الأطفال' : 'Total Enfants'}</p>
-                  <p className="text-3xl font-bold text-primary">{children.length}</p>
+                  <p className="text-3xl font-bold text-primary">
+                    {isLoading ? <Skeleton className="h-9 w-12" /> : children.length}
+                  </p>
                 </div>
                 <Users className="w-10 h-10 text-primary/50" />
               </div>
@@ -518,7 +512,9 @@ const OwnerDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">{t('owner.medicalAlert')}</p>
-                  <p className="text-3xl font-bold text-coral">{children.filter(c => c.medical_condition || c.food_allergies).length}</p>
+                  <p className="text-3xl font-bold text-coral">
+                    {isLoading ? <Skeleton className="h-9 w-12" /> : children.filter(c => c.medical_condition || c.food_allergies).length}
+                  </p>
                 </div>
                 <Heart className="w-10 h-10 text-coral/50" />
               </div>
@@ -531,7 +527,7 @@ const OwnerDashboard = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">{t('owner.attendanceRate')}</p>
                   <p className="text-3xl font-bold text-mint-foreground">
-                    {children.length > 0 ? Math.round((Object.values(attendance).filter(s => s === 'present').length / children.length) * 100) : 0}%
+                    {isLoading ? <Skeleton className="h-9 w-16" /> : (children.length > 0 ? Math.round((Object.values(attendance).filter(s => s === 'present').length / children.length) * 100) : 0) + '%'}
                   </p>
                 </div>
                 <Activity className="w-10 h-10 text-mint/50" />
@@ -545,7 +541,7 @@ const OwnerDashboard = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">{language === 'ar' ? 'مداخيل إلكترونية' : 'Revenus en ligne'}</p>
                   <p className="text-3xl font-bold text-amber-600">
-                    {payments.filter(p => p.payment_method === 'card').reduce((acc, curr) => acc + curr.amount, 0).toLocaleString()} دج
+                    {isLoading ? <Skeleton className="h-9 w-24" /> : payments.filter(p => p.payment_method === 'card').reduce((acc, curr) => acc + curr.amount, 0).toLocaleString() + ' دج'}
                   </p>
                 </div>
                 <CreditCard className="w-10 h-10 text-amber-500/50" />
@@ -595,27 +591,49 @@ const OwnerDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {requests.map((request) => (
-                    <div key={request.id} className="p-4 rounded-xl border bg-card hover:shadow-soft transition-all">
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold">{request.childName}</h3>
-                            {getStatusBadge(request.status)}
+                  {isLoading ? (
+                    <div className="space-y-4">
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className="p-4 rounded-xl border bg-card">
+                          <div className="flex justify-between items-center">
+                            <div className="space-y-2">
+                              <Skeleton className="h-5 w-32" />
+                              <Skeleton className="h-4 w-48" />
+                              <Skeleton className="h-3 w-24" />
+                            </div>
+                            <div className="flex gap-2">
+                              <Skeleton className="h-10 w-20 rounded-lg" />
+                              <Skeleton className="h-10 w-20 rounded-lg" />
+                            </div>
                           </div>
-                          <p className="text-sm text-muted-foreground">{t('registration.parentName')}: {request.parentName}</p>
-                          <p className="text-xs text-muted-foreground">{request.createdAt}</p>
                         </div>
-                        {request.status === 'pending' && (
-                          <div className="flex gap-2">
-                            <Button size="sm" onClick={() => handleStatusChange(request.id, 'approved')} className="bg-mint hover:bg-mint/90">{language === 'ar' ? 'قبول' : 'Accepter'}</Button>
-                            <Button size="sm" variant="outline" onClick={() => handleStatusChange(request.id, 'rejected')}>{language === 'ar' ? 'رفض' : 'Refuser'}</Button>
-                          </div>
-                        )}
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                  {requests.length === 0 && <div className="text-center py-10 text-muted-foreground">{t('admin.noUsers')}</div>}
+                  ) : (
+                    <>
+                      {requests.map((request) => (
+                        <div key={request.id} className="p-4 rounded-xl border bg-card hover:shadow-soft transition-all">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-semibold">{request.childName}</h3>
+                                {getStatusBadge(request.status)}
+                              </div>
+                              <p className="text-sm text-muted-foreground">{t('registration.parentName')}: {request.parentName}</p>
+                              <p className="text-xs text-muted-foreground">{request.createdAt}</p>
+                            </div>
+                            {request.status === 'pending' && (
+                              <div className="flex gap-2">
+                                <Button size="sm" onClick={() => handleStatusChange(request.id, 'approved')} className="bg-mint hover:bg-mint/90">{language === 'ar' ? 'قبول' : 'Accepter'}</Button>
+                                <Button size="sm" variant="outline" onClick={() => handleStatusChange(request.id, 'rejected')}>{language === 'ar' ? 'رفض' : 'Refuser'}</Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      {requests.length === 0 && <div className="text-center py-10 text-muted-foreground">{t('admin.noUsers')}</div>}
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>

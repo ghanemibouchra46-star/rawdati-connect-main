@@ -23,6 +23,7 @@ import { Separator } from '@/components/ui/separator';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useAllSubscriptionRequests } from '@/hooks/useSubscriptionRequests';
 import { useAllPlatformSubscriptions, useUpdatePlatformSubscription } from '@/hooks/usePlatformSubscription';
+import { Skeleton } from '@/components/ui/skeleton';
 interface UserProfile {
     id: string;
     full_name: string | null;
@@ -145,7 +146,7 @@ const AdminDashboard = () => {
             // 1. Process Kindergartens
             let finalKGs = localKindergartens.map(adaptKindergarten);
             if (kgRes.data && kgRes.data.length > 0) {
-                finalKGs = kgRes.data.map(kg => ({
+                finalKGs = (kgRes.data as any[]).map(kg => ({
                     id: kg.id,
                     name_ar: kg.name_ar || kg.nameAr || kg.name || 'N/A',
                     name_fr: kg.name_fr || kg.nameFr || kg.name || 'N/A',
@@ -154,7 +155,7 @@ const AdminDashboard = () => {
                     municipality: kg.municipality || kg.city || 'N/A',
                     municipality_ar: kg.municipality_ar || kg.city_ar || kg.municipality || 'N/A',
                     municipality_fr: kg.municipality_fr || kg.city_fr || kg.municipality || 'N/A',
-                    status: kg.status || 'pending',
+                    status: (kg.status as any) || 'pending',
                     created_at: kg.created_at || new Date().toISOString(),
                 }));
             }
@@ -190,7 +191,7 @@ const AdminDashboard = () => {
 
             // 3. Process Registrations
             if (regRes.data && regRes.data.length > 0) {
-                setRegistrationRequests(regRes.data);
+                setRegistrationRequests(regRes.data as any[]);
             } else {
                 setRegistrationRequests(localMockRegs);
             }
@@ -297,16 +298,7 @@ const AdminDashboard = () => {
         }
     };
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-                <div className="text-center">
-                    <Shield className="w-12 h-12 text-red-500 mx-auto animate-pulse" />
-                    <p className="mt-4 text-slate-400">{t('auth.loading')}</p>
-                </div>
-            </div>
-        );
-    }
+    if (!profile && !authLoading) return null;
 
     return (
         <div className="min-h-screen bg-[#0f172a] text-slate-200" dir={dir}>
@@ -362,7 +354,9 @@ const AdminDashboard = () => {
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-sm font-medium text-slate-400">{stat.label}</p>
-                                        <h3 className="text-3xl font-bold mt-1 text-white">{stat.value}</h3>
+                                        <h3 className="text-3xl font-bold mt-1 text-white">
+                                            {isLoading ? <Skeleton className="h-9 w-16 bg-white/5" /> : stat.value}
+                                        </h3>
                                     </div>
                                     <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
                                         <stat.icon className="w-6 h-6" />
@@ -418,53 +412,73 @@ const AdminDashboard = () => {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
-                                        {[...kindergartens.slice(0, 3), ...registrationRequests.slice(0, 2)]
-                                            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                                            .slice(0, 5)
-                                            .map((item: any) => {
-                                                const isKG = 'name_ar' in item;
-                                                return (
-                                                    <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className={`w-10 h-10 rounded-lg ${isKG ? 'bg-red-500/10' : 'bg-blue-500/10'} flex items-center justify-center`}>
-                                                                {isKG ? <Building2 className="w-5 h-5 text-red-500" /> : <Baby className="w-5 h-5 text-blue-500" />}
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm font-medium text-white">
-                                                                    {isKG ? (language === 'ar' ? item.name_ar : item.name_fr) : item.child_name}
-                                                                </p>
-                                                                <p className="text-xs text-slate-400">
-                                                                    {isKG ? (language === 'ar' ? item.municipality_ar : item.municipality_fr) : `${language === 'ar' ? 'طلب تسجيل من' : 'Registration from'} ${item.parent_name}`}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex gap-1">
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
-                                                                className={item.status === 'approved' ? 'text-green-500 bg-green-500/10' : 'text-slate-500 hover:text-green-500 hover:bg-green-500/10'}
-                                                                onClick={() => {
-                                                                    if (isKG) updateKGStatus(item.id, 'approved');
-                                                                    else updateRegistrationStatus(item.id, 'approved');
-                                                                }}
-                                                            >
-                                                                <CheckCircle2 className="w-4 h-4" />
-                                                            </Button>
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
-                                                                className={item.status === 'rejected' ? 'text-red-500 bg-red-500/10' : 'text-slate-500 hover:text-red-500 hover:bg-red-500/10'}
-                                                                onClick={() => {
-                                                                    if (isKG) updateKGStatus(item.id, 'rejected');
-                                                                    else updateRegistrationStatus(item.id, 'rejected');
-                                                                }}
-                                                            >
-                                                                <XCircle className="w-4 h-4" />
-                                                            </Button>
+                                        {isLoading ? (
+                                            [1, 2, 3, 4, 5].map(i => (
+                                                <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/5">
+                                                    <div className="flex items-center gap-3">
+                                                        <Skeleton className="w-10 h-10 rounded-lg bg-white/5" />
+                                                        <div className="space-y-2">
+                                                            <Skeleton className="h-4 w-32 bg-white/5" />
+                                                            <Skeleton className="h-3 w-48 bg-white/5" />
                                                         </div>
                                                     </div>
-                                                );
-                                            })}
+                                                    <div className="flex gap-1">
+                                                        <Skeleton className="w-8 h-8 rounded bg-white/5" />
+                                                        <Skeleton className="w-8 h-8 rounded bg-white/5" />
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <>
+                                                {[...kindergartens.slice(0, 3), ...registrationRequests.slice(0, 2)]
+                                                    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                                                    .slice(0, 5)
+                                                    .map((item: any) => {
+                                                        const isKG = 'name_ar' in item;
+                                                        return (
+                                                            <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className={`w-10 h-10 rounded-lg ${isKG ? 'bg-red-500/10' : 'bg-blue-500/10'} flex items-center justify-center`}>
+                                                                        {isKG ? <Building2 className="w-5 h-5 text-red-500" /> : <Baby className="w-5 h-5 text-blue-500" />}
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-sm font-medium text-white">
+                                                                            {isKG ? (language === 'ar' ? item.name_ar : item.name_fr) : item.child_name}
+                                                                        </p>
+                                                                        <p className="text-xs text-slate-400">
+                                                                            {isKG ? (language === 'ar' ? item.municipality_ar : item.municipality_fr) : `${language === 'ar' ? 'طلب تسجيل من' : 'Registration from'} ${item.parent_name}`}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex gap-1">
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        className={item.status === 'approved' ? 'text-green-500 bg-green-500/10' : 'text-slate-500 hover:text-green-500 hover:bg-green-500/10'}
+                                                                        onClick={() => {
+                                                                            if (isKG) updateKGStatus(item.id, 'approved');
+                                                                            else updateRegistrationStatus(item.id, 'approved');
+                                                                        }}
+                                                                    >
+                                                                        <CheckCircle2 className="w-4 h-4" />
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        className={item.status === 'rejected' ? 'text-red-500 bg-red-500/10' : 'text-slate-500 hover:text-red-500 hover:bg-red-500/10'}
+                                                                        onClick={() => {
+                                                                            if (isKG) updateKGStatus(item.id, 'rejected');
+                                                                            else updateRegistrationStatus(item.id, 'rejected');
+                                                                        }}
+                                                                    >
+                                                                        <XCircle className="w-4 h-4" />
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                            </>
+                                        )}
                                     </div>
                                     <Button
                                         variant="ghost"
