@@ -98,6 +98,7 @@ const AdminDashboard = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
     const queryClient = useQueryClient();
+    const { profile, loading: authLoading, logout: authLogout } = useAuth();
 
     // Hooks for subscription requests
     const { requests: subscriptionRequests, isLoading: loadingSubscriptions, error: subscriptionError, approveRequest, rejectRequest } = useAllSubscriptionRequests();
@@ -112,7 +113,7 @@ const AdminDashboard = () => {
     const [registrationRequests, setRegistrationRequests] = useState<RegistrationRequest[]>(mockRegistrations);
     const [localMockRegs, setLocalMockRegs] = useState<RegistrationRequest[]>(mockRegistrations);
     const [activeTab, setActiveTab] = useState('overview');
-    const { logout: authLogout } = useAuth();
+    
     const [stats, setStats] = useState<any>({
         totalUsers: 0,
         totalKindergartens: localKindergartens.length,
@@ -122,80 +123,29 @@ const AdminDashboard = () => {
     });
 
     useEffect(() => {
-        const init = async () => {
-            const hasAccess = await checkAdminAccess();
-            if (hasAccess) {
+        if (!authLoading) {
+            if (profile && profile.role === 'admin') {
                 fetchData();
+            } else {
+                navigate('/admin-auth', { replace: true });
             }
-        };
-        init();
-    }, []);
-
-    const checkAdminAccess = async () => {
-        let { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) {
-            // إعادة محاولة مرة واحدة (قد تكون الجلسة لم تُحفظ بعد بعد تسجيل الدخول)
-            await new Promise((r) => setTimeout(r, 200));
-            const retry = await supabase.auth.getSession();
-            session = retry.data.session;
         }
-        if (!session?.user) {
-            navigate('/admin-auth', { replace: true });
-            return false;
-        }
-
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role, status')
-            .eq('id', session.user.id)
-            .single();
-
-        const userEmail = session.user.email?.toLowerCase() || '';
-        const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
-        const isAdminEmail = adminEmails.includes(userEmail);
-        const hasAdminMetadata =
-            session.user.user_metadata?.role === 'admin' ||
-            session.user.app_metadata?.role === 'admin';
-
-        if (profile?.role !== 'admin' && !isAdminEmail && !hasAdminMetadata) {
-            navigate('/admin-auth?error=not_admin', { replace: true });
-            return false;
-        }
-
-        // التأكد من وجود سطر الأدمن في user_roles وفي البروفايل لمطابقة الصلاحيات
-        if (profile?.role !== 'admin' && (isAdminEmail || hasAdminMetadata)) {
-            await supabase.from('profiles').update({ role: 'admin' }).eq('id', session.user.id);
-            await supabase.from('user_roles').upsert(
-                { user_id: session.user.id, role: 'admin' },
-                { onConflict: 'user_id,role' }
-            );
-        }
-        return true;
-    };
+    }, [profile, authLoading, navigate]);
 
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            let rawKgData: any[] = [];
-            try {
-                const { data, error } = await supabase
-                    .from('kindergartens')
-                    .select('*');
-                if (error) {
-                    toast({ title: "KG fetch error", description: error.message, variant: "destructive" });
-                    throw error;
-                }
-                rawKgData = data || [];
-            } catch (e: any) {
-                console.error("KG fetch error:", e);
-                toast({ title: t('common.error'), description: e.message || "Failed to load kindergartens", variant: 'destructive' });
-            }
+            // Parallelize all main data fetches
+            const [kgRes, userRes, regRes] = await Promise.all([
+                supabase.from('kindergartens').select('*'),
+                supabase.rpc('get_profiles_with_roles_for_admin'),
+                supabase.from('registration_requests').select('*').order('created_at', { ascending: false })
+            ]);
 
-            let finalKGs: Kindergarten[] = [];
-            finalKGs = localKindergartens.map(adaptKindergarten);
-
-            if (rawKgData && rawKgData.length > 0) {
-                const dbKGs = rawKgData.map(kg => ({
+            // 1. Process Kindergartens
+            let finalKGs = localKindergartens.map(adaptKindergarten);
+            if (kgRes.data && kgRes.data.length > 0) {
+                finalKGs = kgRes.data.map(kg => ({
                     id: kg.id,
                     name_ar: kg.name_ar || kg.nameAr || kg.name || 'N/A',
                     name_fr: kg.name_fr || kg.nameFr || kg.name || 'N/A',
@@ -207,79 +157,49 @@ const AdminDashboard = () => {
                     status: kg.status || 'pending',
                     created_at: kg.created_at || new Date().toISOString(),
                 }));
-                // Use only Database Kindergartens if there's any, else fallback OR combine?
-                // Let's replace the local data if we found DB items:
-                finalKGs = dbKGs;
-            } else {
-                console.log("No DB kindergartens, using local data");
             }
-
-            // 2. Fetch Profiles and Roles: نفضل RPC (تعمل حتى بدون سياسات RLS)، وإلا الطريقة العادية
-            let usersWithRoles: any[] = [];
-            try {
-                const { data: rpcData, error: rpcError } = await supabase.rpc('get_profiles_with_roles_for_admin');
-                const rpcList = Array.isArray(rpcData) ? rpcData : (rpcData ? [rpcData] : []);
-                if (!rpcError) {
-                    usersWithRoles = rpcList.map((row: any) => ({
-                        id: row.id,
-                        full_name: row.full_name,
-                        phone: row.phone,
-                        status: row.status,
-                        created_at: row.created_at,
-                        updated_at: row.updated_at,
-                        role: row.role || 'parent'
-                    }));
-                }
-                if (usersWithRoles.length === 0 && (rpcError || !rpcData)) {
-                    const [pRes, rRes] = await Promise.all([
-                        supabase.from('profiles').select('*'),
-                        supabase.from('user_roles').select('*')
-                    ]);
-                    if (pRes.error) {
-                        console.error("Profiles fetch error:", pRes.error);
-                        toast({ title: t('common.error'), description: language === 'ar' ? 'تعذر تحميل قائمة المستخدمين' : 'Could not load users', variant: 'destructive' });
-                    }
-                    const profiles = pRes.data || [];
-                    const roles = rRes.data || [];
-                    usersWithRoles = profiles.map((profile: any) => ({
-                        ...profile,
-                        role: roles.find((r: any) => r.user_id === profile.id)?.role || 'parent'
-                    }));
-                }
-            } catch (e) {
-                console.error("Profiles/Roles fetch error:", e);
-            }
-
-            // 3. Fetch Registrations
-            let regData: any[] = [];
-            try {
-                const { data } = await supabase
-                    .from('registration_requests')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                regData = data || [];
-            } catch (e) {
-                console.error("Registration fetch error:", e);
-            }
-
-            // Attempt to link emails if they exist in metadata or profiles
-            // (In a real app, you might join with auth.users if you are a superuser)
-
-            // Update all states
-            setUsers(usersWithRoles);
             setKindergartens(finalKGs);
 
-            if (regData && regData.length > 0) {
-                setRegistrationRequests(regData);
+            // 2. Process Users/Profiles
+            let usersWithRoles: any[] = [];
+            if (userRes.data) {
+                const rpcList = Array.isArray(userRes.data) ? userRes.data : [userRes.data];
+                usersWithRoles = rpcList.map((row: any) => ({
+                    id: row.id,
+                    full_name: row.full_name,
+                    phone: row.phone,
+                    status: row.status,
+                    created_at: row.created_at,
+                    updated_at: row.updated_at,
+                    role: row.role || 'parent'
+                }));
+            } else {
+                // Fallback to separate queries if RPC fails (though less efficient)
+                const [pRes, rRes] = await Promise.all([
+                    supabase.from('profiles').select('*'),
+                    supabase.from('user_roles').select('*')
+                ]);
+                const profiles = pRes.data || [];
+                const roles = rRes.data || [];
+                usersWithRoles = profiles.map((p: any) => ({
+                    ...p,
+                    role: roles.find((r: any) => r.user_id === p.id)?.role || 'parent'
+                }));
+            }
+            setUsers(usersWithRoles);
+
+            // 3. Process Registrations
+            if (regRes.data && regRes.data.length > 0) {
+                setRegistrationRequests(regRes.data);
             } else {
                 setRegistrationRequests(localMockRegs);
             }
 
+            // 4. Update Stats
             const activeOwners = usersWithRoles.filter(u => u.role === 'owner').length;
             const activeParents = usersWithRoles.filter(u => u.role === 'parent').length;
             const pendingKGs = finalKGs.filter(kg => kg.status === 'pending').length;
-            const pendingRegs = (regData && regData.length > 0 ? regData : localMockRegs)
-                .filter(reg => reg.status === 'pending').length;
+            const pendingRegs = (regRes.data || localMockRegs).filter(reg => reg.status === 'pending').length;
 
             setStats({
                 totalUsers: usersWithRoles.length,
@@ -291,9 +211,9 @@ const AdminDashboard = () => {
 
         } catch (error) {
             console.error('Fetch error:', error);
-            // Even on error, we still have local data from initial state
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     };
 
     const updateUserStatus = async (userId: string, status: 'approved' | 'rejected') => {

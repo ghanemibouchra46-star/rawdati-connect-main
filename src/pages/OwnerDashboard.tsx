@@ -107,17 +107,14 @@ const mockKindergarten = {
 };
 
 const OwnerDashboard = () => {
-  const { logout: authLogout } = useAuth();
   const { t, language, dir } = useLanguage();
-  const navigate = useNavigate();
   const { toast } = useToast();
-
+  const navigate = useNavigate();
+  const { profile, loading: authLoading, logout: authLogout } = useAuth();
   // Use subscription requests hooks
   const { requests: subscriptionRequests, isLoading: loadingSubscriptions, approveRequest, rejectRequest } = useSubscriptionRequests();
 
-  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthorized, setIsAuthorized] = useState(false);
   const [kindergartenId, setKindergartenId] = useState<string | null>(null);
 
   const [requests, setRequests] = useState<any[]>([]);
@@ -130,8 +127,13 @@ const OwnerDashboard = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [editData, setEditData] = useState<any>({});
 
+  const isAuthorized = profile && profile.role === 'owner' && profile.status === 'approved';
+
   const fetchDashboardData = async (uid: string) => {
+    if (!uid) return;
     try {
+      setIsLoading(true);
+      
       // 1. Get Kindergarten ID
       const { data: ownerKg } = await supabase
         .from('owner_kindergartens')
@@ -207,26 +209,12 @@ const OwnerDashboard = () => {
     }
   };
 
-  const checkOwnerRole = async (userId: string) => {
-    try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('role, status')
-        .eq('id', userId)
-        .single();
-
-      if (error || !profile) {
-        console.error('Error fetching profile:', error);
-        setIsAuthorized(false);
-        navigate('/owner-auth');
-        return;
-      }
-
-      if (profile.role === 'owner' && profile.status === 'approved') {
-        setIsAuthorized(true);
-        fetchDashboardData(userId);
-      } else {
-        setIsAuthorized(false);
+  useEffect(() => {
+    if (!authLoading) {
+      if (profile && profile.role === 'owner' && profile.status === 'approved') {
+        fetchDashboardData(profile.id);
+      } else if (profile) {
+        // Logged in but not authorized or approved
         toast({
           title: profile.role !== 'owner' ? 'غير مصرح' : 'قيد المراجعة',
           description: profile.role !== 'owner' 
@@ -235,85 +223,25 @@ const OwnerDashboard = () => {
           variant: 'destructive',
         });
         if (profile.role !== 'owner' || profile.status === 'rejected') {
-          await supabase.auth.signOut();
+          authLogout();
         }
         navigate('/owner-auth');
-      }
-    } catch (err) {
-      console.error('Check role error:', err);
-      navigate('/owner-auth');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          checkOwnerRole(session.user.id);
-        } else {
-          setIsLoading(false);
-          navigate('/owner-auth');
-        }
-      }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        checkOwnerRole(session.user.id);
-      } else {
         setIsLoading(false);
+      } else {
+        // Not logged in
         navigate('/owner-auth');
+        setIsLoading(false);
       }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  const handleSaveDetails = async () => {
-    try {
-      if (!kindergartenId) return;
-      setIsSaving(true);
-
-      const { error } = await supabase
-        .from('kindergartens')
-        .update({
-          phone: editData.phone,
-          instagram: editData.instagram, // Added instagram
-          description_ar: editData.description_ar,
-          programs: editData.programs,
-          videos: editData.videos,
-          updated_at: new Date().toISOString()
-        } as any)
-        .eq('id', kindergartenId);
-
-      if (error) throw error;
-
-      toast({ title: language === 'ar' ? 'تم حفظ التحديثات' : 'Sauvegardé avec succès' });
-      setIsEditing(false);
-      if (user) fetchDashboardData(user.id);
-    } catch (error) {
-      console.error('Save error:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to save changes',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsSaving(false);
     }
-  };
+  }, [profile, authLoading, navigate]);
 
   const handleLogout = async () => {
     try {
       await authLogout();
-      navigate('/auth', { replace: true });
+      navigate('/owner-auth', { replace: true });
     } catch (error) {
       console.error('Logout error:', error);
-      navigate('/auth', { replace: true });
+      navigate('/owner-auth', { replace: true });
     }
   };
 
@@ -359,9 +287,40 @@ const OwnerDashboard = () => {
     }
   };
 
+  const handleSaveDetails = async () => {
+    try {
+      setIsSaving(true);
+      const { error } = await supabase
+        .from('kindergartens')
+        .update({
+          phone: editData.phone,
+          instagram: editData.instagram,
+          description_ar: editData.description_ar,
+          programs: editData.programs
+        })
+        .eq('id', kindergartenId);
+
+      if (error) throw error;
+
+      toast({
+        title: language === 'ar' ? 'تم الحفظ بنجاح' : 'Enregistré avec succès',
+      });
+      setIsEditing(false);
+      if (profile) fetchDashboardData(profile.id);
+    } catch (error: any) {
+      toast({
+        title: language === 'ar' ? 'خطأ في الحفظ' : 'Erreur de sauvegarde',
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handlePayment = async (childId: string) => {
     try {
-      if (!kindergartenId || !user) return;
+      if (!kindergartenId || !profile) return;
       const amount = 5000;
       const month = new Date().getMonth() + 1;
       const year = new Date().getFullYear();
@@ -379,7 +338,7 @@ const OwnerDashboard = () => {
 
       if (error) throw error;
 
-      fetchDashboardData(user.id);
+      fetchDashboardData(profile.id);
       toast({ title: t('owner.paid') });
     } catch (error) {
       console.error('Payment error:', error);
@@ -802,8 +761,8 @@ const OwnerDashboard = () => {
                         <div key={child.id} className="flex items-center justify-between p-3 rounded-xl border bg-card">
                           <span className="font-medium text-sm">{child.name}</span>
                           <div className="flex gap-2">
-                            <button className={`p - 1.5 rounded - lg transition - all ${attendance[child.id] === 'present' ? 'bg-mint text-white' : 'bg-muted hover:bg-muted/80'} `} onClick={() => handleAttendance(child.id, 'child', 'present')}><CheckCircle2 className="w-4 h-4" /></button>
-                            <button className={`p - 1.5 rounded - lg transition - all ${attendance[child.id] === 'absent' ? 'bg-destructive text-white' : 'bg-muted hover:bg-muted/80'} `} onClick={() => handleAttendance(child.id, 'child', 'absent')}><XCircle className="w-4 h-4" /></button>
+                            <button className={`p-1.5 rounded-lg transition-all ${attendance[child.id] === 'present' ? 'bg-mint text-white' : 'bg-muted hover:bg-muted/80'}`} onClick={() => handleAttendance(child.id, 'child', 'present')}><CheckCircle2 className="w-4 h-4" /></button>
+                            <button className={`p-1.5 rounded-lg transition-all ${attendance[child.id] === 'absent' ? 'bg-destructive text-white' : 'bg-muted hover:bg-muted/80'}`} onClick={() => handleAttendance(child.id, 'child', 'absent')}><XCircle className="w-4 h-4" /></button>
                           </div>
                         </div>
                       ))}
@@ -821,8 +780,8 @@ const OwnerDashboard = () => {
                             <p className="text-[10px] text-muted-foreground">{member.role}</p>
                           </div>
                           <div className="flex gap-2">
-                            <button className={`p - 1.5 rounded - lg transition - all ${attendance[member.id] === 'present' ? 'bg-mint text-white' : 'bg-muted hover:bg-muted/80'} `} onClick={() => handleAttendance(member.id, 'staff', 'present')}><CheckCircle2 className="w-4 h-4" /></button>
-                            <button className={`p - 1.5 rounded - lg transition - all ${attendance[member.id] === 'absent' ? 'bg-destructive text-white' : 'bg-muted hover:bg-muted/80'} `} onClick={() => handleAttendance(member.id, 'staff', 'absent')}><XCircle className="w-4 h-4" /></button>
+                            <button className={`p-1.5 rounded-lg transition-all ${attendance[member.id] === 'present' ? 'bg-mint text-white' : 'bg-muted hover:bg-muted/80'}`} onClick={() => handleAttendance(member.id, 'staff', 'present')}><CheckCircle2 className="w-4 h-4" /></button>
+                            <button className={`p-1.5 rounded-lg transition-all ${attendance[member.id] === 'absent' ? 'bg-destructive text-white' : 'bg-muted hover:bg-muted/80'}`} onClick={() => handleAttendance(member.id, 'staff', 'absent')}><XCircle className="w-4 h-4" /></button>
                           </div>
                         </div>
                       ))}

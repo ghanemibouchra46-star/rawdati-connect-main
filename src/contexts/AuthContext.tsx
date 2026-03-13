@@ -34,13 +34,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [profile, setProfile] = useState<Tables<'profiles'> | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refreshProfile = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
+  const refreshProfile = async (userId?: string) => {
+    const targetId = userId || (await supabase.auth.getUser()).data.user?.id;
+    
+    if (targetId) {
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', targetId)
         .single();
       setProfile(profileData);
     } else {
@@ -49,28 +50,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await refreshProfile();
+    const initAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          await refreshProfile(session.user.id);
+        }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    getInitialSession();
+    initAuth();
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) {
-        await refreshProfile();
-      } else {
+      
+      if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED') {
+        if (session?.user) {
+          await refreshProfile(session.user.id);
+        }
+      } else if (event === 'SIGNED_OUT') {
         setProfile(null);
       }
+      
       setLoading(false);
     });
 
@@ -78,15 +85,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
-      throw error;
+    if (error) throw error;
+    
+    if (data.user) {
+      await refreshProfile(data.user.id);
     }
-    await refreshProfile();
   };
 
   const signup = async (email: string, password: string, fullName: string) => {
@@ -100,24 +108,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       },
     });
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
   };
 
   const logout = async () => {
     try {
+      setLoading(true);
       await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
       setProfile(null);
-      // Clear all possible supabase auth tokens from localStorage
-      Object.keys(localStorage).forEach(key => {
-        if (key.includes('supabase-auth-token')) {
-          localStorage.removeItem(key);
-        }
-      });
+      
+      // Intensive cleanup for local storage
+      localStorage.clear(); 
+      sessionStorage.clear();
+      
     } catch (error) {
       console.error('Logout error:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
