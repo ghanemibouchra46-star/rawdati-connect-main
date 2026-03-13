@@ -78,12 +78,13 @@ const OwnerAuth = () => {
   }, [searchParams, navigate]);
 
   const checkOwnerRole = async (userId: string) => {
-    const { data, error } = await supabase.rpc('has_role', {
-      _user_id: userId,
-      _role: 'owner'
-    });
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('role, status')
+      .eq('id', userId)
+      .single();
 
-    if (data === true) {
+    if (profile?.role === 'owner' && profile?.status === 'approved') {
       navigate('/owner');
     }
   };
@@ -120,18 +121,29 @@ const OwnerAuth = () => {
       }
 
       if (data.user) {
-        // Check if user has owner role
-        const { data: hasOwnerRole } = await supabase.rpc('has_role', {
-          _user_id: data.user.id,
-          _role: 'owner'
-        });
+        // Check profiles table directly
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role, status')
+          .eq('id', data.user.id)
+          .single();
 
-        if (hasOwnerRole) {
-          toast({
-            title: 'مرحباً بك',
-            description: 'تم تسجيل الدخول بنجاح',
-          });
-          navigate('/owner');
+        if (profile?.role === 'owner') {
+          if (profile.status === 'approved') {
+            toast({
+              title: 'مرحباً بك',
+              description: 'تم تسجيل الدخول بنجاح',
+            });
+            navigate('/owner');
+          } else {
+            // Sign out if not approved
+            await supabase.auth.signOut();
+            toast({
+              title: 'قيد المراجعة',
+              description: 'حسابك لا يزال قيد المراجعة من قبل الإدارة.',
+              variant: 'destructive',
+            });
+          }
         } else {
           // Sign out if not an owner
           await supabase.auth.signOut();

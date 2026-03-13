@@ -57,22 +57,24 @@ const Auth = () => {
     const checkSessionAndRedirect = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user && session.user.email_confirmed_at) {
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role, status')
+          .eq('id', session.user.id)
           .single();
 
         const userEmail = session.user.email?.toLowerCase() || '';
         const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
         const isAdminEmail = adminEmails.includes(userEmail);
         const metadataRole = session.user.user_metadata?.role || session.user.app_metadata?.role;
-        const role = roleData?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
+        const role = profile?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
 
         if (role === 'admin') {
           navigate('/admin');
         } else if (role === 'owner') {
-          navigate('/owner');
+          if (profile?.status === 'approved') {
+            navigate('/owner');
+          }
         } else {
           navigate('/parent');
         }
@@ -118,11 +120,11 @@ const Auth = () => {
         });
       }
     } else if (data.user) {
-      // Check for user role and redirect accordingly
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', data.user.id)
+      // Check for user role in profiles table
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, status')
+        .eq('id', data.user.id)
         .single();
 
       // Robust Role Detection: Database -> Metadata -> Targeted Email Fix
@@ -130,7 +132,7 @@ const Auth = () => {
       const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
       const isAdminEmail = adminEmails.includes(userEmail);
       const metadataRole = data.user.user_metadata?.role || data.user.app_metadata?.role;
-      const role = roleData?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
+      const role = profile?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
 
       if (!data.user.email_confirmed_at) {
         setVerificationEmail(loginEmail);
@@ -141,22 +143,38 @@ const Auth = () => {
           variant: 'destructive',
         });
       } else {
-        toast({
-          title: t('auth.welcome'),
-          description: t('auth.success'),
-        });
-
-        // Role-based navigation
+        // Role-based navigation and validation
         if (role === 'admin') {
-          // التأكد من وجود دور الأدمن في قاعدة البيانات (حتى تعمل سياسات RLS في لوحة الأدمن)
+          toast({
+            title: t('auth.welcome'),
+            description: t('auth.success'),
+          });
+          // التأكد من وجود دور الأدمن في قاعدة البيانات
           await supabase.from('user_roles').upsert(
             { user_id: data.user.id, role: 'admin' },
             { onConflict: 'user_id,role' }
           );
           navigate('/admin');
         } else if (role === 'owner') {
-          navigate('/owner');
+          if (profile?.status === 'approved') {
+            toast({
+              title: t('auth.welcome'),
+              description: t('auth.success'),
+            });
+            navigate('/owner');
+          } else {
+            await supabase.auth.signOut();
+            toast({
+              title: t('common.error'),
+              description: language === 'ar' ? 'حسابك قيد المراجعة' : 'Account under review',
+              variant: 'destructive',
+            });
+          }
         } else {
+          toast({
+            title: t('auth.welcome'),
+            description: t('auth.success'),
+          });
           navigate('/parent');
         }
       }

@@ -63,11 +63,10 @@ const AdminAuth = () => {
     const checkAdminSession = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-            const { data: roleData } = await supabase
-                .from('user_roles')
+            const { data: profile } = await supabase
+                .from('profiles')
                 .select('role')
-                .eq('user_id', session.user.id)
-                .eq('role', 'admin')
+                .eq('id', session.user.id)
                 .single();
 
             const userEmail = session.user.email?.toLowerCase() || '';
@@ -77,7 +76,7 @@ const AdminAuth = () => {
                 session.user.user_metadata?.role === 'admin' ||
                 session.user.app_metadata?.role === 'admin';
 
-            if (roleData || isAdminEmail || hasAdminMetadata) {
+            if (profile?.role === 'admin' || isAdminEmail || hasAdminMetadata) {
                 navigate('/admin');
             }
         }
@@ -115,12 +114,11 @@ const AdminAuth = () => {
         }
 
         if (data.user) {
-            // First check database role
-            const { data: roleData, error: roleError } = await supabase
-                .from('user_roles')
+            // First check profiles table
+            const { data: profile } = await supabase
+                .from('profiles')
                 .select('role')
-                .eq('user_id', data.user.id)
-                .eq('role', 'admin')
+                .eq('id', data.user.id)
                 .single();
 
             // Fallback: Check metadata (user_metadata and app_metadata)
@@ -132,9 +130,9 @@ const AdminAuth = () => {
                 data.user.user_metadata?.role === 'admin' ||
                 data.user.app_metadata?.role === 'admin';
 
-            if (roleError || !roleData) {
+            if (!profile || profile.role !== 'admin') {
                 if (hasAdminMetadata || isAdminEmail) {
-                    // تسجيل دور الأدمن في قاعدة البيانات إن لم يكن موجوداً (حتى يمر التحقق في لوحة الأدمن)
+                    // تسجيل دور الأدمن في قاعدة البيانات إن لم يكن موجوداً
                     const { error: upsertError } = await supabase.from('user_roles').upsert(
                         { user_id: data.user.id, role: 'admin' },
                         { onConflict: 'user_id,role' }
