@@ -6,7 +6,8 @@ import {
     Shield, Users, UserCheck, UserX, Clock, LogOut, Home,
     Building2, LayoutDashboard, Settings as SettingsIcon,
     Search, Filter, CheckCircle2, XCircle, Info, ChevronRight,
-    TrendingUp, Baby, Star, CreditCard, Calendar, Check, X, MapPin, Crown, FileText
+    TrendingUp, Baby, Star, CreditCard, Calendar, Check, X, MapPin, Crown, FileText,
+    RefreshCcw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -19,7 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
-import { RefreshCcw, Separator } from '@/components/ui/separator';
+import { Separator } from '@/components/ui/separator';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useAllSubscriptionRequests } from '@/hooks/useSubscriptionRequests';
 import { useAllPlatformSubscriptions, useUpdatePlatformSubscription } from '@/hooks/usePlatformSubscription';
