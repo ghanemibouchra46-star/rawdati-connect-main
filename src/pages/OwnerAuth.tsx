@@ -134,7 +134,7 @@ const OwnerAuth = () => {
               title: 'مرحباً بك',
               description: 'تم تسجيل الدخول بنجاح',
             });
-            navigate('/owner');
+            navigate('/owner', { replace: true });
           } else {
             // Sign out if not approved
             await supabase.auth.signOut();

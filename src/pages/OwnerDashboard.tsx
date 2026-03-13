@@ -135,25 +135,42 @@ const OwnerDashboard = () => {
       setIsLoading(true);
       
       // 1. Get Kindergarten ID
-      const { data: ownerKg } = await supabase
+      const { data: ownerKg, error: kgError } = await supabase
         .from('owner_kindergartens')
         .select('kindergarten_id')
         .eq('owner_id', uid)
         .single();
 
-      if (!ownerKg) return;
+      if (kgError || !ownerKg) {
+        setIsLoading(false);
+        return;
+      }
+      
       const kgId = ownerKg.kindergarten_id;
       setKindergartenId(kgId);
 
-      // 2. Fetch Registration Requests
-      const { data: reqData } = await supabase
-        .from('registration_requests')
-        .select('*')
-        .eq('kindergarten_id', kgId)
-        .order('created_at', { ascending: false });
+      // 2. Fetch all related data in parallel
+      const today = format(new Date(), 'yyyy-MM-dd');
+      
+      const [
+        regRes,
+        childRes,
+        staffRes,
+        attRes,
+        payRes,
+        detailsRes
+      ] = await Promise.all([
+        supabase.from('registration_requests').select('*').eq('kindergarten_id', kgId).order('created_at', { ascending: false }),
+        supabase.from('children' as any).select('*').eq('kindergarten_id', kgId),
+        supabase.from('staff' as any).select('*').eq('kindergarten_id', kgId),
+        supabase.from('attendance' as any).select('entity_id, status').eq('kindergarten_id', kgId).eq('attendance_date', today),
+        supabase.from('payments' as any).select('*').eq('kindergarten_id', kgId),
+        supabase.from('kindergartens').select('*').eq('id', kgId).single()
+      ]);
 
-      if (reqData) {
-        setRequests(reqData.map(r => ({
+      // Processing results
+      if (regRes.data) {
+        setRequests(regRes.data.map(r => ({
           ...r,
           childName: r.child_name,
           parentName: r.parent_name,
@@ -162,50 +179,22 @@ const OwnerDashboard = () => {
         })));
       }
 
-      // 3. Fetch Children
-      const { data: childData } = await supabase
-        .from('children' as any)
-        .select('*')
-        .eq('kindergarten_id', kgId);
-      if (childData) setChildren(childData as any);
+      if (childRes.data) setChildren(childRes.data as any);
+      if (staffRes.data) setStaff(staffRes.data as any);
 
-      // 4. Fetch Staff
-      const { data: staffData } = await (supabase.from('staff' as any))
-        .select('*')
-        .eq('kindergarten_id', kgId);
-      if (staffData) setStaff(staffData as any);
-
-      // 5. Today's Attendance
-      const today = format(new Date(), 'yyyy-MM-dd');
-      const { data: attData } = await (supabase.from('attendance' as any))
-        .select('entity_id, status')
-        .eq('kindergarten_id', kgId)
-        .eq('attendance_date', today);
-
-      if (attData) {
+      if (attRes.data) {
         const attMap: Record<string, any> = {};
-        attData.forEach((a: any) => attMap[a.entity_id] = a.status);
+        attRes.data.forEach((a: any) => attMap[a.entity_id] = a.status);
         setAttendance(attMap);
       }
 
-      // 6. Payments
-      const { data: payData } = await (supabase.from('payments' as any))
-        .select('*')
-        .eq('kindergarten_id', kgId);
-      if (payData) setPayments(payData as any);
+      if (payRes.data) setPayments(payRes.data as any);
+      if (detailsRes.data) setEditData(detailsRes.data);
 
-      // 7. Fetch Kindergarten Details for Editing
-      const { data: kgDetails } = await supabase
-        .from('kindergartens')
-        .select('*')
-        .eq('id', kgId)
-        .single();
-
-      if (kgDetails) {
-        setEditData(kgDetails);
-      }
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 

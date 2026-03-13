@@ -157,8 +157,6 @@ const AdminAuth = () => {
                 description: t('auth.success'),
             });
 
-            // انتظار قصير لضمان حفظ الجلسة قبل التوجيه
-            await new Promise((r) => setTimeout(r, 100));
             navigate('/admin', { replace: true });
         }
 
