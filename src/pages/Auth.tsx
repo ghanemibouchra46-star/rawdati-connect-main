@@ -207,20 +207,8 @@ const Auth = () => {
     const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
     const isAdminEmail = adminEmails.includes(emailLower);
 
-    if (isAdminEmail && signupRole === 'admin') {
-      toast({
-        title: t('common.error'),
-        description: language === 'ar'
-          ? 'هذا البريد الإلكتروني محجوز للمسؤولين فقط'
-          : language === 'fr'
-            ? 'Cet e-mail est réservé aux administrateurs'
-            : 'This email is reserved for administrators',
-        variant: 'destructive'
-      });
-      return false;
-    }
-
-    if (!isAdminEmail && signupRole !== 'admin') {
+    // If trying to sign up as admin, must have an admin email
+    if (signupRole === 'admin' && !isAdminEmail) {
       toast({
         title: t('common.error'),
         description: language === 'ar'
@@ -228,6 +216,20 @@ const Auth = () => {
           : language === 'fr'
             ? 'Cet e-mail n\'est pas autorisé pour un administrateur'
             : 'This email is not authorized for an administrator account',
+        variant: 'destructive'
+      });
+      return false;
+    }
+
+    // If it's an admin email, it should ONLY be used for admin accounts
+    if (isAdminEmail && signupRole !== 'admin') {
+      toast({
+        title: t('common.error'),
+        description: language === 'ar'
+          ? 'هذا البريد الإلكتروني محجوز للمسؤولين فقط. يرجى اختيار "نوع حساب: مسؤول"'
+          : language === 'fr'
+            ? 'Cet e-mail est réservé aux administrateurs. Veuillez sélectionner le type de compte Administrateur.'
+            : 'This email is reserved for administrators. Please select Admin account type.',
         variant: 'destructive'
       });
       return false;
