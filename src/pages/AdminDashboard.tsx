@@ -144,11 +144,10 @@ const AdminDashboard = () => {
             return false;
         }
 
-        const { data: roleData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', session.user.id)
-            .eq('role', 'admin')
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role, status')
+            .eq('id', session.user.id)
             .single();
 
         const userEmail = session.user.email?.toLowerCase() || '';
@@ -158,13 +157,14 @@ const AdminDashboard = () => {
             session.user.user_metadata?.role === 'admin' ||
             session.user.app_metadata?.role === 'admin';
 
-        if (!roleData && !isAdminEmail && !hasAdminMetadata) {
+        if (profile?.role !== 'admin' && !isAdminEmail && !hasAdminMetadata) {
             navigate('/admin-auth?error=not_admin', { replace: true });
             return false;
         }
 
-        // التأكد من وجود سطر الأدمن في user_roles حتى تسمح RLS برؤية كل المستخدمين (أولياء الأمور، إلخ)
-        if (!roleData && (isAdminEmail || hasAdminMetadata)) {
+        // التأكد من وجود سطر الأدمن في user_roles وفي البروفايل لمطابقة الصلاحيات
+        if (profile?.role !== 'admin' && (isAdminEmail || hasAdminMetadata)) {
+            await supabase.from('profiles').update({ role: 'admin' }).eq('id', session.user.id);
             await supabase.from('user_roles').upsert(
                 { user_id: session.user.id, role: 'admin' },
                 { onConflict: 'user_id,role' }

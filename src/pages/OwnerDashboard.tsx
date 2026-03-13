@@ -209,46 +209,39 @@ const OwnerDashboard = () => {
 
   const checkOwnerRole = async (userId: string) => {
     try {
-      const { data, error } = await supabase.rpc('has_role', {
-        _user_id: userId,
-        _role: 'owner'
-      });
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role, status')
+        .eq('id', userId)
+        .single();
 
-      if (error) {
-        console.error('Error checking role:', error);
+      if (error || !profile) {
+        console.error('Error fetching profile:', error);
+        setIsAuthorized(false);
+        navigate('/owner-auth');
+        return;
+      }
 
-        // Fallback: Check metadata
-        const { data: sessionData } = await supabase.auth.getSession();
-        const hasOwnerMetadata = sessionData?.session?.user.user_metadata?.role === 'owner';
-
-        if (hasOwnerMetadata) {
-          setIsAuthorized(true);
-          fetchDashboardData(userId);
-        } else {
-          setIsAuthorized(false);
-          navigate('/owner-auth');
-        }
-      } else if (data === true) {
+      if (profile.role === 'owner' && profile.status === 'approved') {
         setIsAuthorized(true);
         fetchDashboardData(userId);
       } else {
-        // Fallback: Check metadata
-        const { data: sessionData } = await supabase.auth.getSession();
-        const hasOwnerMetadata = sessionData?.session?.user.user_metadata?.role === 'owner';
-
-        if (hasOwnerMetadata) {
-          setIsAuthorized(true);
-          fetchDashboardData(userId);
-        } else {
-          toast({
-            title: 'غير مصرح',
-            description: 'ليس لديك صلاحية الوصول لهذه الصفحة',
-            variant: 'destructive',
-          });
+        setIsAuthorized(false);
+        toast({
+          title: profile.role !== 'owner' ? 'غير مصرح' : 'قيد المراجعة',
+          description: profile.role !== 'owner' 
+            ? 'ليس لديك صلاحية الوصول لهذه الصفحة'
+            : 'حسابك لا يزال قيد المراجعة من قبل الإدارة.',
+          variant: 'destructive',
+        });
+        if (profile.role !== 'owner' || profile.status === 'rejected') {
           await supabase.auth.signOut();
-          navigate('/owner-auth');
         }
+        navigate('/owner-auth');
       }
+    } catch (err) {
+      console.error('Check role error:', err);
+      navigate('/owner-auth');
     } finally {
       setIsLoading(false);
     }
