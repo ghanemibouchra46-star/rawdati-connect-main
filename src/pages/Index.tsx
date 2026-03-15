@@ -6,7 +6,7 @@ import KindergartenCard from '@/components/KindergartenCard';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { GraduationCap, ArrowLeft, ArrowRight, Star, MapPin, Users, Search, Home } from 'lucide-react';
+import { GraduationCap, ArrowLeft, ArrowRight, Star, MapPin, Users, Search, Home, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import childrenPlaying from '@/assets/children-playing.png';
@@ -60,6 +60,13 @@ const Index = () => {
       description: 'اكتشف أفضل الروضات في منطقتك',
       link: '/kindergartens',
       color: 'from-pink-500 to-pink-600'
+    },
+    {
+      icon: BookOpen,
+      title: 'نصائح للأولياء',
+      description: 'مقالات تعليمية حول التربية والتغذية وتطوير قدرات الطفل',
+      link: '/parenting-tips',
+      color: 'from-emerald-500 to-emerald-600'
     }
   ];
 
@@ -248,26 +255,30 @@ const Index = () => {
           </div>
 
           <div className="flex flex-wrap justify-center gap-6">
-            <div className="relative">
-              <Link to="/kindergartens">
-                <Card className="h-full border-0 shadow-soft hover:shadow-hover transition-all duration-300 group cursor-pointer overflow-hidden">
-                  <CardContent className="p-0">
-                    <div className="h-32 bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center">
-                      <GraduationCap className="w-16 h-16 text-white/90" />
-                    </div>
-                    <div className="p-6">
-                      <h3 className="font-bold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
-                        اختر الروضة المثالية لطفلك
-                      </h3>
-                      <p className="text-muted-foreground text-sm">{services[0].description}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-              <div className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs px-2 py-1 rounded-full">
-                جديد
+            {services.map((service, index) => (
+              <div key={index} className="relative">
+                <Link to={service.link}>
+                  <Card className="h-full border-0 shadow-soft hover:shadow-hover transition-all duration-300 group cursor-pointer overflow-hidden min-w-[280px] max-w-[320px]">
+                    <CardContent className="p-0">
+                      <div className={`h-32 bg-gradient-to-br ${service.color} flex items-center justify-center`}>
+                        <service.icon className="w-16 h-16 text-white/90" />
+                      </div>
+                      <div className="p-6">
+                        <h3 className="font-bold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
+                          {service.title}
+                        </h3>
+                        <p className="text-muted-foreground text-sm">{service.description}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+                {index === 0 && (
+                  <div className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs px-2 py-1 rounded-full">
+                    جديد
+                  </div>
+                )}
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
