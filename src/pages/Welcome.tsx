@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Baby } from 'lucide-react';
+import Logo from '@/components/Logo';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const Welcome = () => {
@@ -67,9 +67,7 @@ const Welcome = () => {
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
         {/* Logo Section */}
         <div className="mb-12 text-center">
-          <div className="inline-flex items-center justify-center w-24 h-24 mb-6 rounded-full bg-gradient-to-br from-primary to-accent shadow-2xl animate-bounce">
-            <Baby className="w-12 h-12 text-white" />
-          </div>
+          <Logo size="xl" showText={false} className="justify-center mb-6" />
 
           <h1 className="text-5xl md:text-7xl font-black mb-4 tracking-tight">
             <span className="text-pink-500 font-arabic">روضتي</span>
