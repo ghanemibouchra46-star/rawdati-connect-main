@@ -41,10 +41,10 @@ const Logo: React.FC<LogoProps> = ({
             <svg viewBox="0 0 100 100" className="w-[98%] h-[98%]">
               {/* Background Decorations (Stars & Dots) */}
               <g className="animate-pulse" style={{ animationDuration: '3s' }}>
-                <path d="M15 15 L17 21 L23 21 L18 25 L20 31 L15 27 L10 31 L12 25 L7 21 L13 21 Z" fill="#ffd54f" /> {/* Top Left Star */}
-                <path d="M85 15 L87 21 L93 21 L88 25 L90 31 L85 27 L80 31 L82 25 L77 21 L83 21 Z" fill="#64b5f6" /> {/* Top Right Star */}
-                <path d="M10 60 L12 64 L16 64 L13 67 L14 71 L10 69 L6 71 L7 67 L4 64 L8 64 Z" fill="#f06292" /> {/* Bottom Left Star */}
-                <path d="M90 60 L92 64 L96 64 L93 67 L94 71 L90 69 L86 71 L87 67 L84 64 L88 64 Z" fill="#81c784" /> {/* Bottom Right Star */}
+                <path d="M12 15 L14 20 L20 20 L15 24 L17 30 L12 26 L7 30 L9 24 L4 20 L10 20 Z" fill="#FFEB3B" /> {/* Yellow Star Top Left */}
+                <path d="M88 15 L90 20 L96 20 L91 24 L93 30 L88 26 L83 30 L85 24 L80 20 L86 20 Z" fill="#81D4FA" /> {/* Blue Star Top Right */}
+                <path d="M10 65 L12 69 L17 69 L13 72 L14 77 L10 74 L6 77 L7 72 L3 69 L8 69 Z" fill="#F48FB1" /> {/* Pink Star Bottom Left */}
+                <path d="M90 65 L92 69 L97 69 L93 72 L94 77 L90 74 L86 77 L87 72 L83 69 L88 69 Z" fill="#A5D6A7" /> {/* Green Star Bottom Right */}
               </g>
               
               <circle cx="20" cy="45" r="2.5" fill="#f06292" opacity="0.6" />
@@ -54,56 +54,58 @@ const Logo: React.FC<LogoProps> = ({
 
               {/* Graduation Cap */}
               <g transform="translate(0, -8)">
-                <path d="M15 40 L50 25 L85 40 L50 55 Z" fill="#7b1fa2" />
-                <path d="M30 43 L30 55 Q50 62 70 55 L70 43" fill="#4a148c" />
+                <path d="M15 40 L50 25 L85 40 L50 55 Z" fill="#C2185B" /> {/* Rich Pinkish Purple */}
+                <path d="M30 43 L30 55 Q50 62 70 55 L70 43" fill="#880E4F" />
                 {/* Star on Cap */}
-                <path d="M50 32 L52 37 L58 37 L53 40 L55 45 L50 42 L45 45 L47 40 L42 37 L48 37 Z" fill="#fbbf24" stroke="#f59e0b" strokeWidth="0.5" />
+                <path d="M50 32 L52 37 L58 37 L53 40 L55 45 L50 42 L45 45 L47 40 L42 37 L48 37 Z" fill="#FFEB3B" />
                 {/* Tassel */}
-                <path d="M85 40 L90 60" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
-                <circle cx="90" cy="62" r="3.5" fill="#ef4444" />
+                <path d="M85 40 L90 60" stroke="#F44336" strokeWidth="2.5" strokeLinecap="round" />
+                <circle cx="90" cy="62" r="3.5" fill="#F44336" />
               </g>
-
-              {/* Ears */}
-              <circle cx="25" cy="68" r="5" fill="#fff5f5" stroke="#7b1fa2" strokeWidth="1" />
-              <circle cx="75" cy="68" r="5" fill="#fff5f5" stroke="#7b1fa2" strokeWidth="1" />
 
               {/* Baby Face */}
-              <circle cx="50" cy="68" r="28" fill="#fff9f9" stroke="#7b1fa2" strokeWidth="1" />
+              {/* Ears */}
+              <circle cx="23" cy="68" r="5" fill="#FFE0E0" stroke="#C2185B" strokeWidth="0.8" />
+              <circle cx="77" cy="68" r="5" fill="#FFE0E0" stroke="#C2185B" strokeWidth="0.8" />
+
+              <circle cx="50" cy="68" r="28" fill="#FFFBFB" stroke="#C2185B" strokeWidth="1" />
               
               {/* Hair Curl */}
-              <path d="M42 45 Q50 35 58 45 Q50 50 42 45" fill="#d81b60" />
+              <path d="M42 45 Q50 35 58 45 Q50 48 42 45" fill="#C2185B" />
               
               {/* Cheeks */}
-              <circle cx="32" cy="75" r="6" fill="#ffcdd2" opacity="0.7" />
-              <circle cx="68" cy="75" r="6" fill="#ffcdd2" opacity="0.7" />
+              <circle cx="32" cy="75" r="6" fill="#FFCDD2" opacity="0.8" />
+              <circle cx="68" cy="75" r="6" fill="#FFCDD2" opacity="0.8" />
               
-              {/* Eyes - Large & Cute */}
+              {/* Eyes */}
               <g>
-                <circle cx="38" cy="65" r="4.5" fill="#1e1b4b" />
-                <circle cx="39.5" cy="63" r="1.8" fill="white" />
-                <circle cx="37" cy="67" r="0.8" fill="white" />
+                <path d="M32 68 Q38 62 44 68" fill="none" stroke="#283593" strokeWidth="2" strokeLinecap="round" /> {/* Lash-style eyes */}
+                <path d="M56 68 Q62 62 68 68" fill="none" stroke="#283593" strokeWidth="2" strokeLinecap="round" />
                 
-                <circle cx="62" cy="65" r="4.5" fill="#1e1b4b" />
-                <circle cx="63.5" cy="63" r="1.8" fill="white" />
-                <circle cx="61" cy="67" r="0.8" fill="white" />
+                {/* Blush below eyes */}
+                <ellipse cx="38" cy="65" rx="4" ry="3.5" fill="#4527A0" opacity="0.9" />
+                <circle cx="39.5" cy="63.5" r="1.2" fill="white" />
+                
+                <ellipse cx="62" cy="65" rx="4" ry="3.5" fill="#4527A0" opacity="0.9" />
+                <circle cx="63.5" cy="63.5" r="1.2" fill="white" />
               </g>
               
-              {/* Brows */}
-              <path d="M33 58 Q38 55 43 58" fill="none" stroke="#7b1fa2" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
-              <path d="M57 58 Q62 55 67 58" fill="none" stroke="#7b1fa2" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
-
               {/* Mouth - Open Smile */}
-              <path d="M42 80 Q50 92 58 80 Z" fill="#4a148c" stroke="#e91e63" strokeWidth="1" />
+              <path d="M43 78 Q50 88 57 78 Z" fill="#4527A0" />
               
-              {/* Arabic Text "روضتي" in a curve */}
-              <defs>
-                <path id="textCurve" d="M15 88 Q50 100 85 88" />
-              </defs>
-              <text className="font-arabic font-black" fill="#e91e63" style={{ fontSize: '15px' }}>
-                <textPath href="#textCurve" startOffset="50%" textAnchor="middle">
-                  روضتي
-                </textPath>
-              </text>
+              {/* Multicolored Arabic Text "روضتي" */}
+              <g transform="translate(0, 5)" className="font-arabic">
+                {/* ر - Green */}
+                <text x="80" y="90" fill="#4CAF50" fontSize="16" fontWeight="900" textAnchor="middle">ر</text>
+                {/* و - Yellow */}
+                <text x="65" y="94" fill="#FFC107" fontSize="16" fontWeight="900" textAnchor="middle">و</text>
+                {/* ض - Blue */}
+                <text x="50" y="95" fill="#2196F3" fontSize="16" fontWeight="900" textAnchor="middle">ض</text>
+                {/* ت - Pink */}
+                <text x="35" y="94" fill="#E91E63" fontSize="16" fontWeight="900" textAnchor="middle">ت</text>
+                {/* ي - Green */}
+                <text x="20" y="90" fill="#4CAF50" fontSize="16" fontWeight="900" textAnchor="middle">ي</text>
+              </g>
             </svg>
           )}
 

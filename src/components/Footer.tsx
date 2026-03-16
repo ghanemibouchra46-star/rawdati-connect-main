@@ -1,8 +1,15 @@
 import { Mail, Phone, MapPin, Facebook, Instagram, Twitter } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import logoIcon from '@/assets/logo-icon.png';
+import { PricingModal, FAQModal, RegisterInfoModal, DashboardInfoModal } from './InfoModals';
 
 const Footer = () => {
+  const [isPricingOpen, setIsPricingOpen] = useState(false);
+  const [isFAQOpen, setIsFAQOpen] = useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
+
   return (
     <footer className="bg-foreground text-primary-foreground">
       <div className="container mx-auto px-4 py-12">
@@ -67,11 +74,39 @@ const Footer = () => {
           {/* For Owners */}
           <div>
             <h4 className="font-extrabold text-lg mb-5 text-secondary">🏫 لأصحاب الروضات</h4>
-            <ul className="space-y-3 text-sm text-primary-foreground/70">
-              <li><Link to="/register-kindergarten" className="hover:text-primary-foreground hover:pr-2 transition-all duration-300">سجل روضتك</Link></li>
-              <li><Link to="/dashboard" className="hover:text-primary-foreground hover:pr-2 transition-all duration-300">لوحة التحكم</Link></li>
-              <li><Link to="/pricing" className="hover:text-primary-foreground hover:pr-2 transition-all duration-300">الأسعار</Link></li>
-              <li><Link to="/faq" className="hover:text-primary-foreground hover:pr-2 transition-all duration-300">الأسئلة الشائعة</Link></li>
+            <ul className="space-y-3 text-sm text-primary-foreground/70 flex flex-col items-start">
+              <li>
+                <button 
+                  onClick={() => setIsRegisterOpen(true)}
+                  className="hover:text-primary-foreground hover:pr-2 transition-all duration-300 text-right w-full"
+                >
+                  سجل روضتك
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => setIsDashboardOpen(true)}
+                  className="hover:text-primary-foreground hover:pr-2 transition-all duration-300 text-right w-full"
+                >
+                  لوحة التحكم
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => setIsPricingOpen(true)}
+                  className="hover:text-primary-foreground hover:pr-2 transition-all duration-300 text-right w-full"
+                >
+                  الأسعار
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => setIsFAQOpen(true)}
+                  className="hover:text-primary-foreground hover:pr-2 transition-all duration-300 text-right w-full"
+                >
+                  الأسئلة الشائعة
+                </button>
+              </li>
             </ul>
           </div>
 
@@ -89,7 +124,7 @@ const Footer = () => {
                 <div className="w-9 h-9 rounded-lg bg-secondary/20 flex items-center justify-center">
                   <Phone className="w-4 h-4 text-primary-foreground" />
                 </div>
-                <span dir="ltr">+213 45 XX XX XX</span>
+                <a href="tel:0798960780" className="hover:text-primary-foreground transition-colors" dir="ltr">0798960780</a>
               </li>
               <li className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-coral/20 flex items-center justify-center">
@@ -108,6 +143,11 @@ const Footer = () => {
           </p>
         </div>
       </div>
+
+      <PricingModal isOpen={isPricingOpen} onClose={() => setIsPricingOpen(false)} />
+      <FAQModal isOpen={isFAQOpen} onClose={() => setIsFAQOpen(false)} />
+      <RegisterInfoModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
+      <DashboardInfoModal isOpen={isDashboardOpen} onClose={() => setIsDashboardOpen(false)} />
     </footer>
   );
 };
