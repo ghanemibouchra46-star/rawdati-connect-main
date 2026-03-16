@@ -11,7 +11,7 @@ interface StatItem {
 }
 
 const stats: StatItem[] = [
-  { icon: GraduationCap, value: 10, suffix: '+', label: 'روضة معتمدة', emoji: '🏫', gradient: 'gradient-accent' },
+  { icon: GraduationCap, value: 6, suffix: '+', label: 'روضة معتمدة', emoji: '🏫', gradient: 'gradient-accent' },
   { icon: MapPin, value: 5, suffix: '', label: 'بلديات', emoji: '📍', gradient: 'bg-gradient-to-br from-coral to-primary' },
   { icon: Users, value: 500, suffix: '+', label: 'ولي مسجل', emoji: '👨‍👩‍👧', gradient: 'bg-gradient-to-br from-secondary to-mint' },
   { icon: Star, value: 4.6, suffix: '', label: 'متوسط التقييم', emoji: '⭐', gradient: 'bg-gradient-to-br from-accent to-secondary' },
