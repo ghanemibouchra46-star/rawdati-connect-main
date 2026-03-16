@@ -6,7 +6,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
-import { Check, HelpCircle, CreditCard, Building2, LayoutDashboard, Users, FileText } from "lucide-react";
+import { Check, HelpCircle, CreditCard, Building2, LayoutDashboard, Users, FileText, Mail, Phone, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -245,6 +245,72 @@ export const DashboardInfoModal = ({ isOpen, onClose }: ModalProps) => {
           }}
         >
           الانتقال إلى لوحة التحكم
+        </Button>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export const ContactModal = ({ isOpen, onClose }: ModalProps) => {
+  const { dir } = useLanguage();
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md" dir={dir}>
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+            <Phone className="w-6 h-6 text-primary" />
+            اتصل بنا
+          </DialogTitle>
+          <DialogDescription>
+            نحن هنا لمساعدتك والإجابة على استفساراتك
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6 my-6 text-right" dir="rtl">
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-primary/5 border border-primary/10">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <Phone className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-900">رقم الهاتف</h4>
+              <a href="tel:0798960780" className="text-lg font-bold text-primary hover:underline" dir="ltr">0798960780</a>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+            <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <Mail className="w-6 h-6 text-emerald-500" />
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-900">البريد الإلكتروني</h4>
+              <p className="text-gray-600">contact@روضتي.dz</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-pink-500/5 border border-pink-500/10">
+            <div className="w-12 h-12 rounded-full bg-pink-500/10 flex items-center justify-center shrink-0">
+              <Facebook className="w-6 h-6 text-pink-500" />
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-900">فيسبوك</h4>
+              <a 
+                href="https://www.facebook.com/profile.php?id=61579605182708" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                صفحتنا الرسمية
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <Button 
+          className="w-full h-12 gradient-accent border-0"
+          onClick={onClose}
+        >
+          إغلاق
         </Button>
       </DialogContent>
     </Dialog>
