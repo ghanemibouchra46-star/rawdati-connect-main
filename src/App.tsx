@@ -27,6 +27,7 @@ import Doctors from "./pages/Doctors";
 import SpeechTherapy from "./pages/SpeechTherapy";
 import Recovery from "./pages/Recovery";
 import ParentingTips from "./pages/ParentingTips";
+import LogoGallery from "./pages/LogoGallery";
 import NotFound from "./pages/NotFound";
 
 import AIChatbot from "./components/AIChatbot";
@@ -118,6 +119,7 @@ const App = () => (
               <Route path="/speech-therapy" element={<SpeechTherapy />} />
               <Route path="/recovery" element={<Recovery />} />
               <Route path="/parenting-tips" element={<ParentingTips />} />
+              <Route path="/logo-gallery" element={<LogoGallery />} />
               <Route path="/dashboard" element={<Navigate to="/parent" replace />} />
               <Route path="/admin-dashboard" element={<Navigate to="/admin" replace />} />
               <Route path="/owner-dashboard" element={<Navigate to="/owner" replace />} />

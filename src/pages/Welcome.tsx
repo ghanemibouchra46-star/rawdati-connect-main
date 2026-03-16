@@ -67,7 +67,7 @@ const Welcome = () => {
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
         {/* Logo Section */}
         <div className="mb-12 text-center">
-          <Logo size="xl" showText={false} className="justify-center mb-6" />
+          <Logo size="xl" showText={true} className="flex-col justify-center mb-6" />
 
           <h1 className="text-5xl md:text-7xl font-black mb-4 tracking-tight">
             <span className="text-pink-500 font-arabic">روضتي</span>
