@@ -16,11 +16,11 @@ const LogoGallery = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-12 max-w-4xl w-full">
         {/* Final Selection */}
-        <div className="bg-white p-8 rounded-3xl shadow-xl flex flex-col items-center text-center border-4 border-slate-200 col-span-1 md:col-span-2">
-          <Logo size="xl" variant="garden" className="mb-6 flex-col" />
-          <h2 className="text-3xl font-bold mb-2">التصميم المختار: الطفل والشجرة</h2>
-          <p className="text-slate-500 mb-6 text-lg">ألوان هادئة ولطيفة تعبر عن الطبيعة والطفولة</p>
-          <Button className="px-12 bg-slate-700 hover:bg-slate-800">هذا هو الشعار النهائي</Button>
+        <div className="bg-white p-8 rounded-3xl shadow-xl flex flex-col items-center text-center border-4 border-pink-100 col-span-1 md:col-span-2">
+          <Logo size="xl" variant="graduated" className="mb-6 flex-col" />
+          <h2 className="text-3xl font-bold mb-2">التصميم النهائي: الطفل المتخرج</h2>
+          <p className="text-slate-500 mb-6 text-lg">تصميم مبهج مع قبعة التخرج وكلمة "روضتي" المنسقة</p>
+          <Button className="px-12 bg-pink-500 hover:bg-pink-600">هذا هو الشعار المعتمد</Button>
         </div>
 
         {/* Option 2 */}

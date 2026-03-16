@@ -2,14 +2,14 @@ interface LogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   showText?: boolean;
-  variant?: 'cute' | 'growth' | 'playful' | 'garden';
+  variant?: 'cute' | 'growth' | 'playful' | 'garden' | 'graduated';
 }
 
 const Logo: React.FC<LogoProps> = ({ 
   size = 'md', 
   className = '', 
   showText = true,
-  variant = 'garden'
+  variant = 'graduated'
 }) => {
   const sizeMap = {
     sm: 'w-8 h-8',
@@ -37,6 +37,47 @@ const Logo: React.FC<LogoProps> = ({
         
         {/* Main Logo Container */}
         <div className="relative h-full w-full bg-white rounded-2xl shadow-lg border-2 border-primary/20 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-500">
+          {variant === 'graduated' && (
+            <svg viewBox="0 0 100 100" className="w-[95%] h-[95%]">
+              {/* Background Stars & Dots */}
+              <circle cx="20" cy="20" r="2" fill="#64b5f6" className="animate-pulse" />
+              <circle cx="85" cy="50" r="3" fill="#f06292" />
+              <circle cx="15" cy="70" r="2.5" fill="#ffd54f" />
+              
+              {/* Mortarboard (Graduation Cap) */}
+              <path d="M20 25 L50 15 L80 25 L50 35 Z" fill="#7b1fa2" stroke="#4a148c" strokeWidth="2" />
+              <rect x="35" y="28" width="30" height="10" fill="#7b1fa2" stroke="#4a148c" strokeWidth="2" />
+              <circle cx="50" cy="23" r="6" fill="#fbc02d" />
+              <path d="M50 23 L55 25 L50 27 L45 25 Z" fill="white" /> {/* Star detail on cap */}
+              <path d="M80 25 L85 45" stroke="#d32f2f" strokeWidth="2" strokeLinecap="round" />
+              <circle cx="85" cy="45" r="3" fill="#d32f2f" /> {/* Tassel */}
+
+              {/* Baby Face */}
+              <circle cx="50" cy="60" r="30" fill="#fff9f9" stroke="#7b1fa2" strokeWidth="1.5" />
+              <circle cx="35" cy="65" r="7" fill="#ffcdd2" opacity="0.6" /> {/* Left cheek */}
+              <circle cx="65" cy="65" r="7" fill="#ffcdd2" opacity="0.6" /> {/* Right cheek */}
+              
+              {/* Eyes */}
+              <circle cx="40" cy="58" r="3.5" fill="#283593" />
+              <circle cx="60" cy="58" r="3.5" fill="#283593" />
+              <circle cx="41" cy="56.5" r="1.5" fill="white" />
+              <circle cx="61" cy="56.5" r="1.5" fill="white" />
+              
+              {/* Mouth */}
+              <path d="M40 72 Q50 82 60 72" fill="none" stroke="#7b1fa2" strokeWidth="2" strokeLinecap="round" />
+              
+              {/* Arabic Text "روضتي" in a curve */}
+              <defs>
+                <path id="textCurve" d="M15 85 Q50 98 85 85" />
+              </defs>
+              <text className="font-arabic font-black" fill="#e91e63" style={{ fontSize: '14px' }}>
+                <textPath href="#textCurve" startOffset="50%" textAnchor="middle">
+                  روضتي
+                </textPath>
+              </text>
+            </svg>
+          )}
+
           {variant === 'garden' && (
             <svg viewBox="0 0 100 100" className="w-[85%] h-[85%] drop-shadow-sm">
               {/* Soft Background Sun/Glow */}
@@ -102,9 +143,9 @@ const Logo: React.FC<LogoProps> = ({
       {showText && (
         <div className="flex flex-col -space-y-1">
           <span className={`font-black tracking-tight ${textSize}`}>
-            <span className="text-slate-700 font-arabic">روضتي</span>
+            <span className="text-[#e91e63] font-arabic">روضتي</span>
           </span>
-          <span className="text-slate-500 font-fredoka text-sm font-bold tracking-widest uppercase opacity-80">
+          <span className="text-[#7b1fa2] font-fredoka text-sm font-bold tracking-widest uppercase opacity-80">
             Rawdati
           </span>
         </div>
