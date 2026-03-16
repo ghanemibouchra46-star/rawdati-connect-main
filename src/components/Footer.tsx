@@ -1,14 +1,15 @@
-import { Mail, Phone, MapPin, Facebook, Instagram, Twitter } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Instagram } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import logoIcon from '@/assets/logo-icon.png';
-import { PricingModal, FAQModal, RegisterInfoModal, DashboardInfoModal } from './InfoModals';
+import { PricingModal, FAQModal, RegisterInfoModal, DashboardInfoModal, ContactModal } from './InfoModals';
 
 const Footer = () => {
   const [isPricingOpen, setIsPricingOpen] = useState(false);
   const [isFAQOpen, setIsFAQOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
+  const [isContactOpen, setIsContactOpen] = useState(false);
 
   return (
     <footer className="bg-foreground text-primary-foreground">
@@ -31,7 +32,7 @@ const Footer = () => {
             </p>
             <div className="flex gap-3">
               <a
-                href="https://www.facebook.com/روضتي.mascara"
+                href="https://www.facebook.com/profile.php?id=61579605182708"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-11 h-11 rounded-xl bg-primary/20 flex items-center justify-center hover:bg-primary/40 transition-all duration-300 hover:scale-110"
@@ -48,15 +49,6 @@ const Footer = () => {
               >
                 <Instagram className="w-5 h-5" />
               </a>
-              <a
-                href="https://www.x.com/روضتي_mascara"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-11 h-11 rounded-xl bg-sky-light/20 flex items-center justify-center hover:bg-sky-light/40 transition-all duration-300 hover:scale-110"
-                title="حسابنا على تويتر"
-              >
-                <Twitter className="w-5 h-5" />
-              </a>
             </div>
           </div>
 
@@ -67,7 +59,14 @@ const Footer = () => {
               <li><Link to="/" className="hover:text-primary-foreground hover:pr-2 transition-all duration-300">الرئيسية</Link></li>
               <li><Link to="/kindergartens" className="hover:text-primary-foreground hover:pr-2 transition-all duration-300">جميع الروضات</Link></li>
               <li><Link to="/about" className="hover:text-primary-foreground hover:pr-2 transition-all duration-300">من نحن</Link></li>
-              <li><Link to="/contact" className="hover:text-primary-foreground hover:pr-2 transition-all duration-300">اتصل بنا</Link></li>
+              <li>
+                <button 
+                  onClick={() => setIsContactOpen(true)}
+                  className="hover:text-primary-foreground hover:pr-2 transition-all duration-300 text-right"
+                >
+                  اتصل بنا
+                </button>
+              </li>
             </ul>
           </div>
 
@@ -148,6 +147,7 @@ const Footer = () => {
       <FAQModal isOpen={isFAQOpen} onClose={() => setIsFAQOpen(false)} />
       <RegisterInfoModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
       <DashboardInfoModal isOpen={isDashboardOpen} onClose={() => setIsDashboardOpen(false)} />
+      <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </footer>
   );
 };
