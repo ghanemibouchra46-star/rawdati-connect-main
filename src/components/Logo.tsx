@@ -38,39 +38,61 @@ const Logo: React.FC<LogoProps> = ({
         {/* Main Logo Container */}
         <div className="relative h-full w-full bg-white rounded-2xl shadow-lg border-2 border-primary/20 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-500">
           {variant === 'graduated' && (
-            <svg viewBox="0 0 100 100" className="w-[95%] h-[95%]">
-              {/* Background Stars & Dots */}
-              <circle cx="20" cy="20" r="2" fill="#64b5f6" className="animate-pulse" />
-              <circle cx="85" cy="50" r="3" fill="#f06292" />
-              <circle cx="15" cy="70" r="2.5" fill="#ffd54f" />
+            <svg viewBox="0 0 100 100" className="w-[98%] h-[98%]">
+              {/* Background Decorations (Stars & Dots) */}
+              <g className="animate-pulse" style={{ animationDuration: '3s' }}>
+                <path d="M15 15 L17 21 L23 21 L18 25 L20 31 L15 27 L10 31 L12 25 L7 21 L13 21 Z" fill="#ffd54f" /> {/* Top Left Star */}
+                <path d="M85 15 L87 21 L93 21 L88 25 L90 31 L85 27 L80 31 L82 25 L77 21 L83 21 Z" fill="#64b5f6" /> {/* Top Right Star */}
+                <path d="M10 60 L12 64 L16 64 L13 67 L14 71 L10 69 L6 71 L7 67 L4 64 L8 64 Z" fill="#f06292" /> {/* Bottom Left Star */}
+                <path d="M90 60 L92 64 L96 64 L93 67 L94 71 L90 69 L86 71 L87 67 L84 64 L88 64 Z" fill="#81c784" /> {/* Bottom Right Star */}
+              </g>
               
-              {/* Mortarboard (Graduation Cap) */}
-              <path d="M20 25 L50 15 L80 25 L50 35 Z" fill="#7b1fa2" stroke="#4a148c" strokeWidth="2" />
-              <rect x="35" y="28" width="30" height="10" fill="#7b1fa2" stroke="#4a148c" strokeWidth="2" />
-              <circle cx="50" cy="23" r="6" fill="#fbc02d" />
-              <path d="M50 23 L55 25 L50 27 L45 25 Z" fill="white" /> {/* Star detail on cap */}
-              <path d="M80 25 L85 45" stroke="#d32f2f" strokeWidth="2" strokeLinecap="round" />
-              <circle cx="85" cy="45" r="3" fill="#d32f2f" /> {/* Tassel */}
+              <circle cx="20" cy="45" r="2.5" fill="#f06292" opacity="0.6" />
+              <circle cx="80" cy="40" r="3" fill="#ffd54f" opacity="0.6" />
+              <circle cx="15" cy="75" r="2" fill="#64b5f6" opacity="0.6" />
+              <circle cx="85" cy="75" r="2.5" fill="#ce93d8" opacity="0.6" />
+
+              {/* Graduation Cap */}
+              <g transform="translate(0, -5)">
+                <path d="M20 35 L50 22 L80 35 L50 48 Z" fill="#7b1fa2" />
+                <path d="M35 38 L35 50 Q50 55 65 50 L65 38" fill="#4a148c" />
+                {/* Star on Cap */}
+                <path d="M50 28 L52 33 L58 33 L53 36 L55 41 L50 38 L45 41 L47 36 L42 33 L48 33 Z" fill="#fbbf24" stroke="#f59e0b" strokeWidth="0.5" />
+                {/* Tassel */}
+                <path d="M80 35 L85 55" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
+                <circle cx="85" cy="55" r="3.5" fill="#ef4444" />
+              </g>
 
               {/* Baby Face */}
-              <circle cx="50" cy="60" r="30" fill="#fff9f9" stroke="#7b1fa2" strokeWidth="1.5" />
-              <circle cx="35" cy="65" r="7" fill="#ffcdd2" opacity="0.6" /> {/* Left cheek */}
-              <circle cx="65" cy="65" r="7" fill="#ffcdd2" opacity="0.6" /> {/* Right cheek */}
+              <circle cx="50" cy="65" r="28" fill="#fff9f9" stroke="#7b1fa2" strokeWidth="1" />
               
-              {/* Eyes */}
-              <circle cx="40" cy="58" r="3.5" fill="#283593" />
-              <circle cx="60" cy="58" r="3.5" fill="#283593" />
-              <circle cx="41" cy="56.5" r="1.5" fill="white" />
-              <circle cx="61" cy="56.5" r="1.5" fill="white" />
+              {/* Cheeks */}
+              <circle cx="32" cy="72" r="6" fill="#ffcdd2" opacity="0.7" />
+              <circle cx="68" cy="72" r="6" fill="#ffcdd2" opacity="0.7" />
               
+              {/* Eyes - Large & Cute */}
+              <g>
+                <circle cx="38" cy="62" r="4.5" fill="#1e1b4b" />
+                <circle cx="39.5" cy="60" r="1.8" fill="white" />
+                <circle cx="37" cy="64" r="0.8" fill="white" />
+                
+                <circle cx="62" cy="62" r="4.5" fill="#1e1b4b" />
+                <circle cx="63.5" cy="60" r="1.8" fill="white" />
+                <circle cx="61" cy="64" r="0.8" fill="white" />
+              </g>
+              
+              {/* Brows */}
+              <path d="M33 55 Q38 52 43 55" fill="none" stroke="#7b1fa2" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+              <path d="M57 55 Q62 52 67 55" fill="none" stroke="#7b1fa2" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+
               {/* Mouth */}
-              <path d="M40 72 Q50 82 60 72" fill="none" stroke="#7b1fa2" strokeWidth="2" strokeLinecap="round" />
+              <path d="M43 78 Q50 86 57 78" fill="none" stroke="#e91e63" strokeWidth="2.5" strokeLinecap="round" />
               
               {/* Arabic Text "روضتي" in a curve */}
               <defs>
-                <path id="textCurve" d="M15 85 Q50 98 85 85" />
+                <path id="textCurve" d="M20 88 Q50 98 80 88" />
               </defs>
-              <text className="font-arabic font-black" fill="#e91e63" style={{ fontSize: '14px' }}>
+              <text className="font-arabic font-black" fill="#e91e63" style={{ fontSize: '12px' }}>
                 <textPath href="#textCurve" startOffset="50%" textAnchor="middle">
                   روضتي
                 </textPath>
