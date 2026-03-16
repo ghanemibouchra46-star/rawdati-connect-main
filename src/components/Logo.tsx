@@ -53,46 +53,53 @@ const Logo: React.FC<LogoProps> = ({
               <circle cx="85" cy="75" r="2.5" fill="#ce93d8" opacity="0.6" />
 
               {/* Graduation Cap */}
-              <g transform="translate(0, -5)">
-                <path d="M20 35 L50 22 L80 35 L50 48 Z" fill="#7b1fa2" />
-                <path d="M35 38 L35 50 Q50 55 65 50 L65 38" fill="#4a148c" />
+              <g transform="translate(0, -8)">
+                <path d="M15 40 L50 25 L85 40 L50 55 Z" fill="#7b1fa2" />
+                <path d="M30 43 L30 55 Q50 62 70 55 L70 43" fill="#4a148c" />
                 {/* Star on Cap */}
-                <path d="M50 28 L52 33 L58 33 L53 36 L55 41 L50 38 L45 41 L47 36 L42 33 L48 33 Z" fill="#fbbf24" stroke="#f59e0b" strokeWidth="0.5" />
+                <path d="M50 32 L52 37 L58 37 L53 40 L55 45 L50 42 L45 45 L47 40 L42 37 L48 37 Z" fill="#fbbf24" stroke="#f59e0b" strokeWidth="0.5" />
                 {/* Tassel */}
-                <path d="M80 35 L85 55" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
-                <circle cx="85" cy="55" r="3.5" fill="#ef4444" />
+                <path d="M85 40 L90 60" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
+                <circle cx="90" cy="62" r="3.5" fill="#ef4444" />
               </g>
 
+              {/* Ears */}
+              <circle cx="25" cy="68" r="5" fill="#fff5f5" stroke="#7b1fa2" strokeWidth="1" />
+              <circle cx="75" cy="68" r="5" fill="#fff5f5" stroke="#7b1fa2" strokeWidth="1" />
+
               {/* Baby Face */}
-              <circle cx="50" cy="65" r="28" fill="#fff9f9" stroke="#7b1fa2" strokeWidth="1" />
+              <circle cx="50" cy="68" r="28" fill="#fff9f9" stroke="#7b1fa2" strokeWidth="1" />
+              
+              {/* Hair Curl */}
+              <path d="M42 45 Q50 35 58 45 Q50 50 42 45" fill="#d81b60" />
               
               {/* Cheeks */}
-              <circle cx="32" cy="72" r="6" fill="#ffcdd2" opacity="0.7" />
-              <circle cx="68" cy="72" r="6" fill="#ffcdd2" opacity="0.7" />
+              <circle cx="32" cy="75" r="6" fill="#ffcdd2" opacity="0.7" />
+              <circle cx="68" cy="75" r="6" fill="#ffcdd2" opacity="0.7" />
               
               {/* Eyes - Large & Cute */}
               <g>
-                <circle cx="38" cy="62" r="4.5" fill="#1e1b4b" />
-                <circle cx="39.5" cy="60" r="1.8" fill="white" />
-                <circle cx="37" cy="64" r="0.8" fill="white" />
+                <circle cx="38" cy="65" r="4.5" fill="#1e1b4b" />
+                <circle cx="39.5" cy="63" r="1.8" fill="white" />
+                <circle cx="37" cy="67" r="0.8" fill="white" />
                 
-                <circle cx="62" cy="62" r="4.5" fill="#1e1b4b" />
-                <circle cx="63.5" cy="60" r="1.8" fill="white" />
-                <circle cx="61" cy="64" r="0.8" fill="white" />
+                <circle cx="62" cy="65" r="4.5" fill="#1e1b4b" />
+                <circle cx="63.5" cy="63" r="1.8" fill="white" />
+                <circle cx="61" cy="67" r="0.8" fill="white" />
               </g>
               
               {/* Brows */}
-              <path d="M33 55 Q38 52 43 55" fill="none" stroke="#7b1fa2" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
-              <path d="M57 55 Q62 52 67 55" fill="none" stroke="#7b1fa2" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+              <path d="M33 58 Q38 55 43 58" fill="none" stroke="#7b1fa2" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+              <path d="M57 58 Q62 55 67 58" fill="none" stroke="#7b1fa2" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
 
-              {/* Mouth */}
-              <path d="M43 78 Q50 86 57 78" fill="none" stroke="#e91e63" strokeWidth="2.5" strokeLinecap="round" />
+              {/* Mouth - Open Smile */}
+              <path d="M42 80 Q50 92 58 80 Z" fill="#4a148c" stroke="#e91e63" strokeWidth="1" />
               
               {/* Arabic Text "روضتي" in a curve */}
               <defs>
-                <path id="textCurve" d="M20 88 Q50 98 80 88" />
+                <path id="textCurve" d="M15 88 Q50 100 85 88" />
               </defs>
-              <text className="font-arabic font-black" fill="#e91e63" style={{ fontSize: '12px' }}>
+              <text className="font-arabic font-black" fill="#e91e63" style={{ fontSize: '15px' }}>
                 <textPath href="#textCurve" startOffset="50%" textAnchor="middle">
                   روضتي
                 </textPath>
