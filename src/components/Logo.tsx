@@ -110,14 +110,10 @@ const Logo: React.FC<LogoProps> = ({
                 </g>
               </g>
 
-              {/* Colorful "روضتي" Text - Positioned Below Face */}
+              {/* Pink "روضتي" Text - Positioned Below Face */}
               <g transform="translate(100, 215)" textAnchor="middle">
-                <text className="font-arabic font-black" style={{ fontSize: '28px' }}>
-                  <tspan fill="#F1C40F">ر</tspan>
-                  <tspan fill="#FF7675">و</tspan>
-                  <tspan fill="#3498DB">ض</tspan>
-                  <tspan fill="#FF7675">ت</tspan>
-                  <tspan fill="#2ECC71">ي</tspan>
+                <text className="font-arabic font-black" fill="#E91E63" style={{ fontSize: '28px' }}>
+                  روضتي
                 </text>
               </g>
             </svg>
@@ -135,12 +131,8 @@ const Logo: React.FC<LogoProps> = ({
       {/* Side Typography - Reverted to Screenshot Style */}
       {showText && (
         <div className="flex flex-col -space-y-1">
-          <div className={`font-black tracking-tight ${textSize} flex gap-0.5`}>
-            <span className="text-[#F1C40F]">ر</span>
-            <span className="text-[#FF7675]">و</span>
-            <span className="text-[#3498DB]">ض</span>
-            <span className="text-[#FF7675]">ت</span>
-            <span className="text-[#2ECC71]">ي</span>
+          <div className={`font-black tracking-tight ${textSize} text-[#E91E63]`}>
+            روضتي
           </div>
           <span className="text-gray-400 font-sans text-xs font-bold tracking-wider capitalize">
             Rawdati
