@@ -1141,7 +1141,6 @@ const OwnerDashboard = () => {
               </div>
             </div>
           </TabsContent>
-        </Tabs>
 
           {/* Finance Tab */}
           <TabsContent value="finance" className="space-y-4">
