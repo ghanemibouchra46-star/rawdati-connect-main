@@ -135,15 +135,15 @@ const OwnerAuth = () => {
         // Check profiles table directly
         const { data: profile } = await supabase
           .from('profiles')
-          .select('role, status')
+          .select('*')
           .eq('id', data.user.id)
           .single();
 
         if (profile) {
           if (profile.role === 'owner') {
             if (profile.status === 'approved') {
-              // Update AuthContext profile before navigating
-              await refreshProfile(data.user.id);
+              // Update AuthContext profile before navigating - efficiency boost by passing existing data
+              await refreshProfile(data.user.id, profile as any);
               
               toast({
                 title: t('auth.welcome'),

@@ -125,7 +125,7 @@ const Auth = () => {
       // Check for user role in profiles table
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role, status')
+        .select('*')
         .eq('id', data.user.id)
         .single();
 
@@ -147,8 +147,8 @@ const Auth = () => {
       } else {
         // Role-based navigation and validation
         if (role === 'admin') {
-          // Refresh AuthContext profile before navigating
-          await refreshProfile(data.user.id);
+          // Refresh AuthContext profile before navigating - efficiency boost by passing existing data
+          await refreshProfile(data.user.id, profile as any);
           
           toast({
             title: t('auth.welcome'),
@@ -162,8 +162,8 @@ const Auth = () => {
           navigate('/admin');
         } else if (role === 'owner') {
           if (profile?.status === 'approved') {
-            // Refresh AuthContext profile before navigating
-            await refreshProfile(data.user.id);
+            // Refresh AuthContext profile before navigating - efficiency boost by passing existing data
+            await refreshProfile(data.user.id, profile as any);
             
             toast({
               title: t('auth.welcome'),
@@ -179,8 +179,8 @@ const Auth = () => {
             });
           }
         } else {
-          // Refresh AuthContext profile before navigating
-          await refreshProfile(data.user.id);
+          // Refresh AuthContext profile before navigating - efficiency boost by passing existing data
+          await refreshProfile(data.user.id, profile as any);
           
           toast({
             title: t('auth.welcome'),

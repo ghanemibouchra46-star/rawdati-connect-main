@@ -11,7 +11,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, fullName: string) => Promise<void>;
   logout: () => Promise<void>;
-  refreshProfile: (userId?: string) => Promise<Tables<'profiles'> | null>;
+  refreshProfile: (userId?: string, existingProfile?: Tables<'profiles'> | null) => Promise<Tables<'profiles'> | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,12 +34,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [profile, setProfile] = useState<Tables<'profiles'> | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refreshProfile = async (userId?: string) => {
+  const refreshProfile = async (userId?: string, existingProfile?: Tables<'profiles'> | null) => {
+    if (existingProfile !== undefined) {
+      setProfile(existingProfile);
+      return existingProfile;
+    }
+
     let targetId = userId;
     
     if (!targetId) {
-      const { data: { user } } = await supabase.auth.getUser();
-      targetId = user?.id;
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      targetId = currentUser?.id;
     }
     
     if (targetId) {
@@ -74,19 +79,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setLoading(true);
+      // Don't set loading for simple token refreshes that don't change the user
+      const isAuthEvent = event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED';
+      
+      if (isAuthEvent) setLoading(true);
+      
       setSession(session);
       setUser(session?.user ?? null);
       
       if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED') {
         if (session?.user) {
+          // If we already have a profile for this user, we can trust it for a moment to speed up the UI
+          // but we still refresh in the background if it's not a fresh sign in
           await refreshProfile(session.user.id);
         }
       } else if (event === 'SIGNED_OUT') {
         setProfile(null);
       }
       
-      setLoading(false);
+      if (isAuthEvent) setLoading(false);
     });
 
     return () => subscription.unsubscribe();
