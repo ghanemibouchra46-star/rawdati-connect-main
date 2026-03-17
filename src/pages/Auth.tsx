@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const Auth = () => {
@@ -31,6 +32,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { refreshProfile } = useAuth();
   const [resendTimer, setResendTimer] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
@@ -145,6 +147,9 @@ const Auth = () => {
       } else {
         // Role-based navigation and validation
         if (role === 'admin') {
+          // Refresh AuthContext profile before navigating
+          await refreshProfile(data.user.id);
+          
           toast({
             title: t('auth.welcome'),
             description: t('auth.success'),
@@ -157,6 +162,9 @@ const Auth = () => {
           navigate('/admin');
         } else if (role === 'owner') {
           if (profile?.status === 'approved') {
+            // Refresh AuthContext profile before navigating
+            await refreshProfile(data.user.id);
+            
             toast({
               title: t('auth.welcome'),
               description: t('auth.success'),
@@ -171,6 +179,9 @@ const Auth = () => {
             });
           }
         } else {
+          // Refresh AuthContext profile before navigating
+          await refreshProfile(data.user.id);
+          
           toast({
             title: t('auth.welcome'),
             description: t('auth.success'),

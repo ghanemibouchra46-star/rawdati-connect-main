@@ -13,8 +13,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const ParentSettings = () => {
+    const { profile: authProfile, loading: authLoading, user: authUser, logout: authLogout } = useAuth();
     const { t, dir, language, setLanguage } = useLanguage();
     const navigate = useNavigate();
     const { toast } = useToast();
@@ -48,34 +50,21 @@ const ParentSettings = () => {
     const [darkMode, setDarkMode] = useState(false);
 
     useEffect(() => {
-        checkAuth();
-    }, []);
-
-    const checkAuth = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) {
-            navigate('/auth');
-            return;
+        if (!authLoading) {
+            if (authProfile) {
+                setProfile({
+                    fullName: authProfile.full_name || '',
+                    phone: authProfile.phone || '',
+                    email: authUser?.email || ''
+                });
+                setIsLoading(false);
+            } else {
+                navigate('/auth');
+            }
         }
-        loadProfile(session.user.id, session.user.email || '');
-    };
+    }, [authProfile, authLoading, authUser, navigate]);
 
-    const loadProfile = async (userId: string, email: string) => {
-        const { data: profileData } = await supabase
-            .from('profiles')
-            .select('full_name, phone')
-            .eq('id', userId)
-            .single();
 
-        if (profileData) {
-            setProfile({
-                fullName: profileData.full_name || '',
-                phone: profileData.phone || '',
-                email: email
-            });
-        }
-        setIsLoading(false);
-    };
 
     const handleSaveProfile = async () => {
         setIsSaving(true);
@@ -153,11 +142,7 @@ const ParentSettings = () => {
 
     const handleLogout = async () => {
         try {
-            await supabase.auth.signOut();
-            // Clear local storage items just in case
-            Object.keys(localStorage).forEach(key => {
-                if (key.includes('supabase-auth-token')) localStorage.removeItem(key);
-            });
+            await authLogout();
             navigate('/auth', { replace: true });
         } catch (error) {
             console.error('Logout error:', error);

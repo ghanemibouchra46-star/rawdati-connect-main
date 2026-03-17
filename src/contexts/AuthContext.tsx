@@ -74,6 +74,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setLoading(true);
       setSession(session);
       setUser(session?.user ?? null);
       

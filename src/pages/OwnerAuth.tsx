@@ -10,10 +10,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const OwnerAuth = () => {
   const { t, language } = useLanguage();
+  const { refreshProfile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -140,11 +142,14 @@ const OwnerAuth = () => {
         if (profile) {
           if (profile.role === 'owner') {
             if (profile.status === 'approved') {
+              // Update AuthContext profile before navigating
+              await refreshProfile(data.user.id);
+              
               toast({
-                title: 'مرحباً بك',
-                description: 'تم تسجيل الدخول بنجاح',
+                title: t('auth.welcome'),
+                description: t('auth.success'),
               });
-              navigate('/owner', { replace: true });
+              navigate('/owner');
             } else {
               // Sign out if not approved
               await supabase.auth.signOut();

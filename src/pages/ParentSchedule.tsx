@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import LanguageSelector from '@/components/LanguageSelector';
 
 interface ScheduleItem {
@@ -27,6 +28,7 @@ interface DaySchedule {
 }
 
 const ParentSchedule = () => {
+    const { profile, loading: authLoading } = useAuth();
     const { t, dir, language } = useLanguage();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
@@ -35,23 +37,22 @@ const ParentSchedule = () => {
     const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
 
     useEffect(() => {
-        checkAuth();
-    }, []);
+        if (!authLoading) {
+            if (profile) {
+                loadSchedule();
+            } else {
+                navigate('/auth');
+            }
+        }
+    }, [profile, authLoading, navigate]);
 
     useEffect(() => {
-        if (!isLoading) {
+        // This useEffect now depends on authLoading and profile to ensure schedule loads only after auth check
+        if (!authLoading && profile) {
             loadSchedule();
         }
-    }, [currentWeekOffset, language]);
+    }, [currentWeekOffset, language, authLoading, profile]);
 
-    const checkAuth = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) {
-            navigate('/auth');
-            return;
-        }
-        loadSchedule();
-    };
 
     const loadSchedule = () => {
         const today = new Date();

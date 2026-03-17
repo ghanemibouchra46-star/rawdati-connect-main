@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import LanguageSelector from '@/components/LanguageSelector';
 
 interface Photo {
@@ -23,6 +24,7 @@ interface Photo {
 }
 
 const ParentPhotos = () => {
+    const { profile, loading: authLoading } = useAuth();
     const { t, dir, language } = useLanguage();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
@@ -31,28 +33,22 @@ const ParentPhotos = () => {
     const [selectedChild, setSelectedChild] = useState<string>('all');
 
     useEffect(() => {
-        checkAuth();
-    }, []);
-
-    const checkAuth = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) {
-            navigate('/auth');
-            return;
+        if (!authLoading) {
+            if (profile) {
+                loadPhotos(profile.id);
+            } else {
+                navigate('/auth');
+            }
         }
-        loadPhotos();
-    };
+    }, [profile, authLoading, navigate]);
 
-    const loadPhotos = async () => {
+    const loadPhotos = async (userId: string) => {
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session?.user) return;
-
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const { data: children, error: childrenError } = await (supabase as any)
                 .from('children')
                 .select('id, name')
-                .eq('parent_id', session.user.id);
+                .eq('parent_id', userId);
 
             if (childrenError) {
                 console.error('Error fetching children:', childrenError);

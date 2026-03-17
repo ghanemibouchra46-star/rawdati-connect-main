@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import LanguageSelector from '@/components/LanguageSelector';
 
 interface Notification {
@@ -22,6 +23,7 @@ interface Notification {
 }
 
 const ParentNotifications = () => {
+    const { profile, loading: authLoading } = useAuth();
     const { t, dir, language } = useLanguage();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
@@ -29,17 +31,14 @@ const ParentNotifications = () => {
     const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
     useEffect(() => {
-        checkAuth();
-    }, []);
-
-    const checkAuth = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) {
-            navigate('/auth');
-            return;
+        if (!authLoading) {
+            if (profile) {
+                loadNotifications();
+            } else {
+                navigate('/auth');
+            }
         }
-        loadNotifications();
-    };
+    }, [profile, authLoading, navigate]);
 
     const loadNotifications = () => {
         // Demo notifications data

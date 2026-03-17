@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSelector from '@/components/LanguageSelector';
 
 const AdminAuth = () => {
@@ -25,6 +26,7 @@ const AdminAuth = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const { toast } = useToast();
+    const { refreshProfile } = useAuth();
     const [resendTimer, setResendTimer] = useState(0);
     const [showPassword, setShowPassword] = useState(false);
     const [showSignupPassword, setShowSignupPassword] = useState(false);
@@ -132,7 +134,7 @@ const AdminAuth = () => {
 
             if (!profile || profile.role !== 'admin') {
                 if (hasAdminMetadata || isAdminEmail) {
-                    // تسجيل دور الأدمن في قاعدة البيانات إن لم يكن موجوداً
+                    // التأكد من وجود دور الأدمن في قاعدة البيانات
                     const { error: upsertError } = await supabase.from('user_roles').upsert(
                         { user_id: data.user.id, role: 'admin' },
                         { onConflict: 'user_id,role' }
@@ -151,6 +153,9 @@ const AdminAuth = () => {
                     return;
                 }
             }
+
+            // Refresh AuthContext profile before navigating
+            await refreshProfile(data.user.id);
 
             toast({
                 title: t('auth.welcome'),

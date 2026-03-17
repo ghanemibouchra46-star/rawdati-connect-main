@@ -45,14 +45,13 @@ interface Payment {
 }
 
 const ParentDashboard = () => {
-    const { logout: authLogout } = useAuth();
+    const { profile: authProfile, loading: authLoading, logout: authLogout } = useAuth();
     const { t, dir, language } = useLanguage();
     const { data: kindergartens = [] } = useKindergartens();
     const { requests: subscriptionRequests, isLoading: loadingSubscriptions } = useSubscriptionRequests();
     const [children, setChildren] = useState<Child[]>([]);
     const [activities, setActivities] = useState<Activity[]>([]);
     const [payments, setPayments] = useState<Payment[]>([]);
-    const [profile, setProfile] = useState<{ full_name: string; phone: string } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [activePayment, setActivePayment] = useState<{
         amount: number;
@@ -67,67 +66,80 @@ const ParentDashboard = () => {
     const { toast } = useToast();
 
     useEffect(() => {
-        checkAuth();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const checkAuth = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) {
-            navigate('/auth');
-            return;
-        }
-
-        const { data: profileData } = await supabase
-            .from('profiles')
-            .select('full_name, phone')
-            .eq('id', session.user.id)
-            .single();
-
-        if (profileData) {
-            setProfile(profileData);
-        }
-
-        const { data: registrationData } = await supabase
-            .from('registration_requests')
-            .select('*')
-            .eq('user_id', session.user.id);
-
-        if (registrationData) {
-            const mappedChildren = registrationData.map(reg => {
-                const kg = kindergartens.find(k => k.id === reg.kindergarten_id);
-                return {
-                    id: reg.id,
-                    name: reg.child_name,
-                    age: reg.child_age,
-                    photo_url: null,
-                    kindergarten_name: language === 'ar' ? (kg?.name_ar || reg.kindergarten_id) : (kg?.nameFr || reg.kindergarten_id),
-                    status: reg.status
-                };
-            });
-            setChildren(mappedChildren);
-
-            // Fetch Payments
-            const childIds = mappedChildren.map(c => c.id);
-            if (childIds.length > 0) {
-                const { data: paymentData } = await supabase
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    .from('payments' as any)
-                    .select('*')
-                    .in('child_id', childIds);
-
-                if (paymentData) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    setPayments(paymentData as any);
-                }
+        if (!authLoading) {
+            if (authProfile) {
+                fetchDashboardData(authProfile.id);
+            } else {
+                navigate('/auth');
             }
-        } else {
-            setChildren([]);
         }
+    }, [authProfile, authLoading, navigate, kindergartens]); // Added kindergartens to dependencies as it's used in fetchDashboardData
 
-        setActivities([]); // Set to empty as we don't have a real activities table yet
+    const fetchDashboardData = async (userId: string) => {
+        setIsLoading(true);
+        try {
+            const { data: registrationData } = await supabase
+                .from('registration_requests')
+                .select('*')
+                .eq('user_id', userId);
 
-        setIsLoading(false);
+            if (registrationData) {
+                const mappedChildren = registrationData.map(reg => {
+                    const kg = kindergartens.find(k => k.id === reg.kindergarten_id);
+                    return {
+                        id: reg.id,
+                        name: reg.child_name,
+                        age: reg.child_age,
+                        photo_url: null, // Placeholder as it's not in DB yet
+                        kindergarten_name: language === 'ar' ? (kg?.name_ar || reg.kindergarten_id) : (kg?.nameFr || reg.kindergarten_id),
+                        status: reg.status
+                    };
+                });
+                setChildren(mappedChildren);
+
+                // Fetch activities for all children
+                const childNames = registrationData?.map(r => r.child_name) || [];
+                if (childNames.length > 0) {
+                    const { data: activitiesData } = await supabase
+                        .from('activities' as any)
+                        .select('*')
+                        .in('child_name', childNames)
+                        .order('created_at', { ascending: false })
+                        .limit(5);
+
+                    if (activitiesData) {
+                        setActivities(activitiesData as any);
+                    }
+                }
+
+                // Fetch payments
+                const childIds = mappedChildren.map(c => c.id);
+                if (childIds.length > 0) {
+                    const { data: paymentsData } = await supabase
+                        .from('payments' as any)
+                        .select('*')
+                        .in('child_id', childIds)
+                        .order('created_at', { ascending: false });
+
+                    if (paymentsData) {
+                        setPayments(paymentsData as any);
+                    }
+                }
+            } else {
+                setChildren([]);
+                setActivities([]);
+                setPayments([]);
+            }
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+            toast({
+                title: language === 'ar' ? 'خطأ' : 'Erreur',
+                description: language === 'ar' ? 'فشل في تحميل بيانات لوحة التحكم.' : 'Échec du chargement des données du tableau de bord.',
+                variant: 'destructive'
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleLogout = async () => {
@@ -193,7 +205,7 @@ const ParentDashboard = () => {
             });
 
             setActivePayment(null);
-            checkAuth(); // Refresh data
+            fetchDashboardData(authProfile!.id); // Refresh data
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error('Payment save error:', error);
@@ -352,7 +364,7 @@ const ParentDashboard = () => {
                                                             childName: child.name,
                                                             month: getMonthName(curMonth),
                                                             childId: child.id,
-                                                            kindergartenId: kg.id,
+                                                            kindergartenId: kg!.id, // Added non-null assertion as kg is checked above
                                                             monthNum: curMonth,
                                                             year: curYear
                                                         })}
