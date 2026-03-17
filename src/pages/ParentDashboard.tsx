@@ -502,9 +502,8 @@ const ParentDashboard = () => {
                         year: activePayment.year,
                         childId: activePayment.childId
                     }}
-                    onComplete={() => {
-                        handlePaymentSuccess('TX-' + Math.random().toString(36).substr(2, 9).toUpperCase());
-                    }}
+                    onComplete={() => setActivePayment(null)}
+                    onSuccess={(txId) => handlePaymentSuccess(txId)}
                 />
             )}
 

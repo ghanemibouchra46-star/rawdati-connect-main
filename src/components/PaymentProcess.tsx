@@ -16,9 +16,10 @@ interface PaymentProcessProps {
   kindergarten: Kindergarten;
   bookingData: any;
   onComplete: () => void;
+  onSuccess?: (txId: string) => void;
 }
 
-const PaymentProcess = ({ kindergarten, bookingData, onComplete }: PaymentProcessProps) => {
+const PaymentProcess = ({ kindergarten, bookingData, onComplete, onSuccess }: PaymentProcessProps) => {
   const { language, dir } = useLanguage();
   const [currentStep, setCurrentStep] = useState(1);
   const [paymentData, setPaymentData] = useState({
@@ -76,6 +77,10 @@ const PaymentProcess = ({ kindergarten, bookingData, onComplete }: PaymentProces
       // We pass a dummy transaction ID for simulation
       const txId = 'TX-' + Math.random().toString(36).substr(2, 9).toUpperCase();
       
+      if (onSuccess) {
+        onSuccess(txId);
+      }
+      
       handleNext();
     } catch (error) {
       console.error('Payment error:', error);
@@ -116,8 +121,15 @@ const PaymentProcess = ({ kindergarten, bookingData, onComplete }: PaymentProces
               </CardContent>
             </Card>
 
-            <div className="flex justify-end pt-4">
-              <Button onClick={handleNext} className="w-full md:w-auto gradient-accent">
+            <div className="flex gap-3 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => onComplete()} 
+                className="flex-1"
+              >
+                {language === 'ar' ? 'إلغاء' : 'Annuler'}
+              </Button>
+              <Button onClick={handleNext} className="flex-[2] gradient-accent">
                 {language === 'ar' ? 'تأكيد ومتابعة' : 'Confirmer et continuer'}
                 <ArrowRight className={`w-4 h-4 ${language === 'ar' ? 'mr-2 rotate-180' : 'ml-2'}`} />
               </Button>
