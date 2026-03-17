@@ -25,7 +25,7 @@ const translations: Record<Language, Record<string, string>> = {
         'nav.clothing': 'ملابس الأطفال',
         'nav.about': 'من نحن',
         'nav.login': 'تسجيل الدخول',
-        'nav.ownerLogin': 'دخول الملاك',
+        'nav.ownerLogin': 'أصحاب الروضات',
 
         // Hero Section
         'hero.title1': 'اختر الروضة المثالية',

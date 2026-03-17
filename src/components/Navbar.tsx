@@ -135,7 +135,7 @@ const Navbar = () => {
                 <Link to="/owner-auth">
                   <Button size="sm" className="gap-2 gradient-accent border-0 rounded-full shadow-soft hover:shadow-hover transition-all duration-300 text-primary-foreground font-bold hover:scale-105">
                     <Building2 className="w-4 h-4" />
-                    <span className="hidden lg:inline">{language === 'ar' ? 'دخول الملاك' : 'Espace crèche'}</span>
+                    <span className="hidden lg:inline">{language === 'ar' ? 'أصحاب الروضات' : 'Espace crèche'}</span>
                   </Button>
                 </Link>
               </div>
@@ -233,7 +233,7 @@ const Navbar = () => {
                   >
                     <Button className="justify-start gap-2 gradient-accent border-0 w-full rounded-2xl font-bold py-6 text-primary-foreground">
                       <Building2 className="w-5 h-5" />
-                      {language === 'ar' ? 'دخول الملاك' : 'Espace propriétaire'}
+                      {language === 'ar' ? 'أصحاب الروضات' : 'Espace propriétaire'}
                     </Button>
                   </Link>
                 </div>
