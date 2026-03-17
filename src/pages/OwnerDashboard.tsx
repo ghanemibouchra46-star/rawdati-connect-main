@@ -44,7 +44,11 @@ import {
   Instagram,
   UserCheck,
   UserX,
-  Crown
+  Crown,
+  Trash,
+  Upload,
+  UserPlus,
+  Image as ImageIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -126,7 +130,13 @@ const OwnerDashboard = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [editData, setEditData] = useState<any>({});
+  const [editData, setEditData] = useState<any>({
+    activities: [],
+    coordinates: { lat: 35.3975, lng: 0.1397 },
+    images: [],
+    programs: []
+  });
+  const [isTrialActive, setIsTrialActive] = useState(true); // Default to true as requested
 
   const isAuthorized = profile && profile.role === 'owner' && profile.status === 'approved';
 
@@ -283,10 +293,14 @@ const OwnerDashboard = () => {
       const { error } = await supabase
         .from('kindergartens')
         .update({
+          name_ar: editData.name_ar,
           phone: editData.phone,
           instagram: editData.instagram,
           description_ar: editData.description_ar,
-          programs: editData.programs
+          programs: editData.programs,
+          activities: editData.activities,
+          coordinates: editData.coordinates,
+          images: editData.images
         })
         .eq('id', kindergartenId);
 
@@ -302,6 +316,39 @@ const OwnerDashboard = () => {
         title: language === 'ar' ? 'خطأ في الحفظ' : 'Erreur de sauvegarde',
         description: error.message,
         variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !kindergartenId) return;
+
+    try {
+      setIsSaving(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${kindergartenId}/${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('kindergarten-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const newImages = [...(editData.images || []), filePath];
+      setEditData({ ...editData, images: newImages });
+      
+      toast({
+        title: language === 'ar' ? 'تم رفع الصورة' : 'Image téléchargée',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error uploading image',
+        description: error.message,
+        variant: 'destructive'
       });
     } finally {
       setIsSaving(false);
@@ -372,13 +419,19 @@ const OwnerDashboard = () => {
             </div>
             <div className="flex items-center gap-3">
               {/* Professional Account Subscription */}
-              <SubscriptionInterface onActivate={() => {
-                // Trigger any specific activation logic if needed
-                toast({
-                  title: language === 'ar' ? 'طلب التفعيل' : 'Demande d\'activation',
-                  description: language === 'ar' ? 'تم تحويلك لصفحة الدفع لتفعيل الحساب المهني' : 'Vous avez été redirigé vers la page de paiement',
-                });
-              }} />
+              {isTrialActive ? (
+                <Badge className="bg-amber-500 hover:bg-amber-600 text-white gap-1 px-3 py-1.5 rounded-xl border-none shadow-sm">
+                  <Crown className="w-4 h-4 fill-white" />
+                  {language === 'ar' ? 'باقة تجريبية مفعلة' : 'Essai gratuit activé'}
+                </Badge>
+              ) : (
+                <SubscriptionInterface onActivate={() => {
+                  toast({
+                    title: language === 'ar' ? 'طلب التفعيل' : 'Demande d\'activation',
+                    description: language === 'ar' ? 'تم تحويلك لصفحة الدفع لتفعيل الحساب المهني' : 'Vous avez été redirigé vers la page de paiement',
+                  });
+                }} />
+              )}
               
               <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
                 <LogOut className="w-4 h-4" />
@@ -751,6 +804,89 @@ const OwnerDashboard = () => {
             </Card>
           </TabsContent>
 
+          {/* Children Tab */}
+          <TabsContent value="children" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>{language === 'ar' ? 'الأطفال المسجلين' : 'Enfants inscrits'}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {children.map(child => (
+                    <div key={child.id} className="p-4 rounded-xl border bg-card flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Baby className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-bold">{child.name}</p>
+                          <p className="text-xs text-muted-foreground">{child.age} {language === 'ar' ? 'سنوات' : 'ans'}</p>
+                        </div>
+                      </div>
+                      <Badge variant="outline">{child.status}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Staff Tab */}
+          <TabsContent value="staff" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>{language === 'ar' ? 'طاقم العمل' : 'Personnel'}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {staff.map(member => (
+                    <div key={member.id} className="p-4 rounded-xl border bg-card flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+                          <GraduationCap className="w-5 h-5 text-accent" />
+                        </div>
+                        <div>
+                          <p className="font-bold">{member.name}</p>
+                          <p className="text-xs text-muted-foreground">{member.role}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Payments Tab */}
+          <TabsContent value="payments" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>{language === 'ar' ? 'سجل المدفوعات' : 'Historique des paiements'}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* Simplified payment view */}
+                <div className="space-y-3">
+                  {payments.map(payment => (
+                    <div key={payment.id} className="p-4 rounded-xl border bg-card flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+                          <DollarSign className="w-5 h-5 text-amber-600" />
+                        </div>
+                        <div>
+                          <p className="font-bold">{payment.amount} دج</p>
+                          <p className="text-xs text-muted-foreground">شهر: {payment.for_month}</p>
+                        </div>
+                      </div>
+                      <Badge className={payment.status === 'paid' ? 'bg-mint/20 text-mint-foreground' : 'bg-red-100 text-red-800'}>
+                        {payment.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Attendance Tab */}
           <TabsContent value="attendance" className="space-y-4">
             <Card>
@@ -798,6 +934,214 @@ const OwnerDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Settings Tab Content */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Main Settings Form */}
+              <div className="lg:col-span-2 space-y-6">
+                <Card className="rounded-3xl border-none shadow-soft overflow-hidden">
+                  <CardHeader className="bg-muted/30 pb-4">
+                    <CardTitle className="text-xl flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-primary" />
+                      {language === 'ar' ? 'إعدادات الروضة' : 'Paramètres de la crèche'}
+                    </CardTitle>
+                    <CardDescription>
+                      {language === 'ar' ? 'تحديث المعلومات الأساسية لروضتك' : 'Mettez à jour les informations de base'}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold">{language === 'ar' ? 'اسم الروضة' : 'Nom de la crèche'}</label>
+                        <Input
+                          value={editData.name_ar || ''}
+                          onChange={(e) => setEditData({ ...editData, name_ar: e.target.value })}
+                          placeholder="مثلاً: روضة البراعم المتفوقة"
+                          className="rounded-xl"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold">{language === 'ar' ? 'رقم الهاتف' : 'Téléphone'}</label>
+                        <Input
+                          value={editData.phone || ''}
+                          onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                          placeholder="05XX XX XX XX"
+                          className="rounded-xl"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold flex items-center gap-2">
+                          <Instagram className="w-4 h-4 text-pink-600" />
+                          <span>رابط الإنستغرام</span>
+                        </label>
+                        <Input
+                          value={editData.instagram || ''}
+                          onChange={(e) => setEditData({ ...editData, instagram: e.target.value })}
+                          placeholder="@username"
+                          className="rounded-xl"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold flex items-center gap-2">
+                          <Check className="w-4 h-4 text-blue-600" />
+                          <span>رابط الفيسبوك</span>
+                        </label>
+                        <Input
+                          value={editData.facebook || ''}
+                          onChange={(e) => setEditData({ ...editData, facebook: e.target.value })}
+                          placeholder="fb.com/page"
+                          className="rounded-xl"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-red-500" />
+                        <span>الموقع الجغرافي (الإحداثيات)</span>
+                      </label>
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input
+                          type="number"
+                          step="any"
+                          value={editData.coordinates?.lat || ''}
+                          onChange={(e) => setEditData({ 
+                            ...editData, 
+                            coordinates: { ...editData.coordinates, lat: parseFloat(e.target.value) } 
+                          })}
+                          placeholder="خط العرض (Lat)"
+                          className="rounded-xl"
+                        />
+                        <Input
+                          type="number"
+                          step="any"
+                          value={editData.coordinates?.lng || ''}
+                          onChange={(e) => setEditData({ 
+                            ...editData, 
+                            coordinates: { ...editData.coordinates, lng: parseFloat(e.target.value) } 
+                          })}
+                          placeholder="خط الطول (Lng)"
+                          className="rounded-xl"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 pt-4 border-t">
+                      <h3 className="font-bold flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-primary" />
+                        {language === 'ar' ? 'الأنشطة المتاحة' : 'Activités disponibles'}
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {['الرسم', 'الموسيقى', 'الروبوتيك', 'السباحة', 'ألعاب تعليمية', 'تحفيظ القرآن'].map((act) => {
+                          const isSelected = (editData.activities || []).includes(act);
+                          return (
+                            <button
+                              key={act}
+                              onClick={() => {
+                                const current = editData.activities || [];
+                                const next = isSelected 
+                                  ? current.filter((a: string) => a !== act)
+                                  : [...current, act];
+                                setEditData({ ...editData, activities: next });
+                              }}
+                              className={`flex items-center gap-2 p-3 rounded-xl border transition-all text-sm ${
+                                isSelected 
+                                  ? 'bg-primary/10 border-primary text-primary font-bold' 
+                                  : 'bg-background hover:bg-muted/50 border-border text-muted-foreground'
+                              }`}
+                            >
+                              <div className={`w-5 h-5 rounded-full flex items-center justify-center border ${isSelected ? 'bg-primary border-primary' : 'bg-muted border-border'}`}>
+                                {isSelected && <Check className="w-3 h-3 text-white" />}
+                              </div>
+                              {act}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    
+                    <div className="pt-6">
+                      <Button 
+                        onClick={handleSaveDetails} 
+                        disabled={isSaving}
+                        className="w-full h-12 gradient-accent border-0 rounded-xl shadow-soft font-bold text-lg"
+                      >
+                        {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : (language === 'ar' ? 'حفظ كافة التغييرات' : 'Enregistrer tout')}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Sidebar: Media & Photos */}
+              <div className="space-y-6">
+                <Card className="rounded-3xl border-none shadow-soft overflow-hidden">
+                  <header className="bg-muted/30 p-4 border-b">
+                    <h3 className="font-bold flex items-center gap-2">
+                      <ImageIcon className="w-5 h-5 text-purple-500" />
+                      {language === 'ar' ? 'صور الروضة' : 'Photos de la crèche'}
+                    </h3>
+                  </header>
+                  <CardContent className="p-4 space-y-4">
+                    <div className="grid grid-cols-2 gap-2">
+                      {(editData.images || []).map((img: string, idx: number) => (
+                        <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group">
+                          <img 
+                            src={img.startsWith('http') ? img : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/kindergarten-images/${img}`} 
+                            alt="" 
+                            className="w-full h-full object-cover"
+                          />
+                          <button 
+                            onClick={() => {
+                              const next = (editData.images || []).filter((_: any, i: number) => i !== idx);
+                              setEditData({ ...editData, images: next });
+                            }}
+                            className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                      <label className="aspect-square flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all">
+                        <Plus className="w-6 h-6 text-muted-foreground mb-1" />
+                        <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{language === 'ar' ? 'رفع صورة' : 'Upload'}</span>
+                        <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                      </label>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground text-center">
+                      {language === 'ar' ? 'يتم حفظ الصور تلقائياً في Supabase Storage' : 'Les photos sont stockées sur Supabase'}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="rounded-3xl border-none shadow-soft bg-gradient-to-br from-primary to-primary/80 text-white">
+                  <CardContent className="p-6 space-y-4">
+                    <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+                      <Crown className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-lg">{language === 'ar' ? 'الباقة التجريبية مفعلة' : 'Essai actif'}</h4>
+                      <p className="text-white/80 text-sm">
+                        {language === 'ar' 
+                          ? 'أنت تستفيد من كافة الميزات المهنية مجاناً خلال الفترة التجريبية.' 
+                          : 'Toutes les fonctionnalités premium sont débloquées.'}
+                      </p>
+                    </div>
+                    <div className="pt-2">
+                        <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">
+                            {language === 'ar' ? 'غير محدود' : 'Illimité'}
+                        </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
 
           {/* Finance Tab */}
           <TabsContent value="finance" className="space-y-4">
