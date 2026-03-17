@@ -192,8 +192,6 @@ const ParentDashboard = () => {
                 for_month: activePayment.monthNum,
                 for_year: activePayment.year,
                 status: 'paid',
-                payment_method: 'card',
-                transaction_id: txId,
                 payment_date: new Date().toISOString()
             });
 
