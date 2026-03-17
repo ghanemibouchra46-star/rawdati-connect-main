@@ -314,5 +314,3 @@ const PaymentProcess = ({ kindergarten, bookingData, onComplete }: PaymentProces
 
 export default PaymentProcess;
 
-
-export default PaymentProcess;
