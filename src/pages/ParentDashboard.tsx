@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Baby, LogOut, Home, Bell, User, Calendar, Clock, Image, Settings, ChevronLeft, CreditCard, DollarSign } from 'lucide-react';
+import { Baby, LogOut, Home, Bell, User, Calendar, Clock, Image, Settings, ChevronLeft, CreditCard, DollarSign, CheckCircle } from 'lucide-react';
 import PaymentProcess from '@/components/PaymentProcess';
 import SubscriptionInterface from '@/components/SubscriptionInterface';
 import { Button } from '@/components/ui/button';
@@ -338,39 +338,62 @@ const ParentDashboard = () => {
                                 p.for_year === curYear &&
                                 p.status === 'paid'
                             );
-                            const kg = kindergartens.find(k => (language === 'ar' ? k.name_ar === child.kindergarten_name : k.nameFr === child.kindergarten_name));
-                            const price = kg?.pricePerMonth || 5000;
+                            
+                            // Find kindergarten safely
+                            const kg = kindergartens.find(k => 
+                                (language === 'ar' ? k.name_ar === child.kindergarten_name : k.nameFr === child.kindergarten_name) ||
+                                k.id === (child as any).kindergarten_id
+                            );
+                            const price = kg?.pricePerMonth || 7000;
 
                             return (
-                                <Card key={`pay-${child.id}`} className="overflow-hidden border-l-4 border-l-primary">
+                                <Card key={`pay-${child.id}`} className={`overflow-hidden transition-all duration-300 ${!isPaid ? 'border-2 border-primary shadow-soft' : 'border border-border/50 opacity-80'}`}>
                                     <CardContent className="p-4">
                                         <div className="flex justify-between items-center">
-                                            <div>
-                                                <p className="font-bold text-foreground">{child.name}</p>
-                                                <p className="text-sm text-muted-foreground">{getMonthName(curMonth)} {curYear}</p>
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                                                    <p className="font-bold text-lg text-foreground">{child.name}</p>
+                                                </div>
+                                                <p className="text-sm text-muted-foreground mr-4">
+                                                    {getMonthName(curMonth)} {curYear}
+                                                </p>
                                             </div>
-                                            <div className="text-right">
-                                                <p className="font-bold text-primary">{price.toLocaleString()} دج</p>
+                                            <div className="flex flex-col items-end gap-2">
+                                                <p className="text-2xl font-black text-primary">
+                                                    {price.toLocaleString()} {language === 'ar' ? 'دج' : 'DZD'}
+                                                </p>
                                                 {isPaid ? (
-                                                    <Badge className="bg-mint/20 text-mint-foreground">
+                                                    <Badge className="bg-mint text-white px-3 py-1 rounded-full flex items-center gap-1">
+                                                        <CheckCircle className="w-3 h-3" />
                                                         {language === 'ar' ? 'تم الدفع' : 'Payé'}
                                                     </Badge>
                                                 ) : (
                                                     <Button
                                                         size="sm"
-                                                        className="mt-1 h-8 gradient-accent"
-                                                        onClick={() => setActivePayment({
-                                                            amount: price,
-                                                            childName: child.name,
-                                                            month: getMonthName(curMonth),
-                                                            childId: child.id,
-                                                            kindergartenId: kg!.id, // Added non-null assertion as kg is checked above
-                                                            monthNum: curMonth,
-                                                            year: curYear
-                                                        })}
+                                                        className="h-10 px-6 rounded-full gradient-accent shadow-soft hover:shadow-hover hover:scale-105 transition-all text-sm font-bold flex items-center gap-2"
+                                                        onClick={() => {
+                                                            if (kg) {
+                                                                setActivePayment({
+                                                                    amount: price,
+                                                                    childName: child.name,
+                                                                    month: getMonthName(curMonth),
+                                                                    childId: child.id,
+                                                                    kindergartenId: kg.id,
+                                                                    monthNum: curMonth,
+                                                                    year: curYear
+                                                                });
+                                                            } else {
+                                                                toast({
+                                                                    title: language === 'ar' ? 'خطأ' : 'Erreur',
+                                                                    description: language === 'ar' ? 'لم يتم العثور على معلومات الروضة' : 'Informations de jardin d\'enfants non trouvées',
+                                                                    variant: 'destructive'
+                                                                });
+                                                            }
+                                                        }}
                                                     >
-                                                        <CreditCard className="w-3.5 h-3.5 mr-1" />
-                                                        {language === 'ar' ? 'دفع الآن' : 'Payer'}
+                                                        <CreditCard className="w-4 h-4" />
+                                                        {language === 'ar' ? 'دفع الآن' : 'Payer maintenant'}
                                                     </Button>
                                                 )}
                                             </div>
