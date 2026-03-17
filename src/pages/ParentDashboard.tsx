@@ -466,11 +466,15 @@ const ParentDashboard = () => {
                         month: activePayment.month,
                         amount: activePayment.amount,
                         monthNum: activePayment.monthNum,
-                        year: activePayment.year
+                        year: activePayment.year,
+                        childId: activePayment.childId
                     }}
-                    onComplete={() => setActivePayment(null)}
+                    onComplete={() => {
+                        handlePaymentSuccess('TX-' + Math.random().toString(36).substr(2, 9).toUpperCase());
+                    }}
                 />
             )}
+
         </div>
     );
 };

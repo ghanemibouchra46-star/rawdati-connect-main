@@ -78,14 +78,23 @@ const OwnerAuth = () => {
   }, [searchParams, navigate]);
 
   const checkOwnerRole = async (userId: string) => {
-    const { data: profile, error } = await supabase
+    const { data: profile } = await supabase
       .from('profiles')
       .select('role, status')
       .eq('id', userId)
       .single();
 
-    if (profile?.role === 'owner' && profile?.status === 'approved') {
-      navigate('/owner');
+    if (profile) {
+      if (profile.role === 'admin') {
+        navigate('/admin');
+      } else if (profile.role === 'owner') {
+        if (profile.status === 'approved') {
+          navigate('/owner');
+        }
+      } else {
+        // Redirect parents or any other role to parent dashboard
+        navigate('/parent');
+      }
     }
   };
 
@@ -128,30 +137,40 @@ const OwnerAuth = () => {
           .eq('id', data.user.id)
           .single();
 
-        if (profile?.role === 'owner') {
-          if (profile.status === 'approved') {
+        if (profile) {
+          if (profile.role === 'owner') {
+            if (profile.status === 'approved') {
+              toast({
+                title: 'مرحباً بك',
+                description: 'تم تسجيل الدخول بنجاح',
+              });
+              navigate('/owner', { replace: true });
+            } else {
+              // Sign out if not approved
+              await supabase.auth.signOut();
+              toast({
+                title: 'قيد المراجعة',
+                description: 'حسابك لا يزال قيد المراجعة من قبل الإدارة.',
+                variant: 'destructive',
+              });
+            }
+          } else if (profile.role === 'admin') {
             toast({
               title: 'مرحباً بك',
-              description: 'تم تسجيل الدخول بنجاح',
+              description: 'تم تسجيل دخول المسؤول بنجاح',
             });
-            navigate('/owner', { replace: true });
+            navigate('/admin', { replace: true });
           } else {
-            // Sign out if not approved
-            await supabase.auth.signOut();
+            // Support parent login even on owner page
             toast({
-              title: 'قيد المراجعة',
-              description: 'حسابك لا يزال قيد المراجعة من قبل الإدارة.',
-              variant: 'destructive',
+              title: 'مرحباً بك',
+              description: 'تم تسجيل دخول ولي الأمر بنجاح',
             });
+            navigate('/parent', { replace: true });
           }
         } else {
-          // Sign out if not an owner
-          await supabase.auth.signOut();
-          toast({
-            title: 'غير مصرح',
-            description: 'هذا الحساب غير مسجل كمدير روضة. يرجى التواصل مع الإدارة.',
-            variant: 'destructive',
-          });
+          // If no profile yet, assume parent and redirect
+          navigate('/parent', { replace: true });
         }
       }
     } catch (error: any) {
