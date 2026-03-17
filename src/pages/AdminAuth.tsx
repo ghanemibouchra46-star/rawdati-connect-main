@@ -26,7 +26,7 @@ const AdminAuth = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const { toast } = useToast();
-    const { refreshProfile } = useAuth();
+    const { refreshProfile, login } = useAuth();
     const [resendTimer, setResendTimer] = useState(0);
     const [showPassword, setShowPassword] = useState(false);
     const [showSignupPassword, setShowSignupPassword] = useState(false);
@@ -88,12 +88,54 @@ const AdminAuth = () => {
         e.preventDefault();
         setIsLoading(true);
 
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: email.trim(),
-            password: password.trim(),
-        });
+        try {
+            // Use AuthContext login() which properly manages loading state
+            await login(email.trim(), password.trim());
 
-        if (error) {
+            // Get user session for role detection
+            const { data: { user: currentUser } } = await supabase.auth.getUser();
+
+            if (!currentUser) {
+                setIsLoading(false);
+                return;
+            }
+
+            // First check profiles table
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+
+            const userEmail = currentUser.email?.toLowerCase() || '';
+            const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
+            const isAdminEmail = adminEmails.includes(userEmail);
+            const hasAdminMetadata =
+                currentUser.user_metadata?.role === 'admin' ||
+                currentUser.app_metadata?.role === 'admin';
+
+            if (!profile || profile.role !== 'admin') {
+                if (hasAdminMetadata || isAdminEmail) {
+                    await supabase.from('user_roles').upsert(
+                        { user_id: currentUser.id, role: 'admin' },
+                        { onConflict: 'user_id,role' }
+                    );
+                } else {
+                    await supabase.auth.signOut();
+                    toast({
+                        title: t('common.error'),
+                        description: t('auth.error.notAdmin'),
+                        variant: 'destructive',
+                    });
+                    setIsLoading(false);
+                    return;
+                }
+            }
+
+            await refreshProfile(currentUser.id, profile as any);
+            toast({ title: t('auth.welcome'), description: t('auth.success') });
+            navigate('/admin', { replace: true });
+        } catch (error: any) {
             console.error('Admin login error:', error);
             if (error.message === 'Email not confirmed') {
                 toast({
@@ -111,61 +153,9 @@ const AdminAuth = () => {
                     variant: 'destructive',
                 });
             }
+        } finally {
             setIsLoading(false);
-            return;
         }
-
-        if (data.user) {
-            // First check profiles table
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', data.user.id)
-                .single();
-
-            // Fallback: Check metadata (user_metadata and app_metadata)
-            // Also include targeted fix for the main admin emails (case-insensitive)
-            const userEmail = data.user.email?.toLowerCase() || '';
-            const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
-            const isAdminEmail = adminEmails.includes(userEmail);
-            const hasAdminMetadata =
-                data.user.user_metadata?.role === 'admin' ||
-                data.user.app_metadata?.role === 'admin';
-
-            if (!profile || profile.role !== 'admin') {
-                if (hasAdminMetadata || isAdminEmail) {
-                    // التأكد من وجود دور الأدمن في قاعدة البيانات
-                    const { error: upsertError } = await supabase.from('user_roles').upsert(
-                        { user_id: data.user.id, role: 'admin' },
-                        { onConflict: 'user_id,role' }
-                    );
-                    if (upsertError) {
-                        console.warn('Admin role upsert (optional):', upsertError.message);
-                    }
-                } else {
-                    await supabase.auth.signOut();
-                    toast({
-                        title: t('common.error'),
-                        description: t('auth.error.notAdmin'),
-                        variant: 'destructive',
-                    });
-                    setIsLoading(false);
-                    return;
-                }
-            }
-
-            // Refresh AuthContext profile before navigating - efficiency boost by passing existing data
-            await refreshProfile(data.user.id, profile as any);
-
-            toast({
-                title: t('auth.welcome'),
-                description: t('auth.success'),
-            });
-
-            navigate('/admin', { replace: true });
-        }
-
-        setIsLoading(false);
     };
 
     const handleSignup = async (e: React.FormEvent) => {

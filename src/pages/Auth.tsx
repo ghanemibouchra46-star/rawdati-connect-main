@@ -32,7 +32,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const { refreshProfile } = useAuth();
+  const { refreshProfile, login } = useAuth();
   const [resendTimer, setResendTimer] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
@@ -90,12 +90,71 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: loginEmail,
-      password: loginPassword,
-    });
+    try {
+      // Use AuthContext login() which properly manages loading state
+      await login(loginEmail, loginPassword);
+      
+      // Get user session for role detection
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      
+      if (!currentUser) {
+        setIsLoading(false);
+        return;
+      }
 
-    if (error) {
+      if (!currentUser.email_confirmed_at) {
+        setVerificationEmail(loginEmail);
+        setShowVerification(true);
+        toast({
+          title: t('auth.confirmEmail'),
+          description: t('auth.error.notConfirmed'),
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Fetch profile for role detection (single fetch, then pass to AuthContext)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
+
+      // Robust Role Detection
+      const userEmail = currentUser.email?.toLowerCase() || '';
+      const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
+      const isAdminEmail = adminEmails.includes(userEmail);
+      const metadataRole = currentUser.user_metadata?.role || currentUser.app_metadata?.role;
+      const role = profile?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
+
+      if (role === 'admin') {
+        await refreshProfile(currentUser.id, profile as any);
+        toast({ title: t('auth.welcome'), description: t('auth.success') });
+        await supabase.from('user_roles').upsert(
+          { user_id: currentUser.id, role: 'admin' },
+          { onConflict: 'user_id,role' }
+        );
+        navigate('/admin');
+      } else if (role === 'owner') {
+        if (profile?.status === 'approved') {
+          await refreshProfile(currentUser.id, profile as any);
+          toast({ title: t('auth.welcome'), description: t('auth.success') });
+          navigate('/owner');
+        } else {
+          await supabase.auth.signOut();
+          toast({
+            title: t('common.error'),
+            description: language === 'ar' ? 'حسابك قيد المراجعة' : 'Account under review',
+            variant: 'destructive',
+          });
+        }
+      } else {
+        await refreshProfile(currentUser.id, profile as any);
+        toast({ title: t('auth.welcome'), description: t('auth.success') });
+        navigate('/parent');
+      }
+    } catch (error: any) {
       if (error.message === 'Email not confirmed') {
         setVerificationEmail(loginEmail);
         setShowVerification(true);
@@ -113,77 +172,9 @@ const Auth = () => {
           variant: 'destructive',
         });
       }
-    } else if (data.user) {
-      // Check for user role in profiles table
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', data.user.id)
-        .single();
-
-      // Robust Role Detection: Database -> Metadata -> Targeted Email Fix
-      const userEmail = data.user.email?.toLowerCase() || '';
-      const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
-      const isAdminEmail = adminEmails.includes(userEmail);
-      const metadataRole = data.user.user_metadata?.role || data.user.app_metadata?.role;
-      const role = profile?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
-
-      if (!data.user.email_confirmed_at) {
-        setVerificationEmail(loginEmail);
-        setShowVerification(true);
-        toast({
-          title: t('auth.confirmEmail'),
-          description: t('auth.error.notConfirmed'),
-          variant: 'destructive',
-        });
-      } else {
-        // Role-based navigation and validation
-        if (role === 'admin') {
-          // Refresh AuthContext profile before navigating - efficiency boost by passing existing data
-          await refreshProfile(data.user.id, profile as any);
-          
-          toast({
-            title: t('auth.welcome'),
-            description: t('auth.success'),
-          });
-          // التأكد من وجود دور الأدمن في قاعدة البيانات
-          await supabase.from('user_roles').upsert(
-            { user_id: data.user.id, role: 'admin' },
-            { onConflict: 'user_id,role' }
-          );
-          navigate('/admin');
-        } else if (role === 'owner') {
-          if (profile?.status === 'approved') {
-            // Refresh AuthContext profile before navigating - efficiency boost by passing existing data
-            await refreshProfile(data.user.id, profile as any);
-            
-            toast({
-              title: t('auth.welcome'),
-              description: t('auth.success'),
-            });
-            navigate('/owner');
-          } else {
-            await supabase.auth.signOut();
-            toast({
-              title: t('common.error'),
-              description: language === 'ar' ? 'حسابك قيد المراجعة' : 'Account under review',
-              variant: 'destructive',
-            });
-          }
-        } else {
-          // Refresh AuthContext profile before navigating - efficiency boost by passing existing data
-          await refreshProfile(data.user.id, profile as any);
-          
-          toast({
-            title: t('auth.welcome'),
-            description: t('auth.success'),
-          });
-          navigate('/parent');
-        }
-      }
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const validateSignup = () => {

@@ -15,7 +15,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 const OwnerAuth = () => {
   const { t, language } = useLanguage();
-  const { refreshProfile } = useAuth();
+  const { refreshProfile, login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -115,73 +115,56 @@ const OwnerAuth = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Use AuthContext login() which properly manages loading state
+      await login(email, password);
 
-      if (error) {
-        toast({
-          title: 'خطأ في تسجيل الدخول',
-          description: error.message === 'Invalid login credentials'
-            ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
-            : error.message,
-          variant: 'destructive',
-        });
+      // Get user session for role detection
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+
+      if (!currentUser) {
+        setIsLoading(false);
         return;
       }
 
-      if (data.user) {
-        // Check profiles table directly
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
+      // Check profiles table directly
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
 
-        if (profile) {
-          if (profile.role === 'owner') {
-            if (profile.status === 'approved') {
-              // Update AuthContext profile before navigating - efficiency boost by passing existing data
-              await refreshProfile(data.user.id, profile as any);
-              
-              toast({
-                title: t('auth.welcome'),
-                description: t('auth.success'),
-              });
-              navigate('/owner');
-            } else {
-              // Sign out if not approved
-              await supabase.auth.signOut();
-              toast({
-                title: 'قيد المراجعة',
-                description: 'حسابك لا يزال قيد المراجعة من قبل الإدارة.',
-                variant: 'destructive',
-              });
-            }
-          } else if (profile.role === 'admin') {
-            toast({
-              title: 'مرحباً بك',
-              description: 'تم تسجيل دخول المسؤول بنجاح',
-            });
-            navigate('/admin', { replace: true });
+      if (profile) {
+        if (profile.role === 'owner') {
+          if (profile.status === 'approved') {
+            await refreshProfile(currentUser.id, profile as any);
+            toast({ title: t('auth.welcome'), description: t('auth.success') });
+            navigate('/owner');
           } else {
-            // Support parent login even on owner page
+            await supabase.auth.signOut();
             toast({
-              title: 'مرحباً بك',
-              description: 'تم تسجيل دخول ولي الأمر بنجاح',
+              title: 'قيد المراجعة',
+              description: 'حسابك لا يزال قيد المراجعة من قبل الإدارة.',
+              variant: 'destructive',
             });
-            navigate('/parent', { replace: true });
           }
+        } else if (profile.role === 'admin') {
+          await refreshProfile(currentUser.id, profile as any);
+          toast({ title: 'مرحباً بك', description: 'تم تسجيل دخول المسؤول بنجاح' });
+          navigate('/admin', { replace: true });
         } else {
-          // If no profile yet, assume parent and redirect
+          await refreshProfile(currentUser.id, profile as any);
+          toast({ title: 'مرحباً بك', description: 'تم تسجيل دخول ولي الأمر بنجاح' });
           navigate('/parent', { replace: true });
         }
+      } else {
+        navigate('/parent', { replace: true });
       }
     } catch (error: any) {
       toast({
-        title: 'خطأ',
-        description: 'حدث خطأ غير متوقع',
+        title: 'خطأ في تسجيل الدخول',
+        description: error.message === 'Invalid login credentials'
+          ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
+          : error.message || 'حدث خطأ غير متوقع',
         variant: 'destructive',
       });
     } finally {

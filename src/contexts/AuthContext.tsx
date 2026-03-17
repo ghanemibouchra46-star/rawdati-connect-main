@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
@@ -34,13 +34,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [profile, setProfile] = useState<Tables<'profiles'> | null>(null);
   const [loading, setLoading] = useState(true);
   
-  // Flag to prevent onAuthStateChange from redundantly fetching profile
-  // when a manual login flow is already handling it
-  let _skipNextAuthEvent = false;
+  // useRef so the flag persists across React re-renders
+  const skipNextAuthEvent = useRef(false);
 
   const refreshProfile = async (userId?: string, existingProfile?: Tables<'profiles'> | null) => {
+    // If we already have the profile data, just set it immediately (no network call)
     if (existingProfile !== undefined) {
       setProfile(existingProfile);
+      setLoading(false);
       return existingProfile;
     }
 
@@ -58,9 +59,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         .eq('id', targetId)
         .single();
       setProfile(profileData);
+      setLoading(false);
       return profileData;
     } else {
       setProfile(null);
+      setLoading(false);
       return null;
     }
   };
@@ -92,15 +95,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return;
       }
 
-      // Skip profile fetch if a manual login is handling it
-      if (_skipNextAuthEvent && event === 'SIGNED_IN') {
-        _skipNextAuthEvent = false;
+      // Skip profile fetch if a manual login is already handling everything
+      if (skipNextAuthEvent.current && event === 'SIGNED_IN') {
+        skipNextAuthEvent.current = false;
         return;
       }
       
       // Only fetch profile for meaningful auth events, not token refreshes
       if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-        if (session?.user && !profile) {
+        if (session?.user) {
           await refreshProfile(session.user.id);
         }
       }
@@ -110,8 +113,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    // Tell onAuthStateChange to skip its profile fetch - we handle it manually
-    _skipNextAuthEvent = true;
+    // Set loading so dashboards know to WAIT (prevents bounce-back)
+    setLoading(true);
+    
+    // Tell onAuthStateChange to skip - auth pages handle profile themselves
+    skipNextAuthEvent.current = true;
     
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -119,12 +125,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     });
 
     if (error) {
-      _skipNextAuthEvent = false;
+      skipNextAuthEvent.current = false;
+      setLoading(false);
       throw error;
     }
     
-    // Don't fetch profile here - auth pages already do it and pass it via refreshProfile
-    // This avoids yet another redundant network request
+    // Don't fetch profile here - auth pages do it and pass via refreshProfile()
+    // which also sets loading=false, giving dashboards the green light
   };
 
   const signup = async (email: string, password: string, fullName: string) => {
@@ -145,20 +152,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       setLoading(true);
       
-      // Clear local state first to ensure UI updates immediately
       setUser(null);
       setSession(null);
       setProfile(null);
       localStorage.clear(); 
       sessionStorage.clear();
 
-      // Then attempt to notify Supabase
       const { error } = await supabase.auth.signOut();
       if (error) console.warn('Supabase signOut error (logged out locally anyway):', error);
       
     } catch (error) {
       console.error('Logout exception:', error);
-      // Even if it fails, our local state is already cleared
     } finally {
       setLoading(false);
     }
