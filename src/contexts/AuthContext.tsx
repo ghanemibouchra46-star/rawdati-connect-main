@@ -33,6 +33,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Tables<'profiles'> | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Flag to prevent onAuthStateChange from redundantly fetching profile
+  // when a manual login flow is already handling it
+  let _skipNextAuthEvent = false;
 
   const refreshProfile = async (userId?: string, existingProfile?: Tables<'profiles'> | null) => {
     if (existingProfile !== undefined) {
@@ -79,41 +83,48 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // Don't set loading for simple token refreshes that don't change the user
-      const isAuthEvent = event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED';
-      
-      if (isAuthEvent) setLoading(true);
-      
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED') {
-        if (session?.user) {
-          // If we already have a profile for this user, we can trust it for a moment to speed up the UI
-          // but we still refresh in the background if it's not a fresh sign in
-          await refreshProfile(session.user.id);
-        }
-      } else if (event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_OUT') {
         setProfile(null);
+        setLoading(false);
+        return;
+      }
+
+      // Skip profile fetch if a manual login is handling it
+      if (_skipNextAuthEvent && event === 'SIGNED_IN') {
+        _skipNextAuthEvent = false;
+        return;
       }
       
-      if (isAuthEvent) setLoading(false);
+      // Only fetch profile for meaningful auth events, not token refreshes
+      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+        if (session?.user && !profile) {
+          await refreshProfile(session.user.id);
+        }
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
+    // Tell onAuthStateChange to skip its profile fetch - we handle it manually
+    _skipNextAuthEvent = true;
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) throw error;
-    
-    if (data.user) {
-      await refreshProfile(data.user.id);
+    if (error) {
+      _skipNextAuthEvent = false;
+      throw error;
     }
+    
+    // Don't fetch profile here - auth pages already do it and pass it via refreshProfile
+    // This avoids yet another redundant network request
   };
 
   const signup = async (email: string, password: string, fullName: string) => {

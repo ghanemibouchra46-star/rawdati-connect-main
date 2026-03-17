@@ -84,14 +84,6 @@ const Auth = () => {
     };
 
     checkSessionAndRedirect();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user && session.user.email_confirmed_at) {
-        checkSessionAndRedirect();
-      }
-    });
-
-    return () => subscription.unsubscribe();
   }, [navigate, searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
