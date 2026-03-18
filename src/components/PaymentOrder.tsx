@@ -273,7 +273,7 @@ const PaymentOrder = ({ orderId, date, amount, status, kindergarten, onClose }: 
           </h2>
           <p className="text-muted-foreground mt-1">
             {language === 'ar' 
-              ? `شكراً لثقتك بـ ${kindergarten.nameAr || kindergarten.name_ar}` 
+              ? `شكراً لثقتك بـ ${kindergarten.name_ar}` 
               : `Merci de votre confiance en ${kindergarten.nameFr}`}
           </p>
         </div>
@@ -291,7 +291,5 @@ const PaymentOrder = ({ orderId, date, amount, status, kindergarten, onClose }: 
     </div>
   );
 };
-
-export default PaymentOrder;
 
 export default PaymentOrder;
