@@ -72,12 +72,12 @@ export interface Kindergarten {
 }
 
 export const municipalities = [
-  { id: 'mascara', name_ar: 'معسكر', nameFr: 'Mascara' },
-  { id: 'sig', name_ar: 'سيق', nameFr: 'Sig' },
-  { id: 'tighennif', name_ar: 'تيغنيف', nameFr: 'Tighennif' },
-  { id: 'mohammadia', name_ar: 'المحمدية', nameFr: 'Mohammadia' },
-  { id: 'ghriss', name_ar: 'غريس', nameFr: 'Ghriss' },
-  { id: 'beni-shqran', name_ar: 'بني شقران', nameFr: 'Beni Shqran' },
+  { id: 'mascara', nameAr: 'معسكر', nameFr: 'Mascara' },
+  { id: 'sig', nameAr: 'سيق', nameFr: 'Sig' },
+  { id: 'tighennif', nameAr: 'تيغنيف', nameFr: 'Tighennif' },
+  { id: 'mohammadia', nameAr: 'المحمدية', nameFr: 'Mohammadia' },
+  { id: 'ghriss', nameAr: 'غريس', nameFr: 'Ghriss' },
+  { id: 'beni-shqran', nameAr: 'بني شقران', nameFr: 'Beni Shqran' },
 ];
 
 export const services = [

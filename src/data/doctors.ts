@@ -1,10 +1,10 @@
 export interface Doctor {
   id: string;
-  name_ar: string;
+  nameAr: string;
   nameFr: string;
-  specialty_ar: string;
+  specialtyAr: string;
   specialtyFr: string;
-  address_ar: string;
+  addressAr: string;
   addressFr: string;
   municipalityId: string;
   phone: string;
@@ -17,11 +17,11 @@ export interface Doctor {
 export const doctors: Doctor[] = [
   {
     id: '1',
-    name_ar: 'د. محمد بن عودة',
+    nameAr: 'د. محمد بن عودة',
     nameFr: 'Dr. Mohamed Ben Aouda',
-    specialty_ar: 'طب أطفال',
+    specialtyAr: 'طب أطفال',
     specialtyFr: 'Pédiatrie',
-    address_ar: 'مستشفى روضتي، معسكر',
+    addressAr: 'مستشفى روضتي، معسكر',
     addressFr: 'Hôpital روضتي, Mascara',
     municipalityId: 'mascara',
     phone: '0555 12 34 56',
@@ -32,11 +32,11 @@ export const doctors: Doctor[] = [
   },
   {
     id: '2',
-    name_ar: 'د. فاطمة الزهراء بوعلام',
+    nameAr: 'د. فاطمة الزهراء بوعلام',
     nameFr: 'Dr. Fatima Zahra Boualam',
-    specialty_ar: 'طب أطفال وحديثي الولادة',
+    specialtyAr: 'طب أطفال وحديثي الولادة',
     specialtyFr: 'Pédiatrie et Néonatologie',
-    address_ar: 'عيادة خاصة، سيق',
+    addressAr: 'عيادة خاصة، سيق',
     addressFr: 'Cabinet privé, Sig',
     municipalityId: 'sig',
     phone: '0661 23 45 67',
@@ -47,11 +47,11 @@ export const doctors: Doctor[] = [
   },
   {
     id: '3',
-    name_ar: 'د. عبد الرحمن مرابط',
+    nameAr: 'د. عبد الرحمن مرابط',
     nameFr: 'Dr. Abdelrahman Merabet',
-    specialty_ar: 'طب أطفال وتغذية',
+    specialtyAr: 'طب أطفال وتغذية',
     specialtyFr: 'Pédiatrie et Nutrition',
-    address_ar: 'مركز صحي، تيغنيف',
+    addressAr: 'مركز صحي، تيغنيف',
     addressFr: 'Centre de santé, Tighennif',
     municipalityId: 'tighennif',
     phone: '0770 34 56 78',
@@ -62,11 +62,11 @@ export const doctors: Doctor[] = [
   },
   {
     id: '4',
-    name_ar: 'د. نورة بن ساسي',
+    nameAr: 'د. نورة بن ساسي',
     nameFr: 'Dr. Noura Ben Sassi',
-    specialty_ar: 'طب أطفال وأمراض الحساسية',
+    specialtyAr: 'طب أطفال وأمراض الحساسية',
     specialtyFr: 'Pédiatrie et Allergologie',
-    address_ar: 'عيادة خاصة، المحمدية',
+    addressAr: 'عيادة خاصة، المحمدية',
     addressFr: 'Cabinet privé, Mohammadia',
     municipalityId: 'mohammadia',
     phone: '0550 45 67 89',
@@ -77,11 +77,11 @@ export const doctors: Doctor[] = [
   },
   {
     id: '5',
-    name_ar: 'د. كريم بوزيان',
+    nameAr: 'د. كريم بوزيان',
     nameFr: 'Dr. Karim Bouziane',
-    specialty_ar: 'طب الأطفال العام',
+    specialtyAr: 'طب الأطفال العام',
     specialtyFr: 'Pédiatrie Générale',
-    address_ar: 'حي الزيتون، غريس',
+    addressAr: 'حي الزيتون، غريس',
     addressFr: 'Cité Ez-Zitoun, Ghriss',
     municipalityId: 'ghriss',
     phone: '0662 56 78 90',
@@ -92,11 +92,11 @@ export const doctors: Doctor[] = [
   },
   {
     id: '6',
-    name_ar: 'د. كريم بوزيان',
-    nameFr: 'Dr. Karim Bouziane',
-    specialty_ar: 'طب أطفال وأمراض الجهاز التنفسي',
+    nameAr: 'د. آمال منصوري',
+    nameFr: 'Dr. Amel Mansouri',
+    specialtyAr: 'طب أطفال وأمراض الجهاز التنفسي',
     specialtyFr: 'Pédiatrie et Pneumologie',
-    address_ar: 'مستشفى روضتي، معسكر',
+    addressAr: 'مستشفى روضتي، معسكر',
     addressFr: 'Hôpital روضتي, Mascara',
     municipalityId: 'mascara',
     phone: '0771 67 89 01',
@@ -104,5 +104,35 @@ export const doctors: Doctor[] = [
     rating: 4.8,
     image: 'https://images.unsplash.com/photo-1651008376811-b90baee60c1f?w=400',
     experience: 14
+  },
+  {
+    id: '7',
+    nameAr: 'د. ياسمين بلقاسم',
+    nameFr: 'Dr. Yasmine Belkacem',
+    specialtyAr: 'طب أطفال ونمو',
+    specialtyFr: 'Pédiatrie et Développement',
+    addressAr: 'حي 500 مسكن، معسكر',
+    addressFr: 'Cité 500 Logements, Mascara',
+    municipalityId: 'mascara',
+    phone: '0552 78 90 12',
+    workingHours: '09:00 - 16:30',
+    rating: 4.9,
+    image: 'https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400',
+    experience: 11
+  },
+  {
+    id: '8',
+    nameAr: 'د. سامي تواتي',
+    nameFr: 'Dr. Sami Touati',
+    specialtyAr: 'جراحة أطفال',
+    specialtyFr: 'Chirurgie pédiatrique',
+    addressAr: 'رقم 12 شارع الأمير، سيق',
+    addressFr: 'N° 12 Rue de l\'Emir, Sig',
+    municipalityId: 'sig',
+    phone: '0663 89 01 23',
+    workingHours: '08:00 - 15:00',
+    rating: 4.7,
+    image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400',
+    experience: 18
   }
 ];

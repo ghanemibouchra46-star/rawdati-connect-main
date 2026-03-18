@@ -100,7 +100,7 @@ const FilterSidebar = ({
                 : 'bg-muted hover:bg-muted/80 text-foreground'
                 }`}
             >
-              {language === 'ar' ? muni.name_ar : muni.nameFr}
+              {language === 'ar' ? (muni as any).nameAr || (muni as any).name_ar : muni.nameFr}
             </button>
           ))}
         </div>
