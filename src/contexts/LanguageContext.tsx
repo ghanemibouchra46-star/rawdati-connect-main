@@ -338,6 +338,16 @@ const translations: Record<Language, Record<string, string>> = {
         'payment.baridimob': 'بريدي موب (Baridi Mob)',
         'payment.payNow': 'ادفع الآن',
         'payment.pending': 'في الانتظار',
+        'payment.cardHolder': 'اسم صاحب البطاقة',
+        'payment.cardNumber': 'رقم البطاقة',
+        'payment.expiryDate': 'تاريخ انتهاء الصلاحية',
+        'payment.cvv': 'الرمز السري (CVV)',
+        'payment.uploadReceipt': 'رفع وصل الاستلام',
+        'payment.selectReceipt': 'اختر صورة الوصل',
+        'payment.confirmPayment': 'تأكيد عملية الدفع',
+        'payment.back': 'رجوع',
+        'payment.receiptTitle': 'أثبت عملية الدفع',
+        'payment.receiptDesc': 'يرجى تحميل صورة لوصل الدفع لتأكيد طلبك',
     },
     fr: {
         // Welcome & General
@@ -672,6 +682,16 @@ const translations: Record<Language, Record<string, string>> = {
         'payment.baridimob': 'Baridi Mob',
         'payment.payNow': 'Payer Maintenant',
         'payment.pending': 'En attente',
+        'payment.cardHolder': 'Nom du titulaire',
+        'payment.cardNumber': 'Numéro de carte',
+        'payment.expiryDate': 'Date d\'expiration',
+        'payment.cvv': 'Code CVV',
+        'payment.uploadReceipt': 'Télécharger le reçu',
+        'payment.selectReceipt': 'Choisir l\'image du reçu',
+        'payment.confirmPayment': 'Confirmer le paiement',
+        'payment.back': 'Retour',
+        'payment.receiptTitle': 'Prouvez votre paiement',
+        'payment.receiptDesc': 'Veuillez télécharger une photo du reçu pour confirmer votre commande',
     },
     en: {
         // Welcome & General
