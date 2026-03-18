@@ -138,7 +138,7 @@ export const clothingStores: ClothingStore[] = [
     phone: '0772 88 99 00',
     workingHours: '08:00 - 19:00',
     rating: 4.8,
-    image: 'https://images.unsplash.com/photo-1519689689358-09705f76efd9?w=400',
+    image: 'https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?w=400',
     categoriesAr: ['مستلزمات رضع', 'ملابس نوم', 'ألعاب'],
     categoriesFr: ['Puericulture', 'Pyjamas', 'Jouets'],
     priceRangeAr: 'متوسط',
