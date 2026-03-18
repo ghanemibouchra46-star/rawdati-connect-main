@@ -6,7 +6,7 @@ import KindergartenCard from '@/components/KindergartenCard';
 import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { GraduationCap, ArrowLeft, ArrowRight, Star, MapPin, Users, Search, Home, BookOpen } from 'lucide-react';
+import { GraduationCap, ArrowLeft, ArrowRight, Star, MapPin, Users, Search, Home, BookOpen, Stethoscope, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import childrenPlaying from '@/assets/children-playing.png';
@@ -67,6 +67,20 @@ const Index = () => {
       description: 'مقالات تعليمية حول التربية والتغذية وتطوير قدرات الطفل',
       link: '/parenting-tips',
       color: 'from-emerald-500 to-emerald-600'
+    },
+    {
+      icon: Stethoscope,
+      title: 'أطباء الأطفال',
+      description: 'ابحث عن أفضل أطباء الأطفال والمختصين في منطقتك',
+      link: '/doctors',
+      color: 'from-blue-500 to-blue-600'
+    },
+    {
+      icon: ShoppingBag,
+      title: 'المحلات التجارية',
+      description: 'اكتشف أفضل المحلات التجارية لملابس ومستلزمات الأطفال',
+      link: '/clothing-stores',
+      color: 'from-orange-500 to-orange-600'
     }
   ];
 
