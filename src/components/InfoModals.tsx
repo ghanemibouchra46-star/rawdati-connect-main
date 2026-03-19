@@ -114,7 +114,7 @@ export const FAQModal = ({ isOpen, onClose }: ModalProps) => {
     },
     {
       q: "كيف يمكنني التواصل مع الدعم الفني؟",
-      a: "يمكنك التواصل معنا عبر رقم الهاتف 0798960780 أو عبر البريد الإلكتروني contact@روضتي.dz الموضح في أسفل الصفحة.",
+      a: "يمكنك التواصل معنا عبر رقم الهاتف 0798960780 أو عبر البريد الإلكتروني Rawdati245@gmail.com الموضح في أسفل الصفحة.",
     },
     {
       q: "هل تدعم المنصة إدارة المدفوعات؟",
@@ -284,7 +284,7 @@ export const ContactModal = ({ isOpen, onClose }: ModalProps) => {
             </div>
             <div>
               <h4 className="font-bold text-gray-900">البريد الإلكتروني</h4>
-              <p className="text-gray-600">contact@روضتي.dz</p>
+              <p className="text-gray-600">Rawdati245@gmail.com</p>
             </div>
           </div>
 

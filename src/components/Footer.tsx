@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Facebook, Instagram } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import logoIcon from '@/assets/logo-icon.png';
@@ -40,15 +40,7 @@ const Footer = () => {
               >
                 <Facebook className="w-5 h-5" />
               </a>
-              <a
-                href="https://www.instagram.com/روضتي.mascara"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-11 h-11 rounded-xl bg-coral/20 flex items-center justify-center hover:bg-coral/40 transition-all duration-300 hover:scale-110"
-                title="حسابنا على انستغرام"
-              >
-                <Instagram className="w-5 h-5" />
-              </a>
+
             </div>
           </div>
 
@@ -129,7 +121,7 @@ const Footer = () => {
                 <div className="w-9 h-9 rounded-lg bg-coral/20 flex items-center justify-center">
                   <Mail className="w-4 h-4 text-primary-foreground" />
                 </div>
-                <span>contact@روضتي.dz</span>
+                <span>Rawdati245@gmail.com</span>
               </li>
             </ul>
           </div>
