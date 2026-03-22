@@ -221,12 +221,21 @@ const ParentDashboard = () => {
         return date.toLocaleString(language === 'ar' ? 'ar-DZ' : 'fr-FR', { month: 'long' });
     };
 
-    if (isLoading) {
+    if (isLoading || authLoading) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="text-center">
-                    <Baby className="w-12 h-12 text-primary mx-auto animate-bounce" />
-                    <p className="mt-4 text-muted-foreground">{t('auth.loading')}</p>
+            <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+                <div className="relative">
+                    <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center animate-pulse">
+                        <Baby className="w-10 h-10 text-primary animate-bounce" />
+                    </div>
+                </div>
+                <div className="mt-8 text-center space-y-2">
+                    <h2 className="text-xl font-bold text-foreground">
+                        {language === 'ar' ? 'جاري تحميل لوحة التحكم...' : 'Chargement du tableau de bord...'}
+                    </h2>
+                    <p className="text-muted-foreground animate-pulse text-sm">
+                        {language === 'ar' ? 'يرجى الانتظار قليلاً، نحن نجهز مساحتك' : 'Veuillez patienter, nous préparons votre espace'}
+                    </p>
                 </div>
             </div>
         );

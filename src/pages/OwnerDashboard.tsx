@@ -398,9 +398,32 @@ const OwnerDashboard = () => {
     }
   };
 
-  if (!isAuthorized && !authLoading) return null;
+  if (authLoading || (isLoading && isAuthorized)) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <div className="relative">
+          <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center animate-pulse">
+            <Building2 className="w-10 h-10 text-primary animate-bounce" />
+          </div>
+          <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-background border-4 border-background flex items-center justify-center shadow-sm">
+            <Loader2 className="w-4 h-4 text-primary animate-spin" />
+          </div>
+        </div>
+        <div className="mt-8 text-center space-y-2">
+          <h2 className="text-xl font-bold text-foreground">
+            {language === 'ar' ? 'جاري تحميل لوحة التحكم...' : 'Chargement du tableau de bord...'}
+          </h2>
+          <p className="text-muted-foreground animate-pulse">
+            {language === 'ar' ? 'يرجى الانتظار قليلاً، نحن نجهز مساحتك' : 'Veuillez patienter, nous préparons votre espace'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  if (!isAuthorized) return null;
+  if (!isAuthorized) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background" dir={dir}>

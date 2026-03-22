@@ -91,11 +91,8 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      // Use AuthContext login() which properly manages loading state
-      await login(loginEmail, loginPassword);
-      
-      // Get user session for role detection
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      // Use AuthContext login() which now returns user and profile
+      const { user: currentUser, profile: fetchedProfile } = await login(loginEmail, loginPassword);
       
       if (!currentUser) {
         setIsLoading(false);
@@ -114,22 +111,14 @@ const Auth = () => {
         return;
       }
 
-      // Fetch profile for role detection (single fetch, then pass to AuthContext)
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', currentUser.id)
-        .single();
-
       // Robust Role Detection
       const userEmail = currentUser.email?.toLowerCase() || '';
       const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
       const isAdminEmail = adminEmails.includes(userEmail);
       const metadataRole = currentUser.user_metadata?.role || currentUser.app_metadata?.role;
-      const role = profile?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
+      const role = fetchedProfile?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
 
       if (role === 'admin') {
-        await refreshProfile(currentUser.id, profile as any);
         toast({ title: t('auth.welcome'), description: t('auth.success') });
         await supabase.from('user_roles').upsert(
           { user_id: currentUser.id, role: 'admin' },
@@ -137,8 +126,7 @@ const Auth = () => {
         );
         navigate('/admin');
       } else if (role === 'owner') {
-        if (profile?.status === 'approved') {
-          await refreshProfile(currentUser.id, profile as any);
+        if (fetchedProfile?.status === 'approved') {
           toast({ title: t('auth.welcome'), description: t('auth.success') });
           navigate('/owner');
         } else {
@@ -150,7 +138,6 @@ const Auth = () => {
           });
         }
       } else {
-        await refreshProfile(currentUser.id, profile as any);
         toast({ title: t('auth.welcome'), description: t('auth.success') });
         navigate('/parent');
       }

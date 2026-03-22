@@ -8,7 +8,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Tables<'profiles'> | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<{ user: User | null; session: Session | null; profile: Tables<'profiles'> | null }>;
   signup: (email: string, password: string, fullName: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: (userId?: string, existingProfile?: Tables<'profiles'> | null) => Promise<Tables<'profiles'> | null>;
@@ -130,8 +130,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       throw error;
     }
     
-    // Don't fetch profile here - auth pages do it and pass via refreshProfile()
-    // which also sets loading=false, giving dashboards the green light
+    // Fetch profile here to return it to the UI immediately
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', data.user?.id)
+      .single();
+    
+    // Sync to local state
+    setProfile(profileData);
+    setLoading(false); // Dashboard can now load
+
+    return { user: data.user, session: data.session, profile: profileData };
   };
 
   const signup = async (email: string, password: string, fullName: string) => {

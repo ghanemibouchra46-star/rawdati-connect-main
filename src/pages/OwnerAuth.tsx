@@ -115,28 +115,17 @@ const OwnerAuth = () => {
     setIsLoading(true);
 
     try {
-      // Use AuthContext login() which properly manages loading state
-      await login(email, password);
-
-      // Get user session for role detection
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      // Use AuthContext login() which now returns user and profile
+      const { user: currentUser, profile: fetchedProfile } = await login(email, password);
 
       if (!currentUser) {
         setIsLoading(false);
         return;
       }
 
-      // Check profiles table directly
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', currentUser.id)
-        .single();
-
-      if (profile) {
-        if (profile.role === 'owner') {
-          if (profile.status === 'approved') {
-            await refreshProfile(currentUser.id, profile as any);
+      if (fetchedProfile) {
+        if (fetchedProfile.role === 'owner') {
+          if (fetchedProfile.status === 'approved') {
             toast({ title: t('auth.welcome'), description: t('auth.success') });
             navigate('/owner');
           } else {
@@ -147,12 +136,10 @@ const OwnerAuth = () => {
               variant: 'destructive',
             });
           }
-        } else if (profile.role === 'admin') {
-          await refreshProfile(currentUser.id, profile as any);
+        } else if (fetchedProfile.role === 'admin') {
           toast({ title: 'مرحباً بك', description: 'تم تسجيل دخول المسؤول بنجاح' });
           navigate('/admin', { replace: true });
         } else {
-          await refreshProfile(currentUser.id, profile as any);
           toast({ title: 'مرحباً بك', description: 'تم تسجيل دخول ولي الأمر بنجاح' });
           navigate('/parent', { replace: true });
         }
