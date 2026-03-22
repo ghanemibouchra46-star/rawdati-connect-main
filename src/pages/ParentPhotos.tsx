@@ -130,7 +130,8 @@ const ParentPhotos = () => {
         });
     };
 
-    const children = ['all', language === 'ar' ? 'أحمد' : 'Ahmed', language === 'ar' ? 'سارة' : 'Sara'];
+    const uniqueChildNames = [...new Set(photos.map(p => p.childName))];
+    const children = ['all', ...uniqueChildNames];
     const filteredPhotos = selectedChild === 'all'
         ? photos
         : photos.filter(p => p.childName === selectedChild);
