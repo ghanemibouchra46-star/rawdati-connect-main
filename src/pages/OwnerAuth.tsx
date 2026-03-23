@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import Logo from '@/components/Logo';
 
 const OwnerAuth = () => {
   const { t, language } = useLanguage();
@@ -421,17 +422,10 @@ const OwnerAuth = () => {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 group">
-            <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center shadow-soft group-hover:shadow-hover transition-all duration-300">
-              <Building2 className="w-6 h-6 text-secondary-foreground" />
-            </div>
-            <div className="flex flex-col text-right">
-              <span className="font-bold text-xl leading-tight">
-                <span className="text-pink-500 font-arabic">روضتي</span>
-              </span>
-              <span className="text-sm text-muted-foreground leading-tight">مساحة المديرين</span>
-            </div>
+          <Link to="/" className="inline-flex items-center group justify-center">
+            <Logo size="lg" />
           </Link>
+          <p className="text-sm text-muted-foreground mt-2 leading-tight">مساحة المديرين</p>
         </div>
 
         <Card className="shadow-card border-border/50">

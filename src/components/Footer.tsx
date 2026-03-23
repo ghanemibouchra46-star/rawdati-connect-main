@@ -1,7 +1,7 @@
 import { Mail, Phone, MapPin, Facebook } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import logoIcon from '@/assets/logo-icon.png';
+import Logo from './Logo';
 import { PricingModal, FAQModal, RegisterInfoModal, DashboardInfoModal, ContactModal } from './InfoModals';
 
 const Footer = () => {
@@ -17,15 +17,8 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="md:col-span-1">
-            <Link to="/" className="flex items-center gap-3 mb-6">
-              <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-lg border-2 border-primary-foreground/20">
-                <img src={logoIcon} alt="روضتي" className="w-full h-full object-cover" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-extrabold text-xl leading-tight">
-                  <span className="text-pink-500 font-arabic">روضتي</span>
-                </span>
-              </div>
+            <Link to="/" className="flex items-center group mb-6">
+              <Logo size="md" className="text-primary-foreground" />
             </Link>
             <p className="text-sm text-primary-foreground/70 mb-6 leading-relaxed">
               منصتك الموثوقة للعثور على أفضل روضات الأطفال في روضتي. 🎈

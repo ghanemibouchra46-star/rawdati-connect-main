@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSelector from '@/components/LanguageSelector';
+import Logo from '@/components/Logo';
 
 const AdminAuth = () => {
     const { t, dir, language } = useLanguage();
@@ -382,17 +383,14 @@ const AdminAuth = () => {
                 <LanguageSelector />
             </div>
             <div className="w-full max-w-md">
-                {/* Logo */}
                 <div className="text-center mb-8">
-                    <Link to="/" className="inline-flex items-center gap-3 group">
-                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-300">
-                            <Shield className="w-7 h-7 text-white" />
-                        </div>
-                        <div className="flex flex-col text-right">
-                            <span className="font-bold text-2xl text-white">{t('admin.title')}</span>
-                            <span className="text-sm text-gray-400">{t('admin.subtitle')}</span>
-                        </div>
+                    <Link to="/" className="inline-flex items-center group justify-center">
+                        <Logo size="lg" />
                     </Link>
+                    <div className="flex flex-col mt-4">
+                        <span className="font-bold text-2xl text-white">{t('admin.title')}</span>
+                        <span className="text-sm text-gray-400">{t('admin.subtitle')}</span>
+                    </div>
                 </div>
 
                 <Card className="border-slate-700 bg-slate-800/50 backdrop-blur-sm">

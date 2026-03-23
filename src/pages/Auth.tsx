@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from '@/contexts/LanguageContext';
+import Logo from '@/components/Logo';
 
 const Auth = () => {
   const { t, dir, language } = useLanguage();
@@ -473,15 +474,8 @@ const Auth = () => {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center p-4" dir={dir}>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-3 group">
-            <div className="w-14 h-14 rounded-2xl gradient-accent flex items-center justify-center shadow-soft group-hover:shadow-hover transition-all duration-300">
-              <Baby className="w-7 h-7 text-primary-foreground" />
-            </div>
-            <div className="flex flex-col text-right">
-              <span className="font-bold text-2xl">
-                <span className="text-pink-500 font-arabic">روضتي</span>
-              </span>
-            </div>
+          <Link to="/" className="inline-flex items-center group justify-center">
+            <Logo size="lg" />
           </Link>
         </div>
 
