@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { kindergartens, type Kindergarten, type Activity, type Facility, type PriceItem, type KindergartenGallery } from '@/data/kindergartens';
 import { normalizeArabic } from '@/lib/arabicUtils';
 
@@ -287,8 +288,9 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
 };
 
 export function useKindergartens() {
+  const { user } = useAuth();
   const query = useQuery({
-    queryKey: ['kindergartens'],
+    queryKey: ['kindergartens', user?.id],
     queryFn: async () => {
       console.log("🚀 useKindergartens - Fetching approved kindergartens...");
       try {
