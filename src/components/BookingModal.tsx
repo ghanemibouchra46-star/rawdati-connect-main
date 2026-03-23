@@ -47,8 +47,17 @@ const BookingModal = ({ kindergarten, isOpen, onClose }: BookingModalProps) => {
         return;
       }
 
+      console.log('Attempting booking with:', {
+        kindergarten_id: kindergarten.id,
+        user_id: user.id,
+        parentName,
+        phone,
+        date,
+        selectedTime
+      });
+
       // 1. Insert into bookings table
-      const { error: bookingError } = await supabase
+      const { error: bookingError } = await (supabase as any)
         .from('bookings')
         .insert({
           kindergarten_id: kindergarten.id,
@@ -60,22 +69,32 @@ const BookingModal = ({ kindergarten, isOpen, onClose }: BookingModalProps) => {
           status: 'pending'
         });
 
-      if (bookingError) throw bookingError;
+      if (bookingError) {
+        console.error('Booking table error:', bookingError);
+        throw new Error(`Booking Error: ${bookingError.message}`);
+      }
 
-      // 2. Insert into notifications table
-      const { error: notificationError } = await supabase
-        .from('notifications')
-        .insert({
-          user_id: user.id,
-          title: language === 'ar' ? 'طلب حجز موعد' : 'Demande de rendez-vous',
-          message: language === 'ar' 
-            ? `طلب حجز موعد لزيارة روضة ${kindergarten.name_ar} يوم ${date} على الساعة ${selectedTime}`
-            : `Demande de rendez-vous pour visiter ${kindergarten.nameFr} le ${date} à ${selectedTime}`,
-          type: 'booking',
-          related_id: kindergarten.id
-        });
+      // 2. Insert into notifications table (optional, don't fail booking if this fails)
+      try {
+        const { error: notificationError } = await supabase
+          .from('notifications')
+          .insert({
+            user_id: user.id,
+            title: language === 'ar' ? 'طلب حجز موعد' : 'Demande de rendez-vous',
+            message: language === 'ar' 
+              ? `طلب حجز موعد لزيارة روضة ${kindergarten.name_ar} يوم ${date} على الساعة ${selectedTime}`
+              : `Demande de rendez-vous pour visiter ${kindergarten.nameFr} le ${date} à ${selectedTime}`,
+            type: 'booking',
+            related_id: kindergarten.id
+          });
 
-      if (notificationError) throw notificationError;
+        if (notificationError) {
+          console.error('Notification error (non-fatal):', notificationError);
+          // We don't throw here to allow the booking to complete
+        }
+      } catch (e) {
+        console.error('Notification insert failed:', e);
+      }
 
       toast.success(t('booking.success'), {
         description: t('booking.successDesc')
@@ -85,8 +104,8 @@ const BookingModal = ({ kindergarten, isOpen, onClose }: BookingModalProps) => {
       setDate('');
       setSelectedTime('');
     } catch (error: any) {
-      console.error('Booking error:', error);
-      toast.error(t('common.error'));
+      console.error('Booking flow error:', error);
+      toast.error(error.message || t('common.error'));
     } finally {
       setIsSubmitting(false);
     }
