@@ -21,6 +21,8 @@ const BookingModal = ({ kindergarten, isOpen, onClose }: BookingModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [date, setDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
+  const [parentName, setParentName] = useState<string>('');
+  const [phone, setPhone] = useState<string>('');
 
   if (!isOpen || !kindergarten) return null;
 
@@ -29,8 +31,8 @@ const BookingModal = ({ kindergarten, isOpen, onClose }: BookingModalProps) => {
   ];
 
   const handleSubmit = async () => {
-    if (!date || !selectedTime) {
-      toast.error(language === 'ar' ? 'يرجى اختيار التاريخ والوقت' : 'Veuillez choisir la date et l\'heure');
+    if (!date || !selectedTime || !parentName || !phone) {
+      toast.error(language === 'ar' ? 'يرجى ملء جميع الحقول' : 'Veuillez remplir tous les champs');
       return;
     }
 
@@ -39,10 +41,32 @@ const BookingModal = ({ kindergarten, isOpen, onClose }: BookingModalProps) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
-      const { error } = await supabase
+      if (!user) {
+        toast.error(t('registration.errorAuth'));
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 1. Insert into bookings table
+      const { error: bookingError } = await supabase
+        .from('bookings')
+        .insert({
+          kindergarten_id: kindergarten.id,
+          user_id: user.id,
+          parent_name: parentName,
+          phone: phone,
+          booking_date: date,
+          booking_time: selectedTime,
+          status: 'pending'
+        });
+
+      if (bookingError) throw bookingError;
+
+      // 2. Insert into notifications table
+      const { error: notificationError } = await supabase
         .from('notifications')
         .insert({
-          user_id: user?.id || null,
+          user_id: user.id,
           title: language === 'ar' ? 'طلب حجز موعد' : 'Demande de rendez-vous',
           message: language === 'ar' 
             ? `طلب حجز موعد لزيارة روضة ${kindergarten.name_ar} يوم ${date} على الساعة ${selectedTime}`
@@ -51,7 +75,7 @@ const BookingModal = ({ kindergarten, isOpen, onClose }: BookingModalProps) => {
           related_id: kindergarten.id
         });
 
-      if (error) throw error;
+      if (notificationError) throw notificationError;
 
       toast.success(t('booking.success'), {
         description: t('booking.successDesc')
@@ -97,7 +121,36 @@ const BookingModal = ({ kindergarten, isOpen, onClose }: BookingModalProps) => {
           </p>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
+                {t('registration.parentName')}
+              </label>
+              <Input
+                required
+                value={parentName}
+                onChange={(e) => setParentName(e.target.value)}
+                placeholder={language === 'ar' ? 'الاسم الكامل' : 'Nom complet'}
+                className="h-10 bg-muted/50 border-border rounded-xl"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
+                {t('auth.phone')}
+              </label>
+              <Input
+                required
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="0XXXXXXXXX"
+                className="h-10 bg-muted/50 border-border rounded-xl"
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <label className={`text-sm font-medium text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
               {language === 'ar' ? 'اختر التاريخ' : 'Choisir la date'}
@@ -107,7 +160,7 @@ const BookingModal = ({ kindergarten, isOpen, onClose }: BookingModalProps) => {
               min={format(new Date(), 'yyyy-MM-dd')}
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="h-12 bg-muted/50 border-border rounded-xl"
+              className="h-10 bg-muted/50 border-border rounded-xl"
             />
           </div>
 
@@ -119,8 +172,9 @@ const BookingModal = ({ kindergarten, isOpen, onClose }: BookingModalProps) => {
               {timeSlots.map((time) => (
                 <button
                   key={time}
+                  type="button"
                   onClick={() => setSelectedTime(time)}
-                  className={`py-3 rounded-xl border-2 transition-all font-medium ${
+                  className={`py-2 rounded-xl border-2 transition-all font-medium text-sm ${
                     selectedTime === time
                       ? 'border-primary bg-primary/10 text-primary'
                       : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted'
@@ -134,13 +188,13 @@ const BookingModal = ({ kindergarten, isOpen, onClose }: BookingModalProps) => {
 
           <Button
             onClick={handleSubmit}
-            disabled={isSubmitting || !date || !selectedTime}
-            className="w-full h-14 gradient-accent border-0 rounded-xl shadow-soft hover:shadow-hover transition-all duration-300 text-primary-foreground font-bold text-lg"
+            disabled={isSubmitting || !date || !selectedTime || !parentName || !phone}
+            className="w-full h-12 gradient-accent border-0 rounded-xl shadow-soft hover:shadow-hover transition-all duration-300 text-primary-foreground font-bold text-lg mt-2"
           >
             {isSubmitting ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              t('booking.confirm') || (language === 'ar' ? 'تأكيد الحجز' : 'Confirmer')
+              t('booking.confirm')
             )}
           </Button>
         </div>
