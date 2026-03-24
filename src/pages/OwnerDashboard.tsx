@@ -161,7 +161,13 @@ const OwnerDashboard = () => {
       const kgId = ownerKg.kindergarten_id;
       setKindergartenId(kgId);
 
-      // 2. Fetch all related data in parallel
+      // 2. Fetch Core Details first to show the dashboard frame
+      const { data: detailsData } = await supabase.from('kindergartens').select('*').eq('id', kgId).single();
+      if (detailsData) setEditData(detailsData);
+      
+      setIsLoading(false); // Show the dashboard frame immediately
+
+      // 3. Fetch all other data in the background
       const today = format(new Date(), 'yyyy-MM-dd');
       
       const [
@@ -169,15 +175,13 @@ const OwnerDashboard = () => {
         childRes,
         staffRes,
         attRes,
-        payRes,
-        detailsRes
+        payRes
       ] = await Promise.all([
         supabase.from('registration_requests').select('*').eq('kindergarten_id', kgId).order('created_at', { ascending: false }),
         supabase.from('children' as any).select('*').eq('kindergarten_id', kgId),
         supabase.from('staff' as any).select('*').eq('kindergarten_id', kgId),
         supabase.from('attendance' as any).select('entity_id, status').eq('kindergarten_id', kgId).eq('attendance_date', today),
-        supabase.from('payments' as any).select('*').eq('kindergarten_id', kgId),
-        supabase.from('kindergartens').select('*').eq('id', kgId).single()
+        supabase.from('payments' as any).select('*').eq('kindergarten_id', kgId)
       ]);
 
       // Processing results
@@ -201,12 +205,9 @@ const OwnerDashboard = () => {
       }
 
       if (payRes.data) setPayments(payRes.data as any);
-      if (detailsRes.data) setEditData(detailsRes.data);
 
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
-    } finally {
-      setIsLoading(false);
     }
   };
 

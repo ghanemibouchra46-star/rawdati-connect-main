@@ -59,25 +59,13 @@ const OwnerAuth = () => {
       setResetStep('new_password');
     }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (session?.user) {
-          // Check if user has owner role
-          setTimeout(() => {
-            checkOwnerRole(session.user.id);
-          }, 0);
-        }
-      }
-    );
-
-    // Check existing session
+    // Only check existing session once on mount, don't use onAuthStateChange here
+    // as it competes with manual login redirection and adds extra network calls
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         checkOwnerRole(session.user.id);
       }
     });
-
-    return () => subscription.unsubscribe();
   }, [searchParams, navigate]);
 
   const checkOwnerRole = async (userId: string) => {

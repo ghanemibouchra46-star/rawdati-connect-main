@@ -77,68 +77,50 @@ const ParentDashboard = () => {
     }, [authProfile, authLoading, navigate, kindergartens]); // Added kindergartens to dependencies as it's used in fetchDashboardData
 
     const fetchDashboardData = async (userId: string) => {
-        setIsLoading(true);
-        try {
-            const { data: registrationData } = await supabase
-                .from('registration_requests')
-                .select('*')
-                .eq('user_id', userId);
+        // 1. Fetch registration requests first (Core Data)
+        const { data: registrationData } = await supabase
+            .from('registration_requests')
+            .select('*')
+            .eq('user_id', userId);
 
-            if (registrationData) {
-                const mappedChildren = registrationData.map(reg => {
-                    const kg = kindergartens.find(k => k.id === reg.kindergarten_id);
-                    return {
-                        id: reg.id,
-                        name: reg.child_name,
-                        age: reg.child_age,
-                        photo_url: null, // Placeholder as it's not in DB yet
-                        kindergarten_name: language === 'ar' ? (kg?.name_ar || reg.kindergarten_id) : (kg?.nameFr || reg.kindergarten_id),
-                        status: reg.status
-                    };
-                });
-                setChildren(mappedChildren);
-
-                // Fetch activities for all children
-                const childNames = registrationData?.map(r => r.child_name) || [];
-                if (childNames.length > 0) {
-                    const { data: activitiesData } = await supabase
-                        .from('activities' as any)
-                        .select('*')
-                        .in('child_name', childNames)
-                        .order('created_at', { ascending: false })
-                        .limit(5);
-
-                    if (activitiesData) {
-                        setActivities(activitiesData as any);
-                    }
-                }
-
-                // Fetch payments
-                const childIds = mappedChildren.map(c => c.id);
-                if (childIds.length > 0) {
-                    const { data: paymentsData } = await supabase
-                        .from('payments' as any)
-                        .select('*')
-                        .in('child_id', childIds)
-                        .order('created_at', { ascending: false });
-
-                    if (paymentsData) {
-                        setPayments(paymentsData as any);
-                    }
-                }
-            } else {
-                setChildren([]);
-                setActivities([]);
-                setPayments([]);
-            }
-        } catch (error) {
-            console.error('Error fetching dashboard data:', error);
-            toast({
-                title: language === 'ar' ? 'خطأ' : 'Erreur',
-                description: language === 'ar' ? 'فشل في تحميل بيانات لوحة التحكم.' : 'Échec du chargement des données du tableau de bord.',
-                variant: 'destructive'
+        if (registrationData) {
+            const mappedChildren = registrationData.map(reg => {
+                const kg = kindergartens.find(k => k.id === reg.kindergarten_id);
+                return {
+                    id: reg.id,
+                    name: reg.child_name,
+                    age: reg.child_age,
+                    photo_url: null,
+                    kindergarten_name: language === 'ar' ? (kg?.name_ar || reg.kindergarten_id) : (kg?.nameFr || reg.kindergarten_id),
+                    status: reg.status
+                };
             });
-        } finally {
+            setChildren(mappedChildren);
+            
+            // Show the dashboard frame and children list immediately
+            setIsLoading(false);
+
+            // 2. Fetch non-essential data in the background
+            const childNames = registrationData.map(r => r.child_name);
+            const childIds = mappedChildren.map(c => c.id);
+
+            // Using Promise.all for background fetches
+            const [activitiesRes, paymentsRes] = await Promise.all([
+                childNames.length > 0 
+                  ? supabase.from('activities' as any).select('*').in('child_name', childNames).order('created_at', { ascending: false }).limit(5)
+                  : Promise.resolve({ data: [] }),
+                childIds.length > 0
+                  ? supabase.from('payments' as any).select('*').in('child_id', childIds).order('created_at', { ascending: false })
+                  : Promise.resolve({ data: [] })
+            ]);
+
+            if (activitiesRes.data) setActivities(activitiesRes.data as any);
+            if (paymentsRes.data) setPayments(paymentsRes.data as any);
+
+        } else {
+            setChildren([]);
+            setActivities([]);
+            setPayments([]);
             setIsLoading(false);
         }
     };
