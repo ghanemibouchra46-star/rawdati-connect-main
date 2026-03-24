@@ -101,7 +101,7 @@ interface PaymentRecord {
 // Mock data for display fallback
 const mockKindergarten = {
   id: '1',
-  name: 'روضة النور',
+  name: 'روضة',
   municipality: 'روضتي',
   address: 'حي 500 مسكن، روضتي',
   phone: '0555 12 34 56',
@@ -438,7 +438,7 @@ const OwnerDashboard = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-foreground">{language === 'ar' ? 'لوحة التحكم' : 'Tableau de bord'}</h1>
-                <p className="text-sm text-muted-foreground">{language === 'ar' ? 'روضة' : 'Crèche'} {mockKindergarten.name}</p>
+                <p className="text-sm text-muted-foreground">{mockKindergarten.name}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -568,7 +568,18 @@ const OwnerDashboard = () => {
         </div>
       )}
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 space-y-8">
+        {/* Subscription Interface - Added to match Parent Dashboard */}
+        <div className="flex justify-center md:justify-start">
+          <SubscriptionInterface onActivate={() => {
+            setShowPaymentRedirect(true);
+            toast({
+              title: language === 'ar' ? 'طلب التفعيل' : 'Demande d\'activation',
+              description: language === 'ar' ? 'تم تحويلك لصفحة الدفع لتفعيل الحساب المهني' : 'Vous avez été redirigé vers la page de paiement',
+            });
+          }} />
+        </div>
+
         {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
