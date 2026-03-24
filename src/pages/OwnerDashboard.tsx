@@ -1309,7 +1309,7 @@ const OwnerDashboard = () => {
       {/* Advanced Payment Process */}
       {activePayment && (
         <PaymentProcess 
-          kindergarten={kgDetails as any}
+          kindergarten={mockKindergarten as any}
           bookingData={activePayment}
           onComplete={() => setActivePayment(null)}
           onSuccess={(txId) => {
