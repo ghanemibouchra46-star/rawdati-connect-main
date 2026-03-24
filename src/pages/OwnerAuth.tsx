@@ -16,7 +16,7 @@ import Logo from '@/components/Logo';
 
 const OwnerAuth = () => {
   const { t, language } = useLanguage();
-  const { refreshProfile, login } = useAuth();
+  const { refreshProfile, login, profile: authProfile, loading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -58,15 +58,21 @@ const OwnerAuth = () => {
       setShowForgotPassword(true);
       setResetStep('new_password');
     }
+  }, [searchParams]);
 
-    // Only check existing session once on mount, don't use onAuthStateChange here
-    // as it competes with manual login redirection and adds extra network calls
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        checkOwnerRole(session.user.id);
+  // Use AuthContext profile to auto-redirect if already logged in (no extra DB call)
+  useEffect(() => {
+    if (authLoading) return;
+    if (authProfile) {
+      if (authProfile.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else if (authProfile.role === 'owner' && authProfile.status === 'approved') {
+        navigate('/owner', { replace: true });
+      } else if (authProfile.role === 'parent') {
+        navigate('/parent', { replace: true });
       }
-    });
-  }, [searchParams, navigate]);
+    }
+  }, [authProfile, authLoading, navigate]);
 
   const checkOwnerRole = async (userId: string) => {
     const { data: profile } = await supabase

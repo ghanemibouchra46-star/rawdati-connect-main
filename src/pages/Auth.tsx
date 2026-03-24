@@ -33,7 +33,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const { refreshProfile, login } = useAuth();
+  const { refreshProfile, login, profile: authProfile, loading: authLoading } = useAuth();
   const [resendTimer, setResendTimer] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
@@ -56,36 +56,22 @@ const Auth = () => {
       setShowForgotPassword(true);
       setResetStep('new_password');
     }
+  }, [searchParams]);
 
-    const checkSessionAndRedirect = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user && session.user.email_confirmed_at) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role, status')
-          .eq('id', session.user.id)
-          .single();
-
-        const userEmail = session.user.email?.toLowerCase() || '';
-        const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
-        const isAdminEmail = adminEmails.includes(userEmail);
-        const metadataRole = session.user.user_metadata?.role || session.user.app_metadata?.role;
-        const role = profile?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
-
-        if (role === 'admin') {
-          navigate('/admin');
-        } else if (role === 'owner') {
-          if (profile?.status === 'approved') {
-            navigate('/owner');
-          }
-        } else {
-          navigate('/parent');
-        }
+  // Use AuthContext profile to auto-redirect if already logged in (no extra DB call)
+  useEffect(() => {
+    if (authLoading) return; // Wait for auth to resolve
+    if (authProfile) {
+      const role = authProfile.role || 'parent';
+      if (role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else if (role === 'owner' && authProfile.status === 'approved') {
+        navigate('/owner', { replace: true });
+      } else if (role === 'parent') {
+        navigate('/parent', { replace: true });
       }
-    };
-
-    checkSessionAndRedirect();
-  }, [navigate, searchParams]);
+    }
+  }, [authProfile, authLoading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

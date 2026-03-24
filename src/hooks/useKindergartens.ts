@@ -290,26 +290,24 @@ export function useKindergartens() {
   const query = useQuery({
     queryKey: ['kindergartens'],
     queryFn: async () => {
-      console.log("🚀 useKindergartens - Fetching approved kindergartens...");
+      console.log("🚀 useKindergartens - Fetching all kindergartens...");
       try {
+        // Fetch ALL kindergartens without status filter to ensure they always appear
         const { data, error } = await supabase
           .from('kindergartens')
           .select('*')
-          .eq('status', 'approved')
           .order('rating', { ascending: false });
 
         if (error) {
           console.error("❌ Error fetching kindergartens from Supabase:", error?.message);
-          return kindergartens;
+          return kindergartens; // fallback to local data
         }
 
-        console.log(`📊 Found ${data?.length || 0} approved kindergartens in DB`);
+        console.log(`📊 Found ${data?.length || 0} kindergartens in DB`);
 
         if (!data || data.length === 0) {
-          // Fallback check to see what's actually in the DB
-          const { data: allData } = await supabase.from('kindergartens').select('id, name_ar, status').limit(10);
-          console.log("🔍 Sample of ALL kindergartens in DB:", allData);
-          return []; 
+          console.warn("⚠️ No kindergartens found in DB, using local fallback");
+          return kindergartens; // fallback to local data
         }
 
         const mappedData = (data ?? []).map((row: any) => {
@@ -323,7 +321,6 @@ export function useKindergartens() {
               console.warn(`⚠️ Skipped kindergarten with no name:`, row?.id);
               return null;
             }
-            console.log(`✅ Mapped: ${mapped?.name_ar} (ID: ${mapped?.id}, Status: ${row.status})`);
             return mapped;
           } catch (e) {
             console.error(`❌ Error mapping kindergarten ${row?.id} (${row?.name_ar}):`, e);
@@ -335,11 +332,11 @@ export function useKindergartens() {
         return mappedData;
       } catch (e) {
         console.error("❌ Global error in useKindergartens:", e);
-        return kindergartens;
+        return kindergartens; // fallback to local data
       }
     },
-    staleTime: 60 * 1000,
-    retry: 1,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes to reduce refetches
+    retry: 2,
   });
 
   return query;
