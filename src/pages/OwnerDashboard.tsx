@@ -50,6 +50,7 @@ import {
   UserPlus,
   Image as ImageIcon
 } from 'lucide-react';
+import PaymentProcess from '@/components/PaymentProcess';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -137,7 +138,7 @@ const OwnerDashboard = () => {
     programs: []
   });
   const [isTrialActive, setIsTrialActive] = useState(true); // Default to true as requested
-  const [showPaymentRedirect, setShowPaymentRedirect] = useState(false);
+  const [activePayment, setActivePayment] = useState<any>(null);
 
   const isAuthorized = profile && profile.role === 'owner' && profile.status === 'approved';
 
@@ -451,12 +452,11 @@ const OwnerDashboard = () => {
                 </Badge>
               ) : (
                 <SubscriptionInterface onActivate={() => {
-                  setShowPaymentRedirect(true);
-                  toast({
-                    title: language === 'ar' ? 'طلب التفعيل' : 'Demande d\'activation',
-                    description: language === 'ar' ? 'تم تحويلك لصفحة الدفع لتفعيل الحساب المهني' : 'Vous avez été redirigé vers la page de paiement',
-                  });
-                }} />
+                    setActivePayment({
+                      amount: 1900, // Example price for professional account
+                      serviceName: language === 'ar' ? 'تفعيل الحساب المهني' : 'Activation Compte Professionnel'
+                    });
+                  }} />
               )}
               
               <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
@@ -573,10 +573,9 @@ const OwnerDashboard = () => {
         {/* Subscription Interface - Added to match Parent Dashboard */}
         <div className="flex justify-center md:justify-start">
           <SubscriptionInterface onActivate={() => {
-            setShowPaymentRedirect(true);
-            toast({
-              title: language === 'ar' ? 'طلب التفعيل' : 'Demande d\'activation',
-              description: language === 'ar' ? 'تم تحويلك لصفحة الدفع لتفعيل الحساب المهني' : 'Vous avez été redirigé vers la page de paiement',
+            setActivePayment({
+              amount: 1900, // Example price for professional account
+              serviceName: language === 'ar' ? 'تفعيل الحساب المهني' : 'Activation Compte Professionnel'
             });
           }} />
         </div>
@@ -1307,38 +1306,20 @@ const OwnerDashboard = () => {
         </Tabs>
       </main>
 
-      {showPaymentRedirect && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-300">
-          <Card className="w-full max-w-lg shadow-2xl border-primary/20 overflow-hidden relative">
-            <div className="absolute top-0 left-0 w-full h-1.5 gradient-accent" />
-            <CardContent className="p-8 text-center space-y-6">
-              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 scale-in animate-bounce-subtle">
-                <CreditCard className="w-10 h-10 text-primary" />
-              </div>
-              
-              <div className="space-y-2">
-                <h3 className="text-2xl font-black text-foreground">
-                  {language === 'ar' ? 'جاري تحويلك للدفع' : 'Redirection vers le paiement'}
-                </h3>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  {language === 'ar' 
-                    ? 'تم تحويلك لصفحة الدفع لتفعيل الحساب المهني' 
-                    : 'Vous avez été redirigé vers la page de paiement pour activer le compte professionnel'}
-                </p>
-              </div>
-
-              <div className="pt-4">
-                <Button 
-                  onClick={() => setShowPaymentRedirect(false)}
-                  className="w-full h-12 rounded-2xl font-bold text-lg shadow-soft hover:shadow-hover transition-all"
-                  variant="outline"
-                >
-                  {language === 'ar' ? 'إغلاق' : 'Fermer'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      {/* Advanced Payment Process */}
+      {activePayment && (
+        <PaymentProcess 
+          kindergarten={kgDetails as any}
+          bookingData={activePayment}
+          onComplete={() => setActivePayment(null)}
+          onSuccess={(txId) => {
+            console.log('Payment successful:', txId);
+            toast({
+              title: language === 'ar' ? 'نجاح' : 'Succès',
+              description: language === 'ar' ? 'تم استلام طلب التفعيل بنجاح' : 'Demande d\'activation reçue avec succès',
+            });
+          }}
+        />
       )}
 
     </div>
