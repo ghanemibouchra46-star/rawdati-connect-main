@@ -73,7 +73,7 @@ const AdminAuth = () => {
                 .single();
 
             const userEmail = session.user.email?.toLowerCase() || '';
-            const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
+            const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com', 'rawdati245@gmail.com'];
             const isAdminEmail = adminEmails.includes(userEmail);
             const hasAdminMetadata =
                 session.user.user_metadata?.role === 'admin' ||
@@ -109,7 +109,7 @@ const AdminAuth = () => {
                 .single();
 
             const userEmail = currentUser.email?.toLowerCase() || '';
-            const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
+            const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com', 'rawdati245@gmail.com'];
             const isAdminEmail = adminEmails.includes(userEmail);
             const hasAdminMetadata =
                 currentUser.user_metadata?.role === 'admin' ||
@@ -117,10 +117,7 @@ const AdminAuth = () => {
 
             if (!profile || profile.role !== 'admin') {
                 if (hasAdminMetadata || isAdminEmail) {
-                    await supabase.from('user_roles').upsert(
-                        { user_id: currentUser.id, role: 'admin' },
-                        { onConflict: 'user_id,role' }
-                    );
+                    await supabase.rpc('assign_admin_role' as any);
                 } else {
                     await supabase.auth.signOut();
                     toast({
@@ -171,7 +168,7 @@ const AdminAuth = () => {
             return;
         }
         const emailLower = email.toLowerCase().trim();
-        const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
+        const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com', 'rawdati245@gmail.com'];
         if (!adminEmails.includes(emailLower)) {
             toast({
                 title: t('common.error'),
