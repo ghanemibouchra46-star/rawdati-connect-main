@@ -118,10 +118,10 @@ const Auth = () => {
         toast({
           title: t('common.error'),
           description: language === 'ar' 
-            ? 'هذا الحساب خاص بأصحاب الروضات، يرجى تسجيل الدخول من صفحة المديرين' 
+            ? 'هذه مساحة مخصصة للأولياء فقط. حسابك مسجل كصاحب روضة.' 
             : language === 'fr'
-            ? 'Ce compte est réservé aux directeurs, veuillez vous connecter via la page des directeurs.'
-            : 'This account is for kindergarten owners, please login from the owner page.',
+            ? 'Cette section est réservée aux parents seulement. Votre compte est enregistré en tant que directeur.'
+            : 'This section is for parents only. Your account is registered as a kindergarten owner.',
           variant: 'destructive',
         });
       } else {

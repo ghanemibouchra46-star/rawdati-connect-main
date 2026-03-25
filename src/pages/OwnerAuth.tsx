@@ -140,10 +140,10 @@ const OwnerAuth = () => {
           toast({
             title: 'خطأ في الدخول',
             description: language === 'ar' 
-              ? 'هذا الحساب خاص بالأولياء، يرجى تسجيل الدخول من صفحة الأولياء' 
+              ? 'هذه مساحة مخصصة لأصحاب الروضات فقط. حسابك مسجل كولي أمر.' 
               : language === 'fr'
-              ? 'Ce compte est réservé aux parents, veuillez vous connecter via la page des parents.'
-              : 'This account is for parents, please login from the parent page.',
+              ? 'Cette section est réservée aux directeurs seulement. Votre compte est enregistré en tant que parent.'
+              : 'This section is for kindergarten owners only. Your account is registered as a parent.',
             variant: 'destructive',
           });
         }
