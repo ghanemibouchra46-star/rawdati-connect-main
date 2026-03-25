@@ -453,7 +453,7 @@ const OwnerDashboard = () => {
               ) : (
                 <SubscriptionInterface onActivate={() => {
                     setActivePayment({
-                      amount: 1900, // Example price for professional account
+                      amount: 2000, // Professional account activation price
                       serviceName: language === 'ar' ? 'تفعيل الحساب المهني' : 'Activation Compte Professionnel'
                     });
                   }} />
@@ -574,7 +574,7 @@ const OwnerDashboard = () => {
         <div className="flex justify-center md:justify-start">
           <SubscriptionInterface onActivate={() => {
             setActivePayment({
-              amount: 1900, // Example price for professional account
+              amount: 2000, // Professional account activation price
               serviceName: language === 'ar' ? 'تفعيل الحساب المهني' : 'Activation Compte Professionnel'
             });
           }} />
