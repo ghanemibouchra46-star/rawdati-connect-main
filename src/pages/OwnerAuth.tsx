@@ -68,9 +68,8 @@ const OwnerAuth = () => {
         navigate('/admin', { replace: true });
       } else if (authProfile.role === 'owner' && authProfile.status === 'approved') {
         navigate('/owner', { replace: true });
-      } else if (authProfile.role === 'parent') {
-        navigate('/parent', { replace: true });
       }
+      // Parents are not auto-redirected from here to allow handleLogin to show the error
     }
   }, [authProfile, authLoading, navigate]);
 

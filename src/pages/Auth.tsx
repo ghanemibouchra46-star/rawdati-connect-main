@@ -62,14 +62,12 @@ const Auth = () => {
   useEffect(() => {
     if (authLoading) return; // Wait for auth to resolve
     if (authProfile) {
-      const role = authProfile.role || 'parent';
-      if (role === 'admin') {
+      if (authProfile.role === 'admin') {
         navigate('/admin', { replace: true });
-      } else if (role === 'owner' && authProfile.status === 'approved') {
-        navigate('/owner', { replace: true });
-      } else if (role === 'parent') {
+      } else if (authProfile.role === 'parent') {
         navigate('/parent', { replace: true });
       }
+      // Owners are not auto-redirected from here to allow handleLogin to show the error
     }
   }, [authProfile, authLoading, navigate]);
 
