@@ -112,16 +112,19 @@ const Auth = () => {
         navigate('/admin');
       } else if (role === 'owner') {
         // Prevent owners from logging in on the parent page
+        console.log("Owner detected on parent login, signing out...");
         await supabase.auth.signOut();
         toast({
-          title: t('common.error'),
+          title: 'خطأ في الدخول',
           description: language === 'ar' 
             ? 'هذه مساحة مخصصة للأولياء فقط. حسابك مسجل كصاحب روضة.' 
             : language === 'fr'
-            ? 'Cette section est réservée aux parents seulement. Votre compte est enregistré en tant que directeur.'
-            : 'This section is for parents only. Your account is registered as a kindergarten owner.',
+            ? 'Cette section est réservée aux parents seulement. Votre compte est enregistré en tant que propriétaire.'
+            : 'This section is for parents only. Your account is registered as an owner.',
           variant: 'destructive',
         });
+        setIsLoading(false);
+        return;
       } else {
         toast({ title: t('auth.welcome'), description: t('auth.success') });
         navigate('/parent');

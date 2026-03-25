@@ -117,43 +117,54 @@ const OwnerAuth = () => {
         return;
       }
 
-      if (fetchedProfile) {
-        if (fetchedProfile.role === 'owner') {
-          if (fetchedProfile.status === 'approved') {
-            toast({ title: t('auth.welcome'), description: t('auth.success') });
-            navigate('/owner');
-          } else {
-            await supabase.auth.signOut();
-            toast({
-              title: 'قيد المراجعة',
-              description: 'حسابك لا يزال قيد المراجعة من قبل الإدارة.',
-              variant: 'destructive',
-            });
-          }
-        } else if (fetchedProfile.role === 'admin') {
-          toast({ title: 'مرحباً بك', description: 'تم تسجيل دخول المسؤول بنجاح' });
-          navigate('/admin', { replace: true });
-        } else if (fetchedProfile.role === 'parent') {
-          // Prevent parents from logging in on the owner page
+      const userEmail = currentUser.email?.toLowerCase() || '';
+      const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com'];
+      const isAdminEmail = adminEmails.includes(userEmail);
+      const metadataRole = currentUser.user_metadata?.role || currentUser.app_metadata?.role;
+      const role = fetchedProfile?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
+
+      if (role === 'owner') {
+        if (fetchedProfile?.status === 'approved') {
+          toast({ title: t('auth.welcome'), description: t('auth.success') });
+          navigate('/owner');
+        } else {
           await supabase.auth.signOut();
           toast({
-            title: 'خطأ في الدخول',
-            description: language === 'ar' 
-              ? 'هذه مساحة مخصصة لأصحاب الروضات فقط. حسابك مسجل كولي أمر.' 
-              : language === 'fr'
-              ? 'Cette section est réservée aux directeurs seulement. Votre compte est enregistré en tant que parent.'
-              : 'This section is for kindergarten owners only. Your account is registered as a parent.',
+            title: 'قيد المراجعة',
+            description: 'حسابك لا يزال قيد المراجعة من قبل الإدارة.',
             variant: 'destructive',
           });
+          setIsLoading(false);
+          return;
         }
-      } else {
-        // If no profile found, assume parent or show error
+      } else if (role === 'admin') {
+        toast({ title: 'مرحباً بك', description: 'تم تسجيل دخول المسؤول بنجاح' });
+        navigate('/admin', { replace: true });
+      } else if (role === 'parent') {
+        // Prevent parents from logging in on the owner page
+        console.log("Parent detected on owner login, signing out...");
         await supabase.auth.signOut();
         toast({
-          title: 'خطأ',
-          description: language === 'ar' ? 'لم يتم العثور على ملف تعريف المستخدم' : 'User profile not found',
+          title: 'خطأ في الدخول',
+          description: language === 'ar' 
+            ? 'هذه مساحة مخصصة لأصحاب الروضات فقط. حسابك مسجل كولي أمر.' 
+            : language === 'fr'
+            ? 'Cette section est réservée aux directeurs seulement. Votre compte est enregistré en tant que parent.'
+            : 'This section is for kindergarten owners only. Your account is registered as a parent.',
           variant: 'destructive',
         });
+        setIsLoading(false);
+        return;
+      } else {
+        // Any other role not intended for this page
+        await supabase.auth.signOut();
+        toast({
+          title: 'خطأ في الدخول',
+          description: 'هذا الحساب غير مصرح له بالدخول من هذه الصفحة',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
       }
     } catch (error: any) {
       toast({
