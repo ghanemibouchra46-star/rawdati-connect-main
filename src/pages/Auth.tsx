@@ -106,12 +106,20 @@ const Auth = () => {
       const role = (fetchedProfile?.role) || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
 
       if (role === 'admin') {
-        // Force a fresh profile refresh from DB to get the NEW role after RPC
-        // We call refreshProfile without the 2nd argument to trigger a DB fetch
-        await supabase.rpc('assign_admin_role' as any);
-        await refreshProfile(currentUser.id); 
-        toast({ title: t('auth.welcome'), description: t('auth.success') });
-        navigate('/admin');
+        // Prevent admins from logging in on the parent page
+        console.log("Admin detected on parent login, signing out...");
+        await supabase.auth.signOut();
+        toast({
+          title: 'خطأ في الدخول',
+          description: language === 'ar' 
+            ? 'هذه مساحة مخصصة للأولياء فقط. حسابك مسجل كمشرف.' 
+            : language === 'fr'
+            ? 'Cette section est réservée aux parents seulement. Votre compte est enregistré en tant qu\'administrateur.'
+            : 'This section is for parents only. Your account is registered as an administrator.',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
       } else if (role === 'owner') {
         // Prevent owners from logging in on the parent page
         console.log("Owner detected on parent login, signing out...");
@@ -119,10 +127,10 @@ const Auth = () => {
         toast({
           title: 'خطأ في الدخول',
           description: language === 'ar' 
-            ? 'هذه مساحة مخصصة للأولياء فقط. حسابك مسجل كصاحب روضة.' 
+            ? 'هذا الجزء خاص بالأولياء فقط، وليس أصحاب الروضات. يرجى تسجيل الدخول من صفحة أصحاب الروضات.' 
             : language === 'fr'
-            ? 'Cette section est réservée aux parents seulement. Votre compte est enregistré en tant que propriétaire.'
-            : 'This section is for parents only. Your account is registered as an owner.',
+            ? 'Cette section est réservée aux parents seulement، وليس أصحاب الروضات. veuillez vous connecter depuis l\'espace propriétaires.'
+            : 'This section is for parents only, not kindergarten owners. Please log in from the owner page.',
           variant: 'destructive',
         });
         setIsLoading(false);

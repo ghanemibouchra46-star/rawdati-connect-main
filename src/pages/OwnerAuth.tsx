@@ -123,11 +123,20 @@ const OwnerAuth = () => {
           return;
         }
       } else if (role === 'admin') {
-        // Force a fresh profile refresh from DB to ensure role change is detected
-        await refreshProfile(currentUser.id); 
-        toast({ title: 'مرحباً بك', description: 'تم تسجيل دخول المسؤول بنجاح' });
-        await supabase.rpc('assign_admin_role' as any);
-        navigate('/admin', { replace: true });
+        // Prevent admins from logging in on the owner page
+        console.log("Admin detected on owner login, signing out...");
+        await supabase.auth.signOut();
+        toast({
+          title: 'خطأ في الدخول',
+          description: language === 'ar' 
+            ? 'هذا الجزء خاص بأصحاب الروضات، وليس المسؤولين. يرجى تسجيل الدخول من صفحة الإدارة.' 
+            : language === 'fr'
+            ? 'Cette section est réservée فقط aux directeurs، وليس المسؤولين. المسؤولين. s\'inscrivent par la page d\'administration.'
+            : 'This section is for kindergarten owners only, not administrators. Please log in from the admin page.',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
       } else if (role === 'parent') {
         // Prevent parents from logging in on the owner page
         console.log("Parent detected on owner login, signing out...");
@@ -135,10 +144,10 @@ const OwnerAuth = () => {
         toast({
           title: 'خطأ في الدخول',
           description: language === 'ar' 
-            ? 'هذه مساحة مخصصة لأصحاب الروضات فقط. حسابك مسجل كولي أمر.' 
+            ? 'هذا الجزء خاص بأصحاب الروضات، وليس الأولياء. يرجى تسجيل الدخول من صفحة الأولياء.' 
             : language === 'fr'
-            ? 'Cette section est réservée aux directeurs seulement. Votre compte est enregistré en tant que parent.'
-            : 'This section is for kindergarten owners only. Your account is registered as a parent.',
+            ? 'Cette section est réservée aux directeurs seulement، وليس الاولياء. veuillez vous connecter depuis l\'espace parents.'
+            : 'This section is for kindergarten owners only, not parents. Please log in from the parent page.',
           variant: 'destructive',
         });
         setIsLoading(false);
