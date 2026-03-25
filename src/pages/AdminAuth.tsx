@@ -101,7 +101,7 @@ const AdminAuth = () => {
             const profile = fetchedProfile;
 
             const userEmail = currentUser.email?.toLowerCase() || '';
-            const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com', 'rawdati245@gmail.com'];
+            const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemibouchra46@gmail.com', 'rawdati245@gmail.com'];
             const isAdminEmail = adminEmails.includes(userEmail);
             const hasAdminMetadata =
                 currentUser.user_metadata?.role === 'admin' ||

@@ -100,9 +100,10 @@ const OwnerAuth = () => {
       }
 
       const userEmail = currentUser.email?.toLowerCase() || '';
-      const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com', 'rawdati245@gmail.com'];
+      const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemibouchra46@gmail.com', 'rawdati245@gmail.com'];
       const isAdminEmail = adminEmails.includes(userEmail);
       const metadataRole = currentUser.user_metadata?.role || currentUser.app_metadata?.role;
+      // Respect existing profile role first, then fallback to admin whitelist
       const role = fetchedProfile?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
 
       if (role === 'owner') {
