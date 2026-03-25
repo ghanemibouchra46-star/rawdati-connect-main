@@ -273,34 +273,27 @@ const AdminDashboard = () => {
                 }));
             } else {
                 // Fallback to direct profiles select
-                const { data: pRes } = await supabase.from('profiles').select('*');
+                const { data: pRes, error: pError } = await supabase.from('profiles').select('*');
                 const { data: rRes } = await supabase.from('user_roles').select('*');
-                const profiles = pRes || [];
-                const roles = rRes || [];
-                usersWithRoles = profiles.map((p: any) => ({
-                    ...p,
-                    role: roles.find((r: any) => r.user_id === p.id)?.role || 'parent'
-                }));
-            }
-            if (usersWithRoles.length === 0) {
-                usersWithRoles = [{
-                    id: 'admin-1',
-                    full_name: 'ghanemi bouchra',
-                    role: 'admin',
-                    created_at: '2026-03-03T12:00:00Z',
-                    status: 'approved'
-                }];
+                if (!pError) {
+                    const profiles = pRes || [];
+                    const roles = rRes || [];
+                    usersWithRoles = profiles.map((p: any) => ({
+                        ...p,
+                        role: roles.find((r: any) => r.user_id === p.id)?.role || 'parent'
+                    }));
+                }
             }
             setUsers(usersWithRoles);
 
             // 3. Fetch Registration Requests (Failure-tolerant)
-            const { data: regData } = await supabase
+            const { data: regData, error: regError } = await supabase
                 .from('registration_requests')
                 .select('*')
                 .order('created_at', { ascending: false });
             
-            if (regData && regData.length > 0) {
-                setRegistrationRequests(regData as any[]);
+            if (!regError) {
+                setRegistrationRequests(regData || []);
             } else {
                 setRegistrationRequests(localMockRegs);
             }
@@ -311,7 +304,7 @@ const AdminDashboard = () => {
             const pendingKGs = finalKGs.filter(kg => kg.status === 'pending').length;
             
             // Fix: Use the same registration data that was set above (including mocks if needed)
-            const finalRegs = (regData && regData.length > 0) ? regData : localMockRegs;
+            const finalRegs = !regError ? (regData || []) : localMockRegs;
             const pendingRegs = finalRegs.filter(reg => reg.status === 'pending').length;
 
             setStats({
