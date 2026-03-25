@@ -137,17 +137,11 @@ const AdminDashboard = () => {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            // Parallelize all main data fetches
-            const [kgRes, userRes, regRes] = await Promise.all([
-                supabase.from('kindergartens').select('*'),
-                supabase.rpc('get_profiles_with_roles_for_admin'),
-                supabase.from('registration_requests').select('*').order('created_at', { ascending: false })
-            ]);
-
-            // 1. Process Kindergartens
+            // 1. Fetch Kindergartens (Failure-tolerant)
+            const { data: kgData } = await supabase.from('kindergartens').select('*');
             let finalKGs = localKindergartens.map(adaptKindergarten);
-            if (kgRes.data && kgRes.data.length > 0) {
-                finalKGs = (kgRes.data as any[]).map(kg => ({
+            if (kgData && kgData.length > 0) {
+                finalKGs = (kgData as any[]).map(kg => ({
                     id: kg.id,
                     name_ar: kg.name_ar || kg.nameAr || kg.name || 'N/A',
                     name_fr: kg.name_fr || kg.nameFr || kg.name || 'N/A',
@@ -162,10 +156,12 @@ const AdminDashboard = () => {
             }
             setKindergartens(finalKGs);
 
-            // 2. Process Users/Profiles
+            // 2. Fetch Users (Failure-tolerant)
             let usersWithRoles: any[] = [];
-            if (userRes.data) {
-                const rpcList = Array.isArray(userRes.data) ? userRes.data : [userRes.data];
+            const { data: rpcData, error: rpcError } = await supabase.rpc('get_profiles_with_roles_for_admin');
+            
+            if (!rpcError && rpcData) {
+                const rpcList = Array.isArray(rpcData) ? rpcData : [rpcData];
                 usersWithRoles = rpcList.map((row: any) => ({
                     id: row.id,
                     full_name: row.full_name,
@@ -176,13 +172,11 @@ const AdminDashboard = () => {
                     role: row.role || 'parent'
                 }));
             } else {
-                // Fallback to separate queries if RPC fails (though less efficient)
-                const [pRes, rRes] = await Promise.all([
-                    supabase.from('profiles').select('*'),
-                    supabase.from('user_roles').select('*')
-                ]);
-                const profiles = pRes.data || [];
-                const roles = rRes.data || [];
+                // Fallback to direct profiles select
+                const { data: pRes } = await supabase.from('profiles').select('*');
+                const { data: rRes } = await supabase.from('user_roles').select('*');
+                const profiles = pRes || [];
+                const roles = rRes || [];
                 usersWithRoles = profiles.map((p: any) => ({
                     ...p,
                     role: roles.find((r: any) => r.user_id === p.id)?.role || 'parent'
@@ -190,9 +184,14 @@ const AdminDashboard = () => {
             }
             setUsers(usersWithRoles);
 
-            // 3. Process Registrations
-            if (regRes.data && regRes.data.length > 0) {
-                setRegistrationRequests(regRes.data as any[]);
+            // 3. Fetch Registration Requests (Failure-tolerant)
+            const { data: regData } = await supabase
+                .from('registration_requests')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (regData && regData.length > 0) {
+                setRegistrationRequests(regData as any[]);
             } else {
                 setRegistrationRequests(localMockRegs);
             }
@@ -201,7 +200,7 @@ const AdminDashboard = () => {
             const activeOwners = usersWithRoles.filter(u => u.role === 'owner').length;
             const activeParents = usersWithRoles.filter(u => u.role === 'parent').length;
             const pendingKGs = finalKGs.filter(kg => kg.status === 'pending').length;
-            const pendingRegs = (regRes.data || localMockRegs).filter(reg => reg.status === 'pending').length;
+            const pendingRegs = (regData || []).filter(reg => reg.status === 'pending').length;
 
             setStats({
                 totalUsers: usersWithRoles.length,
@@ -548,6 +547,44 @@ const AdminDashboard = () => {
                                 </CardContent>
                             </Card>
                         </div>
+
+                        {/* My Personal Registrations Section (Requested) */}
+                        {registrationRequests.filter(r => r.user_id === profile?.id).length > 0 && (
+                            <div className="mt-8">
+                                <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                    <Baby className="w-5 h-5 text-red-500" />
+                                    {language === 'ar' ? 'تسجيلاتي الشخصية' : 'My Personal Registrations'}
+                                </h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {registrationRequests.filter(r => r.user_id === profile?.id).map((reg) => {
+                                        const kg = kindergartens.find(k => k.id === reg.kindergarten_id);
+                                        return (
+                                            <Card key={`personal-${reg.id}`} className="bg-slate-900 border-white/5 hover:bg-white/5 transition-all cursor-pointer group">
+                                                <CardContent className="p-4">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 font-bold text-lg">
+                                                            {reg.child_name.charAt(0)}
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <h3 className="font-bold text-white">{reg.child_name}</h3>
+                                                            <p className="text-xs text-slate-400">{reg.child_age} {language === 'ar' ? 'سنوات' : 'ans'}</p>
+                                                            <div className="flex items-center gap-2 mt-1">
+                                                                <Badge variant="outline" className="text-[10px] border-white/10 text-slate-400">
+                                                                    {language === 'ar' ? (kg?.name_ar || reg.kindergarten_id) : (kg?.name_fr || reg.kindergarten_id)}
+                                                                </Badge>
+                                                                <Badge className={`text-[10px] px-1.5 h-4 ${reg.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' : reg.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
+                                                                    {reg.status}
+                                                                </Badge>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
                     </TabsContent>
 
                     <TabsContent value="kindergartens">
