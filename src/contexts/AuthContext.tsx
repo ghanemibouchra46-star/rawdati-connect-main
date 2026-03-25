@@ -137,9 +137,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       .eq('id', data.user?.id)
       .single();
     
-    // Sync to local state
-    setProfile(profileData);
-    setLoading(false); // Dashboard can now load
+    // IMPORTANT: Do NOT set profile in global state here!
+    // The auth page must validate the role first, then call refreshProfile()
+    // to commit the profile to global state. This prevents race conditions
+    // where a parent profile triggers auto-redirect on the owner page.
+    // setLoading stays true until the auth page calls refreshProfile().
 
     return { user: data.user, session: data.session, profile: profileData };
   };

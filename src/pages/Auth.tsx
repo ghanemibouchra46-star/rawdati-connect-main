@@ -104,6 +104,8 @@ const Auth = () => {
       const role = fetchedProfile?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
 
       if (role === 'admin') {
+        // Role is correct — commit profile to global state
+        await refreshProfile(currentUser.id, fetchedProfile);
         toast({ title: t('auth.welcome'), description: t('auth.success') });
         await supabase.from('user_roles').upsert(
           { user_id: currentUser.id, role: 'admin' },
@@ -126,6 +128,8 @@ const Auth = () => {
         setIsLoading(false);
         return;
       } else {
+        // Role is correct (parent) — commit profile to global state
+        await refreshProfile(currentUser.id, fetchedProfile);
         toast({ title: t('auth.welcome'), description: t('auth.success') });
         navigate('/parent');
       }

@@ -73,26 +73,8 @@ const OwnerAuth = () => {
     }
   }, [authProfile, authLoading, navigate]);
 
-  const checkOwnerRole = async (userId: string) => {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role, status')
-      .eq('id', userId)
-      .single();
+  // checkOwnerRole removed — role validation is now handled entirely in handleLogin
 
-    if (profile) {
-      if (profile.role === 'admin') {
-        navigate('/admin');
-      } else if (profile.role === 'owner') {
-        if (profile.status === 'approved') {
-          navigate('/owner');
-        }
-      } else {
-        // Redirect parents or any other role to parent dashboard
-        navigate('/parent');
-      }
-    }
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,6 +107,8 @@ const OwnerAuth = () => {
 
       if (role === 'owner') {
         if (fetchedProfile?.status === 'approved') {
+          // Role is correct — now commit profile to global state
+          await refreshProfile(currentUser.id, fetchedProfile);
           toast({ title: t('auth.welcome'), description: t('auth.success') });
           navigate('/owner');
         } else {
@@ -138,6 +122,8 @@ const OwnerAuth = () => {
           return;
         }
       } else if (role === 'admin') {
+        // Role is correct — now commit profile to global state
+        await refreshProfile(currentUser.id, fetchedProfile);
         toast({ title: 'مرحباً بك', description: 'تم تسجيل دخول المسؤول بنجاح' });
         navigate('/admin', { replace: true });
       } else if (role === 'parent') {
