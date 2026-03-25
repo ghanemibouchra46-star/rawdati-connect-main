@@ -33,7 +33,6 @@ interface UserProfile {
     status: string | null;
     email?: string;
     role?: string;
-    user_type?: string;
 }
 
 interface Kindergarten {
@@ -129,34 +128,6 @@ const AdminDashboard = () => {
         if (!authLoading) {
             if (profile && profile.role === 'admin') {
                 fetchData();
-                
-                // Set up real-time subscriptions for immediate updates
-                const profilesSub = supabase
-                    .channel('admin-profiles-changes')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => fetchData())
-                    .subscribe();
-                    
-                const rolesSub = supabase
-                    .channel('admin-roles-changes')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'user_roles' }, () => fetchData())
-                    .subscribe();
-                    
-                const kgSub = supabase
-                    .channel('admin-kg-changes')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'kindergartens' }, () => fetchData())
-                    .subscribe();
-                    
-                const regSub = supabase
-                    .channel('admin-reg-changes')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'registration_requests' }, () => fetchData())
-                    .subscribe();
-
-                return () => {
-                    supabase.removeChannel(profilesSub);
-                    supabase.removeChannel(rolesSub);
-                    supabase.removeChannel(kgSub);
-                    supabase.removeChannel(regSub);
-                };
             } else {
                 navigate('/admin-auth', { replace: true });
             }
@@ -202,8 +173,7 @@ const AdminDashboard = () => {
                     status: row.status,
                     created_at: row.created_at,
                     updated_at: row.updated_at,
-                    role: row.role || 'parent',
-                    user_type: row.user_type || row.role || 'parent'
+                    role: row.role || 'parent'
                 }));
             } else {
                 // Fallback to separate queries if RPC fails (though less efficient)
@@ -215,8 +185,7 @@ const AdminDashboard = () => {
                 const roles = rRes.data || [];
                 usersWithRoles = profiles.map((p: any) => ({
                     ...p,
-                    role: roles.find((r: any) => r.user_id === p.id)?.role || 'parent',
-                    user_type: p.user_type || 'parent'
+                    role: roles.find((r: any) => r.user_id === p.id)?.role || 'parent'
                 }));
             }
             setUsers(usersWithRoles);
@@ -229,9 +198,8 @@ const AdminDashboard = () => {
             }
 
             // 4. Update Stats
-            // Ensure we count parents correctly even if role is missing but profile exists
             const activeOwners = usersWithRoles.filter(u => u.role === 'owner').length;
-            const activeParents = usersWithRoles.filter(u => u.role === 'parent' || (!u.role && u.user_type === 'parent')).length;
+            const activeParents = usersWithRoles.filter(u => u.role === 'parent').length;
             const pendingKGs = finalKGs.filter(kg => kg.status === 'pending').length;
             const pendingRegs = (regRes.data || localMockRegs).filter(reg => reg.status === 'pending').length;
 
@@ -344,12 +312,7 @@ const AdminDashboard = () => {
                                 <Shield className="w-5 h-5 text-white" />
                             </div>
                             <div>
-                                <h1 className="font-bold text-lg text-white leading-tight flex items-center gap-2">
-                                    Rawdati <span className="text-red-500">Admin</span>
-                                    <Badge variant="outline" className="text-[9px] h-4 px-1.5 border-green-500/30 text-green-500 bg-green-500/5 animate-pulse">
-                                        LIVE
-                                    </Badge>
-                                </h1>
+                                <h1 className="font-bold text-lg text-white leading-tight">Rawdati <span className="text-red-500">Admin</span></h1>
                                 <p className="text-[10px] text-slate-400 uppercase tracking-widest">{language === 'ar' ? 'لوحة التحكم المركزية' : 'Central Control Panel'}</p>
                             </div>
                         </div>
@@ -361,7 +324,7 @@ const AdminDashboard = () => {
                                 disabled={isLoading}
                                 className="bg-white/5 border-white/10 text-slate-300 hover:text-white"
                             >
-                                <RefreshCcw className={`w-3 h-3 mx-2 ${isLoading ? 'animate-spin' : ''}`} />
+                                <RefreshCcw className={`w-4 h-4 mx-2 ${isLoading ? 'animate-spin' : ''}`} />
                                 {language === 'ar' ? 'تحديث' : 'Refresh'}
                             </Button>
                             <LanguageSelector />
