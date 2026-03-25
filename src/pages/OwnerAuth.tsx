@@ -129,10 +129,10 @@ const OwnerAuth = () => {
         toast({
           title: 'خطأ في الدخول',
           description: language === 'ar' 
-            ? 'هذا الجزء خاص بأصحاب الروضات، وليس المسؤولين. يرجى تسجيل الدخول من صفحة الإدارة.' 
+            ? 'هذا خاص بأصحاب الروضات و ليس أدمين' 
             : language === 'fr'
-            ? 'Cette section est réservée فقط aux directeurs، وليس المسؤولين. المسؤولين. s\'inscrivent par la page d\'administration.'
-            : 'This section is for kindergarten owners only, not administrators. Please log in from the admin page.',
+            ? 'Cette section est réservée aux directeurs seulement، و ليس أدمين.'
+            : 'This section is for kindergarten owners only, not admins.',
           variant: 'destructive',
         });
         setIsLoading(false);

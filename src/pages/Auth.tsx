@@ -112,10 +112,10 @@ const Auth = () => {
         toast({
           title: 'خطأ في الدخول',
           description: language === 'ar' 
-            ? 'هذه مساحة مخصصة للأولياء فقط. حسابك مسجل كمشرف.' 
+            ? 'هذا خاص بأصحاب الروضات و ليس أدمين' 
             : language === 'fr'
-            ? 'Cette section est réservée aux parents seulement. Votre compte est enregistré en tant qu\'administrateur.'
-            : 'This section is for parents only. Your account is registered as an administrator.',
+            ? 'Cette section est réservée aux parents seulement، و ليس أدمين.'
+            : 'This section is for parents only, not admins.',
           variant: 'destructive',
         });
         setIsLoading(false);
