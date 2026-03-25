@@ -309,7 +309,10 @@ const AdminDashboard = () => {
             const activeOwners = usersWithRoles.filter(u => u.role === 'owner').length;
             const activeParents = usersWithRoles.filter(u => u.role === 'parent').length;
             const pendingKGs = finalKGs.filter(kg => kg.status === 'pending').length;
-            const pendingRegs = (regData || []).filter(reg => reg.status === 'pending').length;
+            
+            // Fix: Use the same registration data that was set above (including mocks if needed)
+            const finalRegs = (regData && regData.length > 0) ? regData : localMockRegs;
+            const pendingRegs = finalRegs.filter(reg => reg.status === 'pending').length;
 
             setStats({
                 totalUsers: usersWithRoles.length,
@@ -528,9 +531,9 @@ const AdminDashboard = () => {
                                             ))
                                         ) : (
                                             <>
-                                                {[...kindergartens.slice(0, 3), ...registrationRequests.slice(0, 2), ...users.slice(0, 1)]
+                                                {[...kindergartens.slice(0, 3), ...registrationRequests.slice(0, 5), ...users.slice(0, 1)]
                                                     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                                                    .slice(0, 6)
+                                                    .slice(0, 8)
                                                     .map((item: any) => {
                                                         const isKG = 'name_ar' in item;
                                                         const isUser = 'full_name' in item && !('child_name' in item) && !isKG;
