@@ -91,11 +91,11 @@ const mockRegistrations: RegistrationRequest[] = [
     {
         id: 'reg-3',
         kindergarten_id: 'kg-1',
-        parent_name: 'Older Parent',
-        phone: '000',
-        email: null,
-        child_name: 'Child 3',
-        child_age: 3,
+        parent_name: 'بشرى',
+        phone: '0792547440',
+        email: 'aa33318994@gmail.com',
+        child_name: 'عبد الرحمان',
+        child_age: 1,
         message: null,
         status: 'pending',
         created_at: '2026-03-20T10:00:00Z',
@@ -103,24 +103,24 @@ const mockRegistrations: RegistrationRequest[] = [
     {
         id: 'reg-4',
         kindergarten_id: 'kg-1',
-        parent_name: 'Older Parent',
-        phone: '000',
-        email: null,
-        child_name: 'Child 4',
+        parent_name: 'ghj',
+        phone: '12318',
+        email: 'nanovacentre@gmail.com',
+        child_name: 'bhjbhj.n',
         child_age: 4,
-        message: null,
+        message: 'bhbh',
         status: 'pending',
         created_at: '2026-03-20T11:00:00Z',
     },
     {
         id: 'reg-5',
         kindergarten_id: 'kg-1',
-        parent_name: 'Older Parent',
-        phone: '000',
-        email: null,
-        child_name: 'Child 5',
-        child_age: 5,
-        message: null,
+        parent_name: 'فتيحة الزهراء',
+        phone: '0666493425',
+        email: 'aa33318994@gmail.com',
+        child_name: 'عبد الرؤوف',
+        child_age: 3,
+        message: 'شكرا',
         status: 'pending',
         created_at: '2026-03-20T12:00:00Z',
     }
@@ -503,9 +503,25 @@ const AdminDashboard = () => {
                             <Building2 className="w-4 h-4 mx-2" />
                             {language === 'ar' ? 'الروضات' : 'Kindergartens'}
                         </TabsTrigger>
+                        <TabsTrigger value="registrations" className="data-[state=active]:bg-red-500 data-[state=active]:text-white rounded-xl">
+                            <Baby className="w-4 h-4 mx-2" />
+                            {language === 'ar' ? 'طلبات التسجيل' : 'Registrations'}
+                        </TabsTrigger>
                         <TabsTrigger value="users" className="data-[state=active]:bg-red-500 data-[state=active]:text-white rounded-xl">
+                            <Shield className="w-4 h-4 mx-2" />
+                            {language === 'ar' ? 'أصحاب الروضات' : 'Owners'}
+                        </TabsTrigger>
+                        <TabsTrigger value="parents" className="data-[state=active]:bg-red-500 data-[state=active]:text-white rounded-xl">
                             <Users className="w-4 h-4 mx-2" />
-                            {language === 'ar' ? 'المستخدمون' : 'Users'}
+                            {language === 'ar' ? 'أولياء الأمور' : 'Parents'}
+                        </TabsTrigger>
+                        <TabsTrigger value="subscriptions" className="data-[state=active]:bg-red-500 data-[state=active]:text-white rounded-xl">
+                            <CreditCard className="w-4 h-4 mx-2" />
+                            {language === 'ar' ? 'طلبات الاشتراك' : 'Subscriptions'}
+                        </TabsTrigger>
+                        <TabsTrigger value="settings" className="data-[state=active]:bg-red-500 data-[state=active]:text-white rounded-xl">
+                            <SettingsIcon className="w-4 h-4 mx-2" />
+                            {language === 'ar' ? 'الإعدادات' : 'Settings'}
                         </TabsTrigger>
                     </TabsList>
 
