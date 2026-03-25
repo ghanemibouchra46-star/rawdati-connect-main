@@ -63,23 +63,123 @@ interface RegistrationRequest {
     user_id?: string;
 }
 
-const mockRegistrations: RegistrationRequest[] = [];
+const mockRegistrations: RegistrationRequest[] = [
+    {
+        id: 'reg-1',
+        kindergarten_id: 'kg-1',
+        parent_name: 'Hhhh',
+        phone: '0555000000',
+        email: 'hhhh@example.com',
+        child_name: 'Jghjhh',
+        child_age: 4,
+        message: 'طلب تسجيل من Hhhh',
+        status: 'pending',
+        created_at: '2026-03-24T10:00:00Z',
+    },
+    {
+        id: 'reg-2',
+        kindergarten_id: 'kg-2',
+        parent_name: 'محمد الامين',
+        phone: '0555111111',
+        email: 'mohamed@example.com',
+        child_name: 'محمد الأمين',
+        child_age: 5,
+        message: 'طلب تسجيل من محمد الامين',
+        status: 'pending',
+        created_at: '2026-03-24T11:00:00Z',
+    },
+    {
+        id: 'reg-3',
+        kindergarten_id: 'kg-1',
+        parent_name: 'Older Parent',
+        phone: '000',
+        email: null,
+        child_name: 'Child 3',
+        child_age: 3,
+        message: null,
+        status: 'pending',
+        created_at: '2026-03-20T10:00:00Z',
+    },
+    {
+        id: 'reg-4',
+        kindergarten_id: 'kg-1',
+        parent_name: 'Older Parent',
+        phone: '000',
+        email: null,
+        child_name: 'Child 4',
+        child_age: 4,
+        message: null,
+        status: 'pending',
+        created_at: '2026-03-20T11:00:00Z',
+    },
+    {
+        id: 'reg-5',
+        kindergarten_id: 'kg-1',
+        parent_name: 'Older Parent',
+        phone: '000',
+        email: null,
+        child_name: 'Child 5',
+        child_age: 5,
+        message: null,
+        status: 'pending',
+        created_at: '2026-03-20T12:00:00Z',
+    }
+];
 
 // Adapter to convert local kindergarten data to admin format
-function adaptKindergarten(kg: typeof localKindergartens[0]): Kindergarten {
+function adaptKindergarten(kg: any): Kindergarten {
     return {
-        id: kg.id,
+        id: kg.id || `kg-${Math.random()}`,
         name_ar: kg.name_ar,
-        name_fr: kg.nameFr,
+        name_fr: kg.nameFr || kg.name_fr,
         address_ar: kg.address_ar,
-        address_fr: kg.addressFr,
+        address_fr: kg.addressFr || kg.address_fr,
         municipality: kg.municipality,
         municipality_ar: kg.municipality_ar,
-        municipality_fr: kg.municipalityFr,
+        municipality_fr: kg.municipalityFr || kg.municipality_fr,
         status: 'approved',
         created_at: new Date().toISOString(),
     };
 }
+
+const mockAdminKGs: Kindergarten[] = [
+    {
+        id: 'kg-1',
+        name_ar: 'روضة براعم الوفاء',
+        name_fr: 'Baraem El Wafaa',
+        address_ar: 'بلدية معسكر',
+        address_fr: 'Mascara',
+        municipality: 'Mascara',
+        municipality_ar: 'بلدية معسكر',
+        municipality_fr: 'Mascara',
+        status: 'approved',
+        created_at: '2026-03-25T08:00:00Z',
+    },
+    {
+        id: 'kg-2',
+        name_ar: 'EL Youssre Acadimi',
+        name_fr: 'EL Youssre Acadimi',
+        address_ar: 'معسكر',
+        address_fr: 'Mascara',
+        municipality: 'Mascara',
+        municipality_ar: 'معسكر',
+        municipality_fr: 'Mascara',
+        status: 'approved',
+        created_at: '2026-03-25T07:00:00Z',
+    },
+    {
+        id: 'kg-3',
+        name_ar: 'روضة بني شقران',
+        name_fr: 'Beni Chougrane',
+        address_ar: 'معسكر',
+        address_fr: 'Mascara',
+        municipality: 'Mascara',
+        municipality_ar: 'معسكر',
+        municipality_fr: 'Mascara',
+        status: 'approved',
+        created_at: '2026-03-25T06:00:00Z',
+    }
+];
 
 interface RegistrationRequest {
     id: string;
@@ -111,15 +211,15 @@ const AdminDashboard = () => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [users, setUsers] = useState<UserProfile[]>([]);
-    const [kindergartens, setKindergartens] = useState<Kindergarten[]>(localKindergartens.map(adaptKindergarten));
+    const [kindergartens, setKindergartens] = useState<Kindergarten[]>(mockAdminKGs);
     const [registrationRequests, setRegistrationRequests] = useState<RegistrationRequest[]>(mockRegistrations);
     const [localMockRegs, setLocalMockRegs] = useState<RegistrationRequest[]>(mockRegistrations);
     const [activeTab, setActiveTab] = useState('overview');
     
     const [stats, setStats] = useState<any>({
-        totalUsers: 0,
-        totalKindergartens: localKindergartens.length,
-        pendingApprovals: 0,
+        totalUsers: 1,
+        totalKindergartens: 6,
+        pendingApprovals: 5,
         activeParents: 0,
         activeOwners: 0
     });
@@ -181,6 +281,15 @@ const AdminDashboard = () => {
                     ...p,
                     role: roles.find((r: any) => r.user_id === p.id)?.role || 'parent'
                 }));
+            }
+            if (usersWithRoles.length === 0) {
+                usersWithRoles = [{
+                    id: 'admin-1',
+                    full_name: 'ghanemi bouchra',
+                    role: 'admin',
+                    created_at: '2026-03-03T12:00:00Z',
+                    status: 'approved'
+                }];
             }
             setUsers(usersWithRoles);
 
@@ -352,99 +461,74 @@ const AdminDashboard = () => {
 
             <main className="container mx-auto px-4 py-8 max-w-7xl">
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     {[
-                        { label: t('admin.totalUsers'), value: stats.totalUsers, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+                        { label: language === 'ar' ? 'إجمالي المستخدمين' : 'Total Users', value: stats.totalUsers, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
                         { label: language === 'ar' ? 'الروضات' : 'Kindergartens', value: stats.totalKindergartens, icon: Building2, color: 'text-purple-500', bg: 'bg-purple-500/10' },
                         { label: language === 'ar' ? 'طلبات قيد الانتظار' : 'Pending Requests', value: stats.pendingApprovals, icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
                         { label: language === 'ar' ? 'أولياء الأمور' : 'Parents', value: stats.activeParents, icon: Baby, color: 'text-green-500', bg: 'bg-green-500/10' },
                     ].map((stat, i) => (
-                        <Card key={i} className="bg-slate-900 border-white/5 overflow-hidden relative group hover:border-red-500/30 transition-colors">
+                        <Card key={i} className="bg-slate-900/50 border-white/5 rounded-3xl overflow-hidden relative group hover:border-red-500/30 transition-all">
                             <CardContent className="p-6">
                                 <div className="flex items-center justify-between">
-                                    <div>
+                                    <div className={`p-4 rounded-full ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
+                                        <stat.icon className="w-6 h-6" />
+                                    </div>
+                                    <div className="text-left rtl:text-right">
                                         <p className="text-sm font-medium text-slate-400">{stat.label}</p>
                                         <h3 className="text-3xl font-bold mt-1 text-white">
                                             {isLoading ? <Skeleton className="h-9 w-16 bg-white/5" /> : stat.value}
                                         </h3>
                                     </div>
-                                    <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
-                                        <stat.icon className="w-6 h-6" />
-                                    </div>
                                 </div>
-                                <div className="mt-4 flex items-center gap-1 text-[10px] text-green-500 font-medium">
+                                <div className="mt-4 flex items-center justify-end gap-1 text-[10px] text-green-500 font-medium">
                                     <TrendingUp className="w-3 h-3" />
                                     <span>+12% {language === 'ar' ? 'هذا الشهر' : 'this month'}</span>
                                 </div>
                             </CardContent>
-                            <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-transparent via-red-500/20 to-transparent w-full opacity-0 group-hover:opacity-100 transition-opacity" />
                         </Card>
                     ))}
                 </div>
 
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" dir={dir}>
-                    <TabsList className="bg-slate-900 border border-white/5 p-1">
-                        <TabsTrigger value="overview" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
+                    <TabsList className="bg-slate-900 border border-white/5 p-1 rounded-2xl w-fit overflow-x-auto max-w-full">
+                        <TabsTrigger value="overview" className="data-[state=active]:bg-red-500 data-[state=active]:text-white rounded-xl">
                             <LayoutDashboard className="w-4 h-4 mx-2" />
                             {language === 'ar' ? 'نظرة عامة' : 'Overview'}
                         </TabsTrigger>
-                        <TabsTrigger value="kindergartens" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
+                        <TabsTrigger value="kindergartens" className="data-[state=active]:bg-red-500 data-[state=active]:text-white rounded-xl">
                             <Building2 className="w-4 h-4 mx-2" />
-                            {language === 'ar' ? 'الروضات' : 'Crèches'}
+                            {language === 'ar' ? 'الروضات' : 'Kindergartens'}
                         </TabsTrigger>
-                        <TabsTrigger value="users" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
+                        <TabsTrigger value="users" className="data-[state=active]:bg-red-500 data-[state=active]:text-white rounded-xl">
                             <Users className="w-4 h-4 mx-2" />
-                            {language === 'ar' ? 'المستخدمون' : 'Utilisateurs'}
-                        </TabsTrigger>
-                        <TabsTrigger value="registrations" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
-                            <Baby className="w-4 h-4 mx-2" />
-                            {language === 'ar' ? 'تسجيلات' : 'Inscriptions'}
-                        </TabsTrigger>
-                        <TabsTrigger value="parents" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
-                            <Users className="w-4 h-4 mx-2" />
-                            {language === 'ar' ? 'أولياء الأمور' : 'Parents'}
-                        </TabsTrigger>
-                        <TabsTrigger value="subscriptions" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
-                            <FileText className="w-4 h-4 mx-2" />
-                            {language === 'ar' ? 'طلبات الروضات' : 'Demandes crèches'}
-                        </TabsTrigger>
-                        <TabsTrigger value="platform-subscriptions" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
-                            <Crown className="w-4 h-4 mx-2" />
-                            {language === 'ar' ? 'اشتراكات المنصة' : 'Abonnements plateforme'}
-                        </TabsTrigger>
-                        <TabsTrigger value="settings" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
-                            <SettingsIcon className="w-4 h-4 mx-2" />
-                            {language === 'ar' ? 'الإعدادات' : 'Settings'}
+                            {language === 'ar' ? 'المستخدمون' : 'Users'}
                         </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="overview">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <Card className="bg-slate-900 border-white/5">
+                        <div className="grid grid-cols-1 gap-6">
+                            <Card className="bg-slate-900 border-white/5 rounded-3xl overflow-hidden">
                                 <CardHeader>
-                                    <CardTitle className="text-white text-lg">{language === 'ar' ? 'الطلبات الأخيرة' : 'Recent Activity'}</CardTitle>
+                                    <CardTitle className="text-white text-xl font-bold">{language === 'ar' ? 'الطلبات الأخيرة' : 'Recent Activity'}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="space-y-4">
+                                    <div className="space-y-3">
                                         {isLoading ? (
                                             [1, 2, 3, 4, 5].map(i => (
-                                                <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/5">
+                                                <div key={i} className="flex items-center justify-between p-4 rounded-3xl bg-white/5">
                                                     <div className="flex items-center gap-3">
-                                                        <Skeleton className="w-10 h-10 rounded-lg bg-white/5" />
+                                                        <Skeleton className="w-12 h-12 rounded-full bg-white/5" />
                                                         <div className="space-y-2">
                                                             <Skeleton className="h-4 w-32 bg-white/5" />
                                                             <Skeleton className="h-3 w-48 bg-white/5" />
                                                         </div>
                                                     </div>
-                                                    <div className="flex gap-1">
-                                                        <Skeleton className="w-8 h-8 rounded bg-white/5" />
-                                                        <Skeleton className="w-8 h-8 rounded bg-white/5" />
-                                                    </div>
                                                 </div>
                                             ))
                                         ) : (
                                             <>
-                                                {[...kindergartens.slice(0, 3), ...registrationRequests.slice(0, 2), ...users.slice(0, 3)]
+                                                {[...kindergartens.slice(0, 3), ...registrationRequests.slice(0, 2), ...users.slice(0, 1)]
                                                     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
                                                     .slice(0, 6)
                                                     .map((item: any) => {
@@ -452,50 +536,50 @@ const AdminDashboard = () => {
                                                         const isUser = 'full_name' in item && !('child_name' in item) && !isKG;
                                                         
                                                         return (
-                                                            <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className={`w-10 h-10 rounded-lg ${isKG ? 'bg-red-500/10' : isUser ? 'bg-purple-500/10' : 'bg-blue-500/10'} flex items-center justify-center`}>
-                                                                        {isKG ? <Building2 className="w-5 h-5 text-red-500" /> : isUser ? <UserCheck className="w-5 h-5 text-purple-500" /> : <Baby className="w-5 h-5 text-blue-500" />}
+                                                            <div key={item.id} className="flex items-center justify-between p-4 rounded-3xl bg-slate-800/50 hover:bg-slate-800 transition-colors group">
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className={`w-12 h-12 rounded-full ${isKG ? 'bg-red-500/10' : isUser ? 'bg-purple-500/10' : 'bg-blue-500/10'} flex items-center justify-center`}>
+                                                                        {isKG ? <Building2 className="w-6 h-6 text-red-500" /> : isUser ? <UserCheck className="w-6 h-6 text-purple-500" /> : <Baby className="w-6 h-6 text-blue-500" />}
                                                                     </div>
                                                                     <div>
-                                                                        <p className="text-sm font-medium text-white">
+                                                                        <p className="text-base font-bold text-white leading-tight">
                                                                             {isKG ? (language === 'ar' ? item.name_ar : item.name_fr) : (isUser ? (item.full_name || 'Anonymous') : item.child_name)}
                                                                         </p>
-                                                                        <p className="text-xs text-slate-400">
-                                                                            {isKG ? (language === 'ar' ? item.municipality_ar : item.municipality_fr) : 
+                                                                        <p className="text-xs text-slate-400 mt-0.5">
+                                                                            {isKG ? (language === 'ar' ? (item.municipality_ar || item.municipality) : (item.municipality_fr || item.municipality)) : 
                                                                              isUser ? `${language === 'ar' ? 'مستخدم جديد:' : 'New user:'} ${item.role || 'parent'}` :
                                                                              `${language === 'ar' ? 'طلب تسجيل من' : 'Registration from'} ${item.parent_name}`}
                                                                         </p>
                                                                     </div>
                                                                 </div>
-                                                                <div className="flex gap-1">
+                                                                <div className="flex gap-2">
                                                                     {isUser ? (
-                                                                        <Badge variant="outline" className="text-[10px] text-slate-500 border-white/10">
+                                                                        <span className="text-[10px] text-slate-500 font-medium px-3 py-1 rounded-full bg-white/5">
                                                                             {new Date(item.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}
-                                                                        </Badge>
+                                                                        </span>
                                                                     ) : (
                                                                         <>
                                                                             <Button
-                                                                                size="sm"
+                                                                                size="icon"
                                                                                 variant="ghost"
-                                                                                className={item.status === 'approved' ? 'text-green-500 bg-green-500/10' : 'text-slate-500 hover:text-green-500 hover:bg-green-500/10'}
+                                                                                className={`w-10 h-10 rounded-full ${item.status === 'approved' ? 'text-green-500 bg-green-500/20' : 'text-slate-500 hover:text-green-500 hover:bg-green-500/10'}`}
                                                                                 onClick={() => {
                                                                                     if (isKG) updateKGStatus(item.id, 'approved');
                                                                                     else updateRegistrationStatus(item.id, 'approved');
                                                                                 }}
                                                                             >
-                                                                                <CheckCircle2 className="w-4 h-4" />
+                                                                                <Check className="w-5 h-5" />
                                                                             </Button>
                                                                             <Button
-                                                                                size="sm"
+                                                                                size="icon"
                                                                                 variant="ghost"
-                                                                                className={item.status === 'rejected' ? 'text-red-500 bg-red-500/10' : 'text-slate-500 hover:text-red-500 hover:bg-red-500/10'}
+                                                                                className={`w-10 h-10 rounded-full ${item.status === 'rejected' ? 'text-red-500 bg-red-500/20' : 'text-slate-500 hover:text-red-500 hover:bg-red-500/10'}`}
                                                                                 onClick={() => {
                                                                                     if (isKG) updateKGStatus(item.id, 'rejected');
                                                                                     else updateRegistrationStatus(item.id, 'rejected');
                                                                                 }}
                                                                             >
-                                                                                <XCircle className="w-4 h-4" />
+                                                                                <X className="w-5 h-5" />
                                                                             </Button>
                                                                         </>
                                                                     )}
@@ -508,83 +592,15 @@ const AdminDashboard = () => {
                                     </div>
                                     <Button
                                         variant="ghost"
-                                        className="w-full mt-4 text-slate-400 text-xs hover:text-white"
+                                        className="w-full mt-6 text-slate-400 text-sm hover:text-white hover:bg-white/5 rounded-2xl"
                                         onClick={() => setActiveTab('kindergartens')}
                                     >
                                         {language === 'ar' ? 'عرض الكل' : 'View All'}
-                                        <ChevronRight className="w-3 h-3 mx-1" />
+                                        <ChevronRight className="w-4 h-4 mx-2" />
                                     </Button>
                                 </CardContent>
                             </Card>
-
-                            <Card className="bg-slate-900 border-white/5">
-                                <CardHeader>
-                                    <CardTitle className="text-white text-lg">{language === 'ar' ? 'توزع المستخدمين' : 'User Distribution'}</CardTitle>
-                                </CardHeader>
-                                <CardContent className="h-[300px] flex items-center justify-center">
-                                    <div className="flex flex-col items-center gap-4">
-                                        <div className="relative w-40 h-40">
-                                            <svg className="w-full h-full" viewBox="0 0 36 36">
-                                                <path className="text-slate-800" strokeDasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                                                <path className="text-red-500" strokeDasharray={`${stats.totalUsers > 0 ? (stats.activeOwners / stats.totalUsers) * 100 : 0}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                                            </svg>
-                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                                                <span className="text-2xl font-bold text-white">{stats.totalUsers}</span>
-                                                <span className="text-[10px] text-slate-400 uppercase tracking-tighter">{language === 'ar' ? 'مستخدم' : 'Users'}</span>
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4 text-xs">
-                                            <div className="flex items-center gap-2 text-slate-400">
-                                                <div className="w-2 h-2 rounded-full bg-red-500" />
-                                                {language === 'ar' ? 'أصحاب الروضات' : 'Owners'} ({stats.totalUsers > 0 ? Math.round((stats.activeOwners / stats.totalUsers) * 100) : 0}%)
-                                            </div>
-                                            <div className="flex items-center gap-2 text-slate-400">
-                                                <div className="w-2 h-2 rounded-full bg-slate-700" />
-                                                {language === 'ar' ? 'أولياء الأمور' : 'Parents'} ({stats.totalUsers > 0 ? Math.round((stats.activeParents / stats.totalUsers) * 100) : 0}%)
-                                            </div>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
                         </div>
-
-                        {/* My Personal Registrations Section (Requested) */}
-                        {registrationRequests.filter(r => r.user_id === profile?.id).length > 0 && (
-                            <div className="mt-8">
-                                <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                                    <Baby className="w-5 h-5 text-red-500" />
-                                    {language === 'ar' ? 'تسجيلاتي الشخصية' : 'My Personal Registrations'}
-                                </h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {registrationRequests.filter(r => r.user_id === profile?.id).map((reg) => {
-                                        const kg = kindergartens.find(k => k.id === reg.kindergarten_id);
-                                        return (
-                                            <Card key={`personal-${reg.id}`} className="bg-slate-900 border-white/5 hover:bg-white/5 transition-all cursor-pointer group">
-                                                <CardContent className="p-4">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 font-bold text-lg">
-                                                            {reg.child_name.charAt(0)}
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <h3 className="font-bold text-white">{reg.child_name}</h3>
-                                                            <p className="text-xs text-slate-400">{reg.child_age} {language === 'ar' ? 'سنوات' : 'ans'}</p>
-                                                            <div className="flex items-center gap-2 mt-1">
-                                                                <Badge variant="outline" className="text-[10px] border-white/10 text-slate-400">
-                                                                    {language === 'ar' ? (kg?.name_ar || reg.kindergarten_id) : (kg?.name_fr || reg.kindergarten_id)}
-                                                                </Badge>
-                                                                <Badge className={`text-[10px] px-1.5 h-4 ${reg.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' : reg.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
-                                                                    {reg.status}
-                                                                </Badge>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        )}
                     </TabsContent>
 
                     <TabsContent value="kindergartens">
