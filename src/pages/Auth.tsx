@@ -101,13 +101,16 @@ const Auth = () => {
       const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com', 'rawdati245@gmail.com'];
       const isAdminEmail = adminEmails.includes(userEmail);
       const metadataRole = currentUser.user_metadata?.role || currentUser.app_metadata?.role;
-      const role = fetchedProfile?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
+      
+      // Prioritize admin role if whitelisted
+      const role = isAdminEmail ? 'admin' : (fetchedProfile?.role || metadataRole || 'parent');
 
       if (role === 'admin') {
-        // Role is correct — commit profile to global state
-        await refreshProfile(currentUser.id, fetchedProfile);
-        toast({ title: t('auth.welcome'), description: t('auth.success') });
+        // Force a fresh profile refresh from DB to get the NEW role after RPC
+        // We call refreshProfile without the 2nd argument to trigger a DB fetch
         await supabase.rpc('assign_admin_role' as any);
+        await refreshProfile(currentUser.id); 
+        toast({ title: t('auth.welcome'), description: t('auth.success') });
         navigate('/admin');
       } else if (role === 'owner') {
         // Prevent owners from logging in on the parent page

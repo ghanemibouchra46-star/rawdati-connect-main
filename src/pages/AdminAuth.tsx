@@ -122,7 +122,8 @@ const AdminAuth = () => {
                 }
             }
 
-            await refreshProfile(currentUser.id, profile as any);
+            // Freshly refresh profile from DB to ensure role change is detected
+            await refreshProfile(currentUser.id); 
             toast({ title: t('auth.welcome'), description: t('auth.success') });
             navigate('/admin', { replace: true });
         } catch (error: any) {

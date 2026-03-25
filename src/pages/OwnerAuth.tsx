@@ -122,8 +122,8 @@ const OwnerAuth = () => {
           return;
         }
       } else if (role === 'admin') {
-        // Role is correct — now commit profile to global state
-        await refreshProfile(currentUser.id, fetchedProfile);
+        // Force a fresh profile refresh from DB to ensure role change is detected
+        await refreshProfile(currentUser.id); 
         toast({ title: 'مرحباً بك', description: 'تم تسجيل دخول المسؤول بنجاح' });
         await supabase.rpc('assign_admin_role' as any);
         navigate('/admin', { replace: true });
