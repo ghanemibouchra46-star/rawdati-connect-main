@@ -113,17 +113,17 @@ const Auth = () => {
         );
         navigate('/admin');
       } else if (role === 'owner') {
-        if (fetchedProfile?.status === 'approved') {
-          toast({ title: t('auth.welcome'), description: t('auth.success') });
-          navigate('/owner');
-        } else {
-          await supabase.auth.signOut();
-          toast({
-            title: t('common.error'),
-            description: language === 'ar' ? 'حسابك قيد المراجعة' : 'Account under review',
-            variant: 'destructive',
-          });
-        }
+        // Prevent owners from logging in on the parent page
+        await supabase.auth.signOut();
+        toast({
+          title: t('common.error'),
+          description: language === 'ar' 
+            ? 'هذا الحساب خاص بأصحاب الروضات، يرجى تسجيل الدخول من صفحة المديرين' 
+            : language === 'fr'
+            ? 'Ce compte est réservé aux directeurs, veuillez vous connecter via la page des directeurs.'
+            : 'This account is for kindergarten owners, please login from the owner page.',
+          variant: 'destructive',
+        });
       } else {
         toast({ title: t('auth.welcome'), description: t('auth.success') });
         navigate('/parent');

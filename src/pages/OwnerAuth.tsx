@@ -134,12 +134,27 @@ const OwnerAuth = () => {
         } else if (fetchedProfile.role === 'admin') {
           toast({ title: 'مرحباً بك', description: 'تم تسجيل دخول المسؤول بنجاح' });
           navigate('/admin', { replace: true });
-        } else {
-          toast({ title: 'مرحباً بك', description: 'تم تسجيل دخول ولي الأمر بنجاح' });
-          navigate('/parent', { replace: true });
+        } else if (fetchedProfile.role === 'parent') {
+          // Prevent parents from logging in on the owner page
+          await supabase.auth.signOut();
+          toast({
+            title: 'خطأ في الدخول',
+            description: language === 'ar' 
+              ? 'هذا الحساب خاص بالأولياء، يرجى تسجيل الدخول من صفحة الأولياء' 
+              : language === 'fr'
+              ? 'Ce compte est réservé aux parents, veuillez vous connecter via la page des parents.'
+              : 'This account is for parents, please login from the parent page.',
+            variant: 'destructive',
+          });
         }
       } else {
-        navigate('/parent', { replace: true });
+        // If no profile found, assume parent or show error
+        await supabase.auth.signOut();
+        toast({
+          title: 'خطأ',
+          description: language === 'ar' ? 'لم يتم العثور على ملف تعريف المستخدم' : 'User profile not found',
+          variant: 'destructive',
+        });
       }
     } catch (error: any) {
       toast({
