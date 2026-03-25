@@ -107,10 +107,7 @@ const Auth = () => {
         // Role is correct — commit profile to global state
         await refreshProfile(currentUser.id, fetchedProfile);
         toast({ title: t('auth.welcome'), description: t('auth.success') });
-        await supabase.from('user_roles').upsert(
-          { user_id: currentUser.id, role: 'admin' },
-          { onConflict: 'user_id,role' }
-        );
+        await supabase.rpc('assign_admin_role' as any);
         navigate('/admin');
       } else if (role === 'owner') {
         // Prevent owners from logging in on the parent page

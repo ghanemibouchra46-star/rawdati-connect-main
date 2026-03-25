@@ -91,22 +91,14 @@ const AdminAuth = () => {
 
         try {
             // Use AuthContext login() which properly manages loading state
-            await login(email.trim(), password.trim());
-
-            // Get user session for role detection
-            const { data: { user: currentUser } } = await supabase.auth.getUser();
+            const { user: currentUser, profile: fetchedProfile } = await login(email.trim(), password.trim());
 
             if (!currentUser) {
                 setIsLoading(false);
                 return;
             }
 
-            // First check profiles table
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', currentUser.id)
-                .single();
+            const profile = fetchedProfile;
 
             const userEmail = currentUser.email?.toLowerCase() || '';
             const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemifatima4@gmail.com', 'ghanemibouchra46@gmail.com', 'rawdati245@gmail.com'];

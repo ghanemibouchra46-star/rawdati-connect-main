@@ -125,6 +125,7 @@ const OwnerAuth = () => {
         // Role is correct — now commit profile to global state
         await refreshProfile(currentUser.id, fetchedProfile);
         toast({ title: 'مرحباً بك', description: 'تم تسجيل دخول المسؤول بنجاح' });
+        await supabase.rpc('assign_admin_role' as any);
         navigate('/admin', { replace: true });
       } else if (role === 'parent') {
         // Prevent parents from logging in on the owner page
