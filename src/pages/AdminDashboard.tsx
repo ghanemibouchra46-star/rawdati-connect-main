@@ -10,6 +10,7 @@ import {
     RefreshCcw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -148,6 +149,10 @@ const AdminDashboard = () => {
     const [registrationRequests, setRegistrationRequests] = useState<RegistrationRequest[]>(mockRegistrations);
     const [localMockRegs, setLocalMockRegs] = useState<RegistrationRequest[]>(mockRegistrations);
     const [activeTab, setActiveTab] = useState('overview');
+
+    // Detail modal states
+    const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+    const [selectedKG, setSelectedKG] = useState<Kindergarten | null>(null);
     
     const [stats, setStats] = useState<any>({
         totalUsers: 1,
@@ -630,7 +635,7 @@ const AdminDashboard = () => {
                                                                         <XCircle className="w-4 h-4" />
                                                                     </Button>
                                                                 )}
-                                                                <Button size="sm" variant="ghost" className="text-slate-400"><Info className="w-4 h-4" /></Button>
+                                                                <Button size="sm" variant="ghost" className="text-slate-400" onClick={() => setSelectedKG(kg)}><Info className="w-4 h-4" /></Button>
                                                             </div>
                                                         </TableCell>
                                                     </TableRow>
@@ -803,7 +808,7 @@ const AdminDashboard = () => {
                                                                 <UserX className="w-4 h-4" />
                                                             </Button>
                                                         )}
-                                                        <Button variant="ghost" size="icon" className="text-slate-500 hover:text-white"><ChevronRight className="w-5 h-5" /></Button>
+                                                        <Button variant="ghost" size="icon" className="text-slate-500 hover:text-white" onClick={() => setSelectedUser(user)}><ChevronRight className="w-5 h-5" /></Button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -861,7 +866,7 @@ const AdminDashboard = () => {
                                                         <p className="text-[10px] text-slate-500 uppercase tracking-wider">{language === 'ar' ? 'تاريخ الانضمام' : 'Joined Date'}</p>
                                                         <p className="text-xs text-slate-300">{new Date(user.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}</p>
                                                     </div>
-                                                    <Button variant="ghost" size="icon" className="text-slate-500 hover:text-blue-500 hover:bg-blue-500/10 transition-all rounded-full">
+                                                    <Button variant="ghost" size="icon" className="text-slate-500 hover:text-blue-500 hover:bg-blue-500/10 transition-all rounded-full" onClick={() => setSelectedUser(user)}>
                                                         <ChevronRight className="w-5 h-5" />
                                                     </Button>
                                                 </div>
@@ -931,14 +936,14 @@ const AdminDashboard = () => {
                                                             <div>
                                                                 <p className="text-sm font-medium">
                                                                     {(() => {
-                                                                        const targetKg = kindergartens.find(k => k.id === request.kindergarten_id) || localKindergartens.find(k => k.id === request.kindergarten_id);
+                                                                        const targetKg = kindergartens.find(k => k.id === request.kindergarten_id);
                                                                         const name = language === 'ar' ? targetKg?.name_ar : ((targetKg as any)?.name_fr || (targetKg as any)?.nameFr);
                                                                         return name || 'N/A';
                                                                     })()}
                                                                 </p>
                                                                 <p className="text-xs text-slate-400">
                                                                     {(() => {
-                                                                        const targetKg = kindergartens.find(k => k.id === request.kindergarten_id) || localKindergartens.find(k => k.id === request.kindergarten_id);
+                                                                        const targetKg = kindergartens.find(k => k.id === request.kindergarten_id);
                                                                         const mun = language === 'ar' ? targetKg?.municipality_ar : ((targetKg as any)?.municipality_fr || (targetKg as any)?.municipalityFr);
                                                                         return mun || 'N/A';
                                                                     })()}
@@ -1052,6 +1057,192 @@ const AdminDashboard = () => {
                     </TabsContent>
                 </Tabs>
             </main>
+
+            {/* ===== User Detail Modal ===== */}
+            <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
+                <DialogContent className="bg-slate-900 border-white/10 text-white max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="text-white flex items-center gap-3">
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg border ${
+                                selectedUser?.role === 'owner' 
+                                    ? 'bg-red-500/10 text-red-500 border-red-500/20' 
+                                    : 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                            }`}>
+                                {(selectedUser?.full_name || '?').charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <p className="text-lg font-bold">{selectedUser?.full_name || (language === 'ar' ? 'مجهول' : 'Anonymous')}</p>
+                                <Badge className={selectedUser?.role === 'owner' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}>
+                                    {selectedUser?.role === 'owner' ? (language === 'ar' ? 'صاحب روضة' : 'Owner') : (language === 'ar' ? 'ولي أمر' : 'Parent')}
+                                </Badge>
+                            </div>
+                        </DialogTitle>
+                        <DialogDescription className="text-slate-400">
+                            {language === 'ar' ? 'معلومات الحساب التفصيلية' : 'Detailed account information'}
+                        </DialogDescription>
+                    </DialogHeader>
+                    {selectedUser && (
+                        <div className="space-y-4 mt-4">
+                            <div className="grid grid-cols-1 gap-3">
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                                    <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{language === 'ar' ? 'الاسم الكامل' : 'Full Name'}</p>
+                                    <p className="text-sm font-medium text-white">{selectedUser.full_name || '-'}</p>
+                                </div>
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                                    <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{language === 'ar' ? 'رقم الهاتف' : 'Phone'}</p>
+                                    <p className="text-sm font-medium text-white dir-ltr">{selectedUser.phone || (language === 'ar' ? 'غير متوفر' : 'Not provided')}</p>
+                                </div>
+                                {selectedUser.email && (
+                                    <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</p>
+                                        <p className="text-sm font-medium text-white">{selectedUser.email}</p>
+                                    </div>
+                                )}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{language === 'ar' ? 'الحالة' : 'Status'}</p>
+                                        <Badge className={
+                                            selectedUser.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                            selectedUser.status === 'rejected' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                                            'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                                        }>
+                                            {selectedUser.status === 'approved' ? (language === 'ar' ? 'مفعّل' : 'Approved') :
+                                             selectedUser.status === 'rejected' ? (language === 'ar' ? 'مرفوض' : 'Rejected') :
+                                             (language === 'ar' ? 'في الانتظار' : 'Pending')}
+                                        </Badge>
+                                    </div>
+                                    <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{language === 'ar' ? 'تاريخ الانضمام' : 'Joined'}</p>
+                                        <p className="text-sm font-medium text-white">{new Date(selectedUser.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}</p>
+                                    </div>
+                                </div>
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                                    <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">ID</p>
+                                    <p className="text-xs font-mono text-slate-400 break-all">{selectedUser.id}</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-2 pt-2">
+                                {selectedUser.status !== 'approved' && (
+                                    <Button
+                                        className="flex-1 bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white border border-green-500/20"
+                                        onClick={() => { updateUserStatus(selectedUser.id, 'approved'); setSelectedUser(null); }}
+                                    >
+                                        <UserCheck className="w-4 h-4 mx-2" />
+                                        {language === 'ar' ? 'قبول' : 'Approve'}
+                                    </Button>
+                                )}
+                                {selectedUser.status !== 'rejected' && (
+                                    <Button
+                                        className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20"
+                                        onClick={() => { updateUserStatus(selectedUser.id, 'rejected'); setSelectedUser(null); }}
+                                    >
+                                        <UserX className="w-4 h-4 mx-2" />
+                                        {language === 'ar' ? 'رفض' : 'Reject'}
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* ===== Kindergarten Detail Modal ===== */}
+            <Dialog open={!!selectedKG} onOpenChange={() => setSelectedKG(null)}>
+                <DialogContent className="bg-slate-900 border-white/10 text-white max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle className="text-white flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg shadow-red-500/20">
+                                <Building2 className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <p className="text-lg font-bold">{language === 'ar' ? selectedKG?.name_ar : selectedKG?.name_fr}</p>
+                                <p className="text-xs text-slate-400">{language === 'ar' ? selectedKG?.name_fr : selectedKG?.name_ar}</p>
+                            </div>
+                        </DialogTitle>
+                        <DialogDescription className="text-slate-400">
+                            {language === 'ar' ? 'معلومات الروضة التفصيلية' : 'Detailed kindergarten information'}
+                        </DialogDescription>
+                    </DialogHeader>
+                    {selectedKG && (
+                        <div className="space-y-4 mt-4">
+                            <div className="grid grid-cols-1 gap-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                            <Building2 className="w-3 h-3" />
+                                            {language === 'ar' ? 'الاسم بالعربية' : 'Arabic Name'}
+                                        </p>
+                                        <p className="text-sm font-medium text-white">{selectedKG.name_ar}</p>
+                                    </div>
+                                    <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                            <Building2 className="w-3 h-3" />
+                                            {language === 'ar' ? 'الاسم بالفرنسية' : 'French Name'}
+                                        </p>
+                                        <p className="text-sm font-medium text-white">{selectedKG.name_fr}</p>
+                                    </div>
+                                </div>
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                                    <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                        <MapPin className="w-3 h-3" />
+                                        {language === 'ar' ? 'العنوان' : 'Address'}
+                                    </p>
+                                    <p className="text-sm font-medium text-white">{language === 'ar' ? selectedKG.address_ar : selectedKG.address_fr}</p>
+                                </div>
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                                    <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                        <MapPin className="w-3 h-3" />
+                                        {language === 'ar' ? 'البلدية' : 'Municipality'}
+                                    </p>
+                                    <p className="text-sm font-medium text-white">{language === 'ar' ? selectedKG.municipality_ar : selectedKG.municipality_fr}</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{language === 'ar' ? 'الحالة' : 'Status'}</p>
+                                        <Badge className={
+                                            selectedKG.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                            selectedKG.status === 'rejected' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                                            'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                                        }>
+                                            {selectedKG.status === 'approved' ? (language === 'ar' ? 'مقبولة' : 'Approved') :
+                                             selectedKG.status === 'rejected' ? (language === 'ar' ? 'مرفوضة' : 'Rejected') :
+                                             (language === 'ar' ? 'في الانتظار' : 'Pending')}
+                                        </Badge>
+                                    </div>
+                                    <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{language === 'ar' ? 'تاريخ التسجيل' : 'Registered'}</p>
+                                        <p className="text-sm font-medium text-white">{new Date(selectedKG.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}</p>
+                                    </div>
+                                </div>
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                                    <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">ID</p>
+                                    <p className="text-xs font-mono text-slate-400 break-all">{selectedKG.id}</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-2 pt-2">
+                                {selectedKG.status !== 'approved' && (
+                                    <Button
+                                        className="flex-1 bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white border border-green-500/20"
+                                        onClick={() => { updateKGStatus(selectedKG.id, 'approved'); setSelectedKG(null); }}
+                                    >
+                                        <CheckCircle2 className="w-4 h-4 mx-2" />
+                                        {language === 'ar' ? 'قبول' : 'Approve'}
+                                    </Button>
+                                )}
+                                {selectedKG.status !== 'rejected' && (
+                                    <Button
+                                        className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20"
+                                        onClick={() => { updateKGStatus(selectedKG.id, 'rejected'); setSelectedKG(null); }}
+                                    >
+                                        <XCircle className="w-4 h-4 mx-2" />
+                                        {language === 'ar' ? 'رفض' : 'Reject'}
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
