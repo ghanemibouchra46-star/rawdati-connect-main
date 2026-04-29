@@ -21,7 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import { Separator } from '@/components/ui/separator';
-import { kindergartens as localKindergartens } from '@/data/kindergartens';
+
 import { useAllSubscriptionRequests } from '@/hooks/useSubscriptionRequests';
 import { useAllPlatformSubscriptions, useUpdatePlatformSubscription } from '@/hooks/usePlatformSubscription';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -126,74 +126,7 @@ const mockRegistrations: RegistrationRequest[] = [
     }
 ];
 
-// Adapter to convert local kindergarten data to admin format
-function adaptKindergarten(kg: any): Kindergarten {
-    return {
-        id: kg.id || `kg-${Math.random()}`,
-        name_ar: kg.name_ar,
-        name_fr: kg.nameFr || kg.name_fr,
-        address_ar: kg.address_ar,
-        address_fr: kg.addressFr || kg.address_fr,
-        municipality: kg.municipality,
-        municipality_ar: kg.municipality_ar,
-        municipality_fr: kg.municipalityFr || kg.municipality_fr,
-        status: 'approved',
-        created_at: new Date().toISOString(),
-    };
-}
 
-const mockAdminKGs: Kindergarten[] = [
-    {
-        id: 'kg-1',
-        name_ar: 'روضة براعم الوفاء',
-        name_fr: 'Baraem El Wafaa',
-        address_ar: 'بلدية معسكر',
-        address_fr: 'Mascara',
-        municipality: 'Mascara',
-        municipality_ar: 'بلدية معسكر',
-        municipality_fr: 'Mascara',
-        status: 'approved',
-        created_at: '2026-03-25T08:00:00Z',
-    },
-    {
-        id: 'kg-2',
-        name_ar: 'EL Youssre Acadimi',
-        name_fr: 'EL Youssre Acadimi',
-        address_ar: 'معسكر',
-        address_fr: 'Mascara',
-        municipality: 'Mascara',
-        municipality_ar: 'معسكر',
-        municipality_fr: 'Mascara',
-        status: 'approved',
-        created_at: '2026-03-25T07:00:00Z',
-    },
-    {
-        id: 'kg-3',
-        name_ar: 'روضة بني شقران',
-        name_fr: 'Beni Chougrane',
-        address_ar: 'معسكر',
-        address_fr: 'Mascara',
-        municipality: 'Mascara',
-        municipality_ar: 'معسكر',
-        municipality_fr: 'Mascara',
-        status: 'approved',
-        created_at: '2026-03-25T06:00:00Z',
-    }
-];
-
-interface RegistrationRequest {
-    id: string;
-    kindergarten_id: string;
-    parent_name: string;
-    phone: string;
-    email: string | null;
-    child_name: string;
-    child_age: number;
-    message: string | null;
-    status: 'pending' | 'approved' | 'rejected';
-    created_at: string;
-    user_id?: string;
-}
 
 const AdminDashboard = () => {
     const { t, dir, language } = useLanguage();
@@ -211,7 +144,7 @@ const AdminDashboard = () => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [users, setUsers] = useState<UserProfile[]>([]);
-    const [kindergartens, setKindergartens] = useState<Kindergarten[]>(mockAdminKGs);
+    const [kindergartens, setKindergartens] = useState<Kindergarten[]>([]);
     const [registrationRequests, setRegistrationRequests] = useState<RegistrationRequest[]>(mockRegistrations);
     const [localMockRegs, setLocalMockRegs] = useState<RegistrationRequest[]>(mockRegistrations);
     const [activeTab, setActiveTab] = useState('overview');
@@ -263,9 +196,7 @@ const AdminDashboard = () => {
                     created_at: kg.created_at || new Date().toISOString(),
                 }));
             } else {
-                // Fallback: try without RLS restrictions using local data
-                console.warn('⚠️ Admin: No kindergartens from DB, using mock data');
-                finalKGs = mockAdminKGs;
+                console.warn('⚠️ Admin: No kindergartens returned from Supabase');
             }
             setKindergartens(finalKGs);
 
