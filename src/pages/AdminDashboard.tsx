@@ -238,8 +238,16 @@ const AdminDashboard = () => {
         setIsLoading(true);
         try {
             // 1. Fetch Kindergartens (Failure-tolerant)
-            const { data: kgData } = await supabase.from('kindergartens').select('*');
-            let finalKGs = localKindergartens.map(adaptKindergarten);
+            console.log('🔄 Admin: Fetching kindergartens from Supabase...');
+            const { data: kgData, error: kgError } = await supabase.from('kindergartens').select('*');
+            
+            if (kgError) {
+                console.error('❌ Admin: Error fetching kindergartens:', kgError.message);
+            } else {
+                console.log(`✅ Admin: Fetched ${kgData?.length || 0} kindergartens from DB`);
+            }
+
+            let finalKGs: Kindergarten[] = [];
             if (kgData && kgData.length > 0) {
                 finalKGs = (kgData as any[]).map(kg => ({
                     id: kg.id,
@@ -250,9 +258,14 @@ const AdminDashboard = () => {
                     municipality: kg.municipality || kg.city || 'N/A',
                     municipality_ar: kg.municipality_ar || kg.city_ar || kg.municipality || 'N/A',
                     municipality_fr: kg.municipality_fr || kg.city_fr || kg.municipality || 'N/A',
-                    status: (kg.status as any) || 'pending',
+                    owner_id: kg.owner_id,
+                    status: (kg.status as any) || 'approved',
                     created_at: kg.created_at || new Date().toISOString(),
                 }));
+            } else {
+                // Fallback: try without RLS restrictions using local data
+                console.warn('⚠️ Admin: No kindergartens from DB, using mock data');
+                finalKGs = mockAdminKGs;
             }
             setKindergartens(finalKGs);
 
