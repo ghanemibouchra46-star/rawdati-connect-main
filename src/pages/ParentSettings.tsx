@@ -106,7 +106,7 @@ const ParentSettings = () => {
 
         if (newPassword !== confirmPassword) {
             toast({
-                description: t('parent.confirmPassword'),
+                description: t('parent.confirmPasswordError'),
                 variant: 'destructive'
             });
             return;
@@ -351,7 +351,7 @@ const ParentSettings = () => {
                         <CardTitle className="flex items-center gap-2">
                             <Globe className="w-5 h-5 text-primary" />
                             {t('parent.chooseLanguage')}
-                        </CardDescription>
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-3 gap-3">
