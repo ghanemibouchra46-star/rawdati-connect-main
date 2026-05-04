@@ -82,7 +82,7 @@ const ParentDashboard = () => {
                     name: reg.child_name,
                     age: reg.child_age,
                     photo_url: null,
-                    kindergarten_name: language === 'ar' ? (kg?.name_ar || reg.kindergarten_id) : (kg?.nameFr || reg.kindergarten_id),
+                    kindergarten_name: language === 'ar' ? (kg?.name_ar || reg.kindergarten_id) : language === 'fr' ? (kg?.nameFr || reg.kindergarten_id) : (kg?.nameEn || reg.kindergarten_id),
                     status: reg.status
                 };
             });
@@ -119,7 +119,7 @@ const ParentDashboard = () => {
     const handleLogout = async () => {
         try {
             toast({
-                title: language === 'ar' ? 'جاري تسجيل الخروج...' : 'Déconnexion en cours...',
+                title: t('parent.loggingOut'),
             });
             await authLogout();
             window.location.href = '/auth';
@@ -151,7 +151,7 @@ const ParentDashboard = () => {
 
     const formatTime = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleTimeString(language === 'ar' ? 'ar-DZ' : 'fr-FR', { hour: '2-digit', minute: '2-digit' });
+        return date.toLocaleTimeString(language === 'ar' ? 'ar-DZ' : language === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' });
     };
 
     const handlePaymentSuccess = async (txId: string) => {
@@ -172,8 +172,8 @@ const ParentDashboard = () => {
             if (error) throw error;
 
             toast({
-                title: language === 'ar' ? 'تم الدفع بنجاح' : 'Paiement effectué',
-                description: language === 'ar' ? 'تم تحديث سجل المدفوعات الخاص بطفلك' : 'Le registre des paiements a été mis à jour',
+                title: t('parent.paymentSuccess'),
+                description: t('parent.paymentUpdate'),
             });
 
             setActivePayment(null);
@@ -192,7 +192,7 @@ const ParentDashboard = () => {
     const getMonthName = (month: number) => {
         const date = new Date();
         date.setMonth(month - 1);
-        return date.toLocaleString(language === 'ar' ? 'ar-DZ' : 'fr-FR', { month: 'long' });
+        return date.toLocaleString(language === 'ar' ? 'ar-DZ' : language === 'fr' ? 'fr-FR' : 'en-US', { month: 'long' });
     };
 
     if (isLoading || authLoading) {
@@ -205,10 +205,10 @@ const ParentDashboard = () => {
                 </div>
                 <div className="mt-8 text-center space-y-2">
                     <h2 className="text-xl font-bold text-foreground">
-                        {language === 'ar' ? 'جاري تحميل لوحة التحكم...' : 'Chargement du tableau de bord...'}
+                        {t('parent.loadingDash')}
                     </h2>
                     <p className="text-muted-foreground animate-pulse text-sm">
-                        {language === 'ar' ? 'يرجى الانتظار قليلاً، نحن نجهز مساحتك' : 'Veuillez patienter, nous préparons votre espace'}
+                        {t('parent.loadingDashDesc')}
                     </p>
                 </div>
             </div>
@@ -229,8 +229,8 @@ const ParentDashboard = () => {
                                 <Baby className="w-5 h-5 text-primary" />
                             </div>
                             <div>
-                                <h1 className="text-lg font-bold text-foreground">{language === 'ar' ? 'لوحة التحكم' : 'Tableau de bord'}</h1>
-                                <p className="text-sm text-muted-foreground">{language === 'ar' ? 'ولي الأمر' : 'Parent'}</p>
+                                <h1 className="text-lg font-bold text-foreground">{t('parent.dashboardTitle')}</h1>
+                                <p className="text-sm text-muted-foreground">{t('parent.parentRole')}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -249,7 +249,7 @@ const ParentDashboard = () => {
                     <SubscriptionInterface onActivate={() => {
                         setActivePayment({
                             amount: 2000, // Daily follow-up service price
-                            serviceName: language === 'ar' ? 'خدمة المتابعة اليومية' : 'Service de suivi quotidien'
+                            serviceName: t('parent.followUpService')
                         });
                     }} />
                 </div>
@@ -307,7 +307,7 @@ const ParentDashboard = () => {
                 <section>
                     <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                         <DollarSign className="w-5 h-5 text-primary" />
-                        {language === 'ar' ? 'متابعة المدفوعات' : 'Suivi des paiements'}
+                        {t('parent.paymentFollowUp')}
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {children.map(child => {
@@ -322,7 +322,7 @@ const ParentDashboard = () => {
                             
                             // Find kindergarten safely
                             const kg = kindergartens.find(k => 
-                                (language === 'ar' ? k.name_ar === child.kindergarten_name : k.nameFr === child.kindergarten_name) ||
+                                (language === 'ar' ? k.name_ar === child.kindergarten_name : language === 'fr' ? k.nameFr === child.kindergarten_name : k.nameEn === child.kindergarten_name) ||
                                 k.id === (child as any).kindergarten_id
                             );
                             const price = kg?.pricePerMonth || 7000;
@@ -342,12 +342,12 @@ const ParentDashboard = () => {
                                             </div>
                                             <div className="flex flex-col items-end gap-2">
                                                 <p className="text-2xl font-black text-primary">
-                                                    {price.toLocaleString()} {language === 'ar' ? 'دج' : 'DZD'}
+                                                    {price.toLocaleString()} {t('common.da')}
                                                 </p>
                                                 {isPaid ? (
                                                     <Badge className="bg-mint text-white px-3 py-1 rounded-full flex items-center gap-1">
                                                         <CheckCircle className="w-3 h-3" />
-                                                        {language === 'ar' ? 'تم الدفع' : 'Payé'}
+                                                        {t('parent.paid')}
                                                     </Badge>
                                                 ) : (
                                                     <Button
@@ -366,15 +366,15 @@ const ParentDashboard = () => {
                                                                 });
                                                             } else {
                                                                 toast({
-                                                                    title: language === 'ar' ? 'خطأ' : 'Erreur',
-                                                                    description: language === 'ar' ? 'لم يتم العثور على معلومات الروضة' : 'Informations de jardin d\'enfants non trouvées',
+                                                                    title: t('common.error'),
+                                                                    description: t('parent.errorKgInfo'),
                                                                     variant: 'destructive'
                                                                 });
                                                             }
                                                         }}
                                                     >
                                                         <CreditCard className="w-4 h-4" />
-                                                        {language === 'ar' ? 'دفع الآن' : 'Payer maintenant'}
+                                                        {t('parent.payNow')}
                                                     </Button>
                                                 )}
                                             </div>
@@ -476,7 +476,7 @@ const ParentDashboard = () => {
 
             {activePayment && (
                 <PaymentProcess 
-                    kindergarten={kindergartens.find(k => k.id === activePayment.kindergartenId) || { name_ar: 'الروضة', nameFr: 'Kindergarten' } as any}
+                    kindergarten={kindergartens.find(k => k.id === activePayment.kindergartenId) || { name_ar: t('common.kindergarten', 'ar'), nameFr: t('common.kindergarten', 'fr'), nameEn: t('common.kindergarten', 'en') } as any}
                     bookingData={activePayment}
                     onComplete={() => setActivePayment(null)}
                     onSuccess={(txId) => {

@@ -34,9 +34,10 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
     sports: t('filter.sports') || 'Sports',
   };
 
-  const name = language === 'ar' ? kindergarten?.name_ar : kindergarten?.nameFr;
-  const address = language === 'ar' ? kindergarten?.address_ar : kindergarten?.addressFr;
-  const municipality = language === 'ar' ? kindergarten?.municipality_ar : kindergarten?.municipalityFr;
+  const langSuffix = language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En';
+  const name = kindergarten[`name${language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En'}`] || kindergarten.name_ar;
+  const address = kindergarten[`address${language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En'}`] || kindergarten.address_ar;
+  const municipality = kindergarten[`municipality${language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En'}`] || kindergarten.municipality_ar;
 
   return (
     <>
@@ -66,8 +67,8 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
 
           {/* Price Badge */}
           <div className={`absolute bottom-3 ${dir === 'rtl' ? 'left-3' : 'right-3'} px-3 py-1.5 bg-primary/90 backdrop-blur-sm rounded-lg`}>
-            <span className="text-sm font-bold text-primary-foreground">{kindergarten?.pricePerMonth?.toLocaleString()} {language === 'ar' ? 'دج' : 'DA'}</span>
-            <span className="text-xs text-primary-foreground/80">/{language === 'ar' ? 'شهر' : 'mois'}</span>
+            <span className="text-sm font-bold text-primary-foreground">{kindergarten?.pricePerMonth?.toLocaleString()} {t('common.da')}</span>
+            <span className="text-xs text-primary-foreground/80">/{t('common.month')}</span>
           </div>
 
           {/* Municipality */}
@@ -103,7 +104,7 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
           {kindergarten.partners?.doctors && kindergarten.partners.doctors.length > 0 && (
             <div className={`flex items-center gap-1.5 mb-4 text-xs font-semibold text-blue-700 bg-blue-50 w-fit px-2.5 py-1 rounded-md border border-blue-100 ${dir === 'rtl' ? 'flex-row' : 'flex-row-reverse'}`}>
               <Stethoscope className="w-4 h-4" />
-              <span className="line-clamp-1">{language === 'ar' ? 'أطباء مختصين:' : 'Médecins:'} {kindergarten.partners.doctors.join(', ')}</span>
+              <span className="line-clamp-1">{t('kindergarten.doctors')}: {kindergarten.partners.doctors.join(', ')}</span>
             </div>
           )}
 
@@ -142,7 +143,7 @@ const KindergartenCard = ({ kindergarten, onViewDetails, onRegister, onBook }: K
                 onClick={() => onBook(kindergarten?.id)}
               >
                 <Calendar className="w-4 h-4" />
-                {language === 'ar' ? 'حجز زيارة' : 'Réserver'}
+                {t('kindergarten.bookVisit')}
               </Button>
             </div>
             <Button

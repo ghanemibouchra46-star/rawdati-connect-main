@@ -18,8 +18,9 @@ const ClothingStores = () => {
 
   const filteredStores = useMemo(() => {
     return clothingStores.filter(store => {
-      const name = language === 'ar' ? store.nameAr : store.nameFr;
-      const address = language === 'ar' ? store.addressAr : store.addressFr;
+      const langSuffix = language === 'ar' ? 'Ar' : language === 'fr' ? 'Fr' : 'En';
+      const name = store[`name${langSuffix}`] || store.nameAr;
+      const address = store[`address${langSuffix}`] || store.addressAr;
 
       const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         address.toLowerCase().includes(searchQuery.toLowerCase());
@@ -90,7 +91,7 @@ const ClothingStores = () => {
                       : 'bg-card hover:bg-muted text-foreground'
                     }`}
                 >
-                  {language === 'ar' ? muni.nameAr : muni.nameFr}
+                  {muni[`name${language === 'ar' ? 'Ar' : language === 'fr' ? 'Fr' : 'En'}`]}
                 </button>
               ))}
             </div>
@@ -103,10 +104,11 @@ const ClothingStores = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredStores.map((store) => {
-              const name = language === 'ar' ? store.nameAr : store.nameFr;
-              const address = language === 'ar' ? store.addressAr : store.addressFr;
-              const categoryList = language === 'ar' ? store.categoriesAr : store.categoriesFr;
-              const priceRange = language === 'ar' ? store.priceRangeAr : store.priceRangeFr;
+              const langSuffix = language === 'ar' ? 'Ar' : language === 'fr' ? 'Fr' : 'En';
+              const name = store[`name${langSuffix}`] || store.nameAr;
+              const address = store[`address${langSuffix}`] || store.addressAr;
+              const categoryList = store[`categories${langSuffix}`] || store.categoriesAr;
+              const priceRange = store[`priceRange${langSuffix}`] || store.priceRangeAr;
 
               return (
                 <Card key={store.id} className="overflow-hidden hover:shadow-hover transition-all duration-300 group" dir={dir}>

@@ -46,7 +46,7 @@ const ParentNotifications = () => {
             {
                 id: '1',
                 type: 'activity',
-                title: language === 'ar' ? 'نشاط تعليمي جديد' : language === 'fr' ? 'Nouvelle activité éducative' : 'New Learning Activity',
+                title: t('notif.activity'),
                 description: language === 'ar' ? 'أحمد تعلم الحروف الأبجدية اليوم وأظهر تقدماً ملحوظاً!' : language === 'fr' ? 'Ahmed a appris l\'alphabet aujourd\'hui et a montré des progrès remarquables!' : 'Ahmed learned the alphabet today and showed remarkable progress!',
                 time: language === 'ar' ? 'منذ 30 دقيقة' : language === 'fr' ? 'Il y a 30 min' : '30 min ago',
                 isRead: false,
@@ -56,7 +56,7 @@ const ParentNotifications = () => {
             {
                 id: '2',
                 type: 'announcement',
-                title: language === 'ar' ? 'إعلان هام من الروضة' : language === 'fr' ? 'Annonce importante' : 'Important Announcement',
+                title: t('notif.announcement'),
                 description: language === 'ar' ? 'سيتم تنظيم رحلة ترفيهية يوم الأحد القادم. يرجى تحضير وجبة خفيفة لطفلك.' : language === 'fr' ? 'Une sortie récréative sera organisée dimanche prochain. Veuillez préparer une collation.' : 'A recreational trip will be organized next Sunday. Please prepare a snack for your child.',
                 time: language === 'ar' ? 'منذ ساعة' : language === 'fr' ? 'Il y a 1 heure' : '1 hour ago',
                 isRead: false,
@@ -65,7 +65,7 @@ const ParentNotifications = () => {
             {
                 id: '3',
                 type: 'reminder',
-                title: language === 'ar' ? 'تذكير بموعد الدفع' : language === 'fr' ? 'Rappel de paiement' : 'Payment Reminder',
+                title: t('notif.reminder'),
                 description: language === 'ar' ? 'يرجى تسديد رسوم الشهر القادم قبل تاريخ 10 فبراير.' : language === 'fr' ? 'Veuillez régler les frais du mois prochain avant le 10 février.' : 'Please pay next month\'s fees before February 10th.',
                 time: language === 'ar' ? 'منذ ساعتين' : language === 'fr' ? 'Il y a 2 heures' : '2 hours ago',
                 isRead: true,
@@ -84,7 +84,7 @@ const ParentNotifications = () => {
             {
                 id: '5',
                 type: 'message',
-                title: language === 'ar' ? 'رسالة من المعلمة' : language === 'fr' ? 'Message de l\'enseignante' : 'Message from Teacher',
+                title: t('notif.message'),
                 description: language === 'ar' ? 'أود إعلامكم أن أحمد أظهر موهبة في الرسم. ننصح بتشجيعه في المنزل.' : language === 'fr' ? 'Je voudrais vous informer qu\'Ahmed a montré un talent pour le dessin. Nous vous conseillons de l\'encourager à la maison.' : 'I would like to inform you that Ahmed has shown a talent for drawing. We recommend encouraging him at home.',
                 time: language === 'ar' ? 'أمس' : language === 'fr' ? 'Hier' : 'Yesterday',
                 isRead: true,
@@ -184,8 +184,8 @@ const ParentNotifications = () => {
                                 <h1 className="font-bold text-lg text-foreground">{t('parent.notifications')}</h1>
                                 <p className="text-xs text-muted-foreground">
                                     {unreadCount > 0
-                                        ? (language === 'ar' ? `${unreadCount} إشعارات غير مقروءة` : language === 'fr' ? `${unreadCount} non lues` : `${unreadCount} unread`)
-                                        : (language === 'ar' ? 'لا توجد إشعارات جديدة' : language === 'fr' ? 'Aucune nouvelle notification' : 'No new notifications')
+                                        ? t('notif.unreadCount').replace('{count}', unreadCount.toString())
+                                        : t('notif.noNew')
                                     }
                                 </p>
                             </div>
@@ -201,10 +201,10 @@ const ParentNotifications = () => {
                     <Tabs value={filter} onValueChange={(v) => setFilter(v as 'all' | 'unread')} className="w-auto">
                         <TabsList className="grid grid-cols-2 w-[200px]">
                             <TabsTrigger value="all">
-                                {language === 'ar' ? 'الكل' : language === 'fr' ? 'Toutes' : 'All'}
+                                {t('common.all')}
                             </TabsTrigger>
                             <TabsTrigger value="unread" className="relative">
-                                {language === 'ar' ? 'غير مقروءة' : language === 'fr' ? 'Non lues' : 'Unread'}
+                                {t('notif.unread')}
                                 {unreadCount > 0 && (
                                     <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center">
                                         {unreadCount}
@@ -217,7 +217,7 @@ const ParentNotifications = () => {
                     {unreadCount > 0 && (
                         <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-primary">
                             <CheckCircle className="w-4 h-4 mr-1" />
-                            {language === 'ar' ? 'تحديد الكل كمقروء' : language === 'fr' ? 'Tout marquer comme lu' : 'Mark all as read'}
+                            {t('notif.markAllRead')}
                         </Button>
                     )}
                 </div>
@@ -229,10 +229,10 @@ const ParentNotifications = () => {
                             <CardContent className="py-12 text-center">
                                 <Bell className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
                                 <p className="text-muted-foreground text-lg">
-                                    {language === 'ar' ? 'لا توجد إشعارات' : language === 'fr' ? 'Pas de notifications' : 'No notifications'}
+                                    {t('notif.noNotifs')}
                                 </p>
                                 <p className="text-sm text-muted-foreground mt-2">
-                                    {language === 'ar' ? 'ستظهر هنا الإشعارات الجديدة من الروضة' : language === 'fr' ? 'Les nouvelles notifications apparaîtront ici' : 'New notifications from kindergarten will appear here'}
+                                    {t('notif.noNotifsDesc')}
                                 </p>
                             </CardContent>
                         </Card>

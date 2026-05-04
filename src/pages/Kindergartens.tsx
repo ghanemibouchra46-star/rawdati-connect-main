@@ -70,7 +70,7 @@ const Kindergartens = () => {
     console.log("Selected municipality:", selectedMunicipality);
     
     const filtered = kindergartens.filter((k) => {
-      const searchStr = `${k?.name_ar || ''} ${k?.nameFr || ''} ${k?.municipality_ar || ''} ${k?.municipalityFr || ''}`;
+      const searchStr = `${k?.name_ar || ''} ${k?.nameFr || ''} ${k?.nameEn || ''} ${k?.municipality_ar || ''} ${k?.municipalityFr || ''} ${k?.municipalityEn || ''}`;
       
       const matchesSearch = !searchQuery || arabicSearch(searchStr, searchQuery);
       const matchesMunicipality = !selectedMunicipality || k?.municipality === selectedMunicipality;

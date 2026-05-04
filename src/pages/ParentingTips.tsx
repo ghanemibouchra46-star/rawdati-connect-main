@@ -19,11 +19,16 @@ const ParentingTips = () => {
 
   const ArrowIcon = dir === 'rtl' ? ArrowLeft : ArrowRight;
 
-  const filteredArticles = parentingArticles.filter(article =>
-    article.title.includes(searchQuery) || 
-    article.description.includes(searchQuery) ||
-    article.category.includes(searchQuery)
-  );
+  const langSuffix = language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En';
+
+  const filteredArticles = parentingArticles.filter(article => {
+    const title = article[`title${langSuffix}`] || '';
+    const description = article[`description${langSuffix}`] || '';
+    const category = article[`category${langSuffix}`] || '';
+    return title.includes(searchQuery) || 
+           description.includes(searchQuery) ||
+           category.includes(searchQuery);
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -36,12 +41,10 @@ const ParentingTips = () => {
             <BookOpen className="w-8 h-8" />
           </div>
           <h1 className="text-4xl md:text-5xl font-black mb-4 text-foreground">
-            {language === 'ar' ? 'نصائح للأولياء' : 'Parenting Tips'}
+            {t('tips.title')}
           </h1>
           <p className="text-xl text-muted-foreground">
-            {language === 'ar' 
-              ? 'دليل شامل لمساعدتك في رحلة تربية طفلك، من التغذية السليمة إلى تطوير المهارات.' 
-              : 'A comprehensive guide to help you in your parenting journey, from nutrition to skill development.'}
+            {t('tips.subtitle')}
           </p>
         </div>
 
@@ -51,7 +54,7 @@ const ParentingTips = () => {
             <Search className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground`} />
             <Input
               type="text"
-              placeholder={language === 'ar' ? 'ابحث عن نصيحة...' : 'Search for a tip...'}
+              placeholder={t('tips.searchPlaceholder')}
               className={`${dir === 'rtl' ? 'pr-10' : 'pl-10'} py-6 bg-card border-muted shadow-sm`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -74,18 +77,18 @@ const ParentingTips = () => {
                     <article.icon className="w-6 h-6" />
                   </div>
                   <Badge variant="secondary" className="bg-pink-100 text-pink-700 hover:bg-pink-100 border-0">
-                    {article.category}
+                    {article[`category${langSuffix}`]}
                   </Badge>
                 </div>
                 <CardTitle className="text-xl font-bold mb-2 group-hover:text-pink-600 transition-colors">
-                  {article.title}
+                  {article[`title${langSuffix}`]}
                 </CardTitle>
                 <CardDescription className="line-clamp-2 text-base">
-                  {article.description}
+                  {article[`description${langSuffix}`]}
                 </CardDescription>
               </CardHeader>
               <CardContent className="mt-auto pt-4 flex items-center text-pink-600 font-semibold gap-2">
-                <span>{language === 'ar' ? 'اقرأ المزيد' : 'Read More'}</span>
+                <span>{t('tips.readMore')}</span>
                 <ArrowIcon className="w-4 h-4" />
               </CardContent>
             </Card>
@@ -96,7 +99,7 @@ const ParentingTips = () => {
         {filteredArticles.length === 0 && (
           <div className="text-center py-20">
             <p className="text-muted-foreground text-lg">
-              {language === 'ar' ? 'لم يتم العثور على نتائج للبحث.' : 'No results found for your search.'}
+              {t('tips.noResults')}
             </p>
           </div>
         )}
@@ -110,7 +113,7 @@ const ParentingTips = () => {
             onClick={() => navigate('/')}
           >
             <ArrowIcon className="w-5 h-5 rotate-180" />
-            {language === 'ar' ? 'العودة للرئيسية' : 'Back to Home'}
+            {t('tips.backToHome')}
           </Button>
         </div>
       </main>
@@ -127,17 +130,17 @@ const ParentingTips = () => {
                   </div>
                   <div>
                     <Badge variant="outline" className="text-pink-600 border-pink-200 mb-1">
-                      {selectedArticle.category}
+                      {selectedArticle[`category${langSuffix}`]}
                     </Badge>
-                    <DialogTitle className="text-2xl font-black text-right">
-                      {selectedArticle.title}
+                    <DialogTitle className={`text-2xl font-black ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
+                      {selectedArticle[`title${langSuffix}`]}
                     </DialogTitle>
                   </div>
                 </div>
               </DialogHeader>
-              <div className="prose prose-pink max-w-none text-right" dir="rtl">
+              <div className={`prose prose-pink max-w-none ${dir === 'rtl' ? 'text-right' : 'text-left'}`} dir={dir}>
                 <div className="whitespace-pre-line text-lg leading-relaxed text-foreground/80">
-                  {selectedArticle.content}
+                  {selectedArticle[`content${langSuffix}`]}
                 </div>
               </div>
               <div className="mt-8 pt-6 border-t border-muted flex justify-center">
@@ -145,7 +148,7 @@ const ParentingTips = () => {
                   onClick={() => setSelectedArticle(null)}
                   className="bg-pink-600 hover:bg-pink-700 text-white px-8"
                 >
-                  {language === 'ar' ? 'إغلاق' : 'Close'}
+                  {t('tips.close')}
                 </Button>
               </div>
             </>

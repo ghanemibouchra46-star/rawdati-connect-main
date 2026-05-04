@@ -18,9 +18,10 @@ const SpeechTherapy = () => {
 
   const filteredTherapists = useMemo(() => {
     return speechTherapists.filter(therapist => {
-      const name = language === 'ar' ? therapist.nameAr : therapist.nameFr;
-      const specialty = language === 'ar' ? therapist.specialtyAr : therapist.specialtyFr;
-      const address = language === 'ar' ? therapist.addressAr : therapist.addressFr;
+      const langSuffix = language === 'ar' ? 'Ar' : language === 'fr' ? 'Fr' : 'En';
+      const name = therapist[`name${langSuffix}`] || therapist.nameAr;
+      const specialty = therapist[`specialty${langSuffix}`] || therapist.specialtyAr;
+      const address = therapist[`address${langSuffix}`] || therapist.addressAr;
 
       const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         specialty.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -92,7 +93,7 @@ const SpeechTherapy = () => {
                       : 'bg-card hover:bg-muted text-foreground'
                     }`}
                 >
-                  {language === 'ar' ? muni.nameAr : muni.nameFr}
+                  {muni[`name${language === 'ar' ? 'Ar' : language === 'fr' ? 'Fr' : 'En'}`]}
                 </button>
               ))}
             </div>
@@ -105,10 +106,11 @@ const SpeechTherapy = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTherapists.map((therapist) => {
-              const name = language === 'ar' ? therapist.nameAr : therapist.nameFr;
-              const specialty = language === 'ar' ? therapist.specialtyAr : therapist.specialtyFr;
-              const address = language === 'ar' ? therapist.addressAr : therapist.addressFr;
-              const serviceList = language === 'ar' ? therapist.servicesAr : therapist.servicesFr;
+              const langSuffix = language === 'ar' ? 'Ar' : language === 'fr' ? 'Fr' : 'En';
+              const name = therapist[`name${langSuffix}`] || therapist.nameAr;
+              const specialty = therapist[`specialty${langSuffix}`] || therapist.specialtyAr;
+              const address = therapist[`address${langSuffix}`] || therapist.addressAr;
+              const serviceList = therapist[`services${langSuffix}`] || therapist.servicesAr;
 
               return (
                 <Card key={therapist.id} className="overflow-hidden hover:shadow-hover transition-all duration-300 group" dir={dir}>

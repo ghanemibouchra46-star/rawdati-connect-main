@@ -60,17 +60,15 @@ const ParentSchedule = () => {
         const sunday = new Date(today);
         sunday.setDate(today.getDate() - today.getDay());
 
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
-        const daysAr = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
-        const daysFr = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi'];
+        const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday'];
 
         const schedule: DaySchedule[] = days.map((day, index) => {
             const date = new Date(sunday);
             date.setDate(sunday.getDate() + index);
             return {
-                day,
-                dayAr: daysAr[index],
-                dayFr: daysFr[index],
+                day: day,
+                dayAr: t('days.' + day, 'ar'),
+                dayFr: t('days.' + day, 'fr'),
                 date: date.toISOString().split('T')[0],
                 items: getScheduleItems(index)
             };
@@ -90,88 +88,88 @@ const ParentSchedule = () => {
             {
                 id: '1',
                 time: '08:00',
-                title: language === 'ar' ? 'الاستقبال' : language === 'fr' ? 'Accueil' : 'Welcome',
-                description: language === 'ar' ? 'استقبال الأطفال والأنشطة الحرة' : language === 'fr' ? 'Accueil des enfants et activités libres' : 'Welcoming children and free activities',
+                title: t('schedule.welcome'),
+                description: t('schedule.welcomeDesc'),
                 type: 'play',
                 duration: '30 min'
             },
             {
                 id: '2',
                 time: '08:30',
-                title: language === 'ar' ? 'حصة التعلم الأولى' : language === 'fr' ? 'Première séance d\'apprentissage' : 'First Learning Session',
-                description: language === 'ar' ? 'تعلم الحروف والأرقام' : language === 'fr' ? 'Apprentissage des lettres et des chiffres' : 'Learning letters and numbers',
+                title: t('schedule.learning1'),
+                description: t('schedule.learning1Desc'),
                 type: 'learning',
                 duration: '45 min'
             },
             {
                 id: '3',
                 time: '09:15',
-                title: language === 'ar' ? 'وجبة الفطور' : language === 'fr' ? 'Petit-déjeuner' : 'Breakfast',
-                description: language === 'ar' ? 'وجبة صحية ومغذية' : language === 'fr' ? 'Repas sain et nutritif' : 'Healthy and nutritious meal',
+                title: t('schedule.breakfast'),
+                description: t('schedule.breakfastDesc'),
                 type: 'meal',
                 duration: '30 min'
             },
             {
                 id: '4',
                 time: '09:45',
-                title: language === 'ar' ? 'النشاط الفني' : language === 'fr' ? 'Activité artistique' : 'Art Activity',
-                description: language === 'ar' ? 'الرسم والتلوين والأعمال اليدوية' : language === 'fr' ? 'Dessin, coloriage et travaux manuels' : 'Drawing, coloring and crafts',
+                title: t('schedule.art'),
+                description: t('schedule.artDesc'),
                 type: 'art',
                 duration: '45 min'
             },
             {
                 id: '5',
                 time: '10:30',
-                title: language === 'ar' ? 'اللعب في الخارج' : language === 'fr' ? 'Jeux en plein air' : 'Outdoor Play',
-                description: language === 'ar' ? 'الألعاب الحركية في الحديقة' : language === 'fr' ? 'Jeux sportifs dans le jardin' : 'Sports games in the garden',
+                title: t('schedule.outdoor'),
+                description: t('schedule.outdoorDesc'),
                 type: 'play',
                 duration: '45 min'
             },
             {
                 id: '6',
                 time: '11:15',
-                title: language === 'ar' ? 'حصة الموسيقى' : language === 'fr' ? 'Séance de musique' : 'Music Session',
-                description: language === 'ar' ? 'الغناء والإيقاع' : language === 'fr' ? 'Chant et rythme' : 'Singing and rhythm',
+                title: t('schedule.music'),
+                description: t('schedule.musicDesc'),
                 type: 'music',
                 duration: '30 min'
             },
             {
                 id: '7',
                 time: '11:45',
-                title: language === 'ar' ? 'وجبة الغداء' : language === 'fr' ? 'Déjeuner' : 'Lunch',
-                description: language === 'ar' ? 'وجبة غداء متكاملة' : language === 'fr' ? 'Repas complet' : 'Complete meal',
+                title: t('schedule.lunch'),
+                description: t('schedule.lunchDesc'),
                 type: 'meal',
                 duration: '45 min'
             },
             {
                 id: '8',
                 time: '12:30',
-                title: language === 'ar' ? 'وقت القيلولة' : language === 'fr' ? 'Temps de sieste' : 'Nap Time',
-                description: language === 'ar' ? 'راحة ونوم القيلولة' : language === 'fr' ? 'Repos et sieste' : 'Rest and nap',
+                title: t('schedule.nap'),
+                description: t('schedule.napDesc'),
                 type: 'nap',
                 duration: '1h 30min'
             },
             {
                 id: '9',
                 time: '14:00',
-                title: language === 'ar' ? 'حصة التعلم الثانية' : language === 'fr' ? 'Deuxième séance d\'apprentissage' : 'Second Learning Session',
-                description: language === 'ar' ? 'أنشطة تعليمية متنوعة' : language === 'fr' ? 'Activités éducatives variées' : 'Various educational activities',
+                title: t('schedule.learning2'),
+                description: t('schedule.learning2Desc'),
                 type: 'learning',
                 duration: '45 min'
             },
             {
                 id: '10',
                 time: '14:45',
-                title: language === 'ar' ? 'اللعب الحر' : language === 'fr' ? 'Jeu libre' : 'Free Play',
-                description: language === 'ar' ? 'وقت اللعب الحر والاستعداد للمغادرة' : language === 'fr' ? 'Temps de jeu libre et préparation au départ' : 'Free play time and preparation for departure',
+                title: t('schedule.freePlay'),
+                description: t('schedule.freePlayDesc'),
                 type: 'play',
                 duration: '45 min'
             },
             {
                 id: '11',
                 time: '15:30',
-                title: language === 'ar' ? 'المغادرة' : language === 'fr' ? 'Départ' : 'Departure',
-                description: language === 'ar' ? 'وداع الأطفال' : language === 'fr' ? 'Au revoir aux enfants' : 'Goodbye to children',
+                title: t('schedule.departure'),
+                description: t('schedule.departureDesc'),
                 type: 'activity',
                 duration: '30 min'
             }
@@ -181,8 +179,8 @@ const ParentSchedule = () => {
         if (dayIndex === 1 || dayIndex === 3) { // Monday, Wednesday
             baseSchedule[3] = {
                 ...baseSchedule[3],
-                title: language === 'ar' ? 'حصة الرياضة' : language === 'fr' ? 'Séance de sport' : 'Sports Session',
-                description: language === 'ar' ? 'تمارين رياضية وألعاب حركية' : language === 'fr' ? 'Exercices sportifs et jeux de mouvement' : 'Sports exercises and movement games',
+                title: t('schedule.sports'),
+                description: t('schedule.sportsDesc'),
                 type: 'activity'
             };
         }
@@ -262,7 +260,7 @@ const ParentSchedule = () => {
                             <div>
                                 <h1 className="font-bold text-lg text-foreground">{t('parent.schedule')}</h1>
                                 <p className="text-xs text-muted-foreground">
-                                    {language === 'ar' ? 'الجدول الأسبوعي' : language === 'fr' ? 'Emploi du temps hebdomadaire' : 'Weekly Schedule'}
+                                    {t('schedule.weekly')}
                                 </p>
                             </div>
                         </div>
@@ -284,10 +282,10 @@ const ParentSchedule = () => {
                     </Button>
                     <span className="font-medium text-foreground">
                         {currentWeekOffset === 0
-                            ? (language === 'ar' ? 'هذا الأسبوع' : language === 'fr' ? 'Cette semaine' : 'This Week')
+                            ? t('schedule.thisWeek')
                             : currentWeekOffset > 0
-                                ? (language === 'ar' ? `بعد ${currentWeekOffset} أسبوع` : language === 'fr' ? `Dans ${currentWeekOffset} semaine(s)` : `In ${currentWeekOffset} week(s)`)
-                                : (language === 'ar' ? `قبل ${Math.abs(currentWeekOffset)} أسبوع` : language === 'fr' ? `Il y a ${Math.abs(currentWeekOffset)} semaine(s)` : `${Math.abs(currentWeekOffset)} week(s) ago`)
+                                ? t('schedule.afterWeeks').replace('{weeks}', currentWeekOffset.toString())
+                                : t('schedule.beforeWeeks').replace('{weeks}', Math.abs(currentWeekOffset).toString())
                         }
                     </span>
                     <Button
@@ -310,12 +308,12 @@ const ParentSchedule = () => {
                             onClick={() => setSelectedDayIndex(index)}
                         >
                             <span className="text-xs opacity-70">
-                                {language === 'ar' ? day.dayAr : language === 'fr' ? day.dayFr : day.day.slice(0, 3)}
+                                {t('days.' + day.day).slice(0, 3)}
                             </span>
                             <span className="font-bold">{formatDate(day.date)}</span>
                             {isToday(day.date) && (
                                 <Badge variant="secondary" className="text-[10px] mt-1 px-1">
-                                    {language === 'ar' ? 'اليوم' : language === 'fr' ? "Aujourd'hui" : 'Today'}
+                                    {t('schedule.today')}
                                 </Badge>
                             )}
                         </Button>
@@ -327,7 +325,7 @@ const ParentSchedule = () => {
                     <CardHeader className="pb-2">
                         <CardTitle className="text-lg flex items-center gap-2">
                             <Calendar className="w-5 h-5 text-primary" />
-                            {language === 'ar' ? selectedDay?.dayAr : language === 'fr' ? selectedDay?.dayFr : selectedDay?.day} - {formatDate(selectedDay?.date || '')}
+                            {t('days.' + selectedDay?.day)} - {formatDate(selectedDay?.date || '')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">

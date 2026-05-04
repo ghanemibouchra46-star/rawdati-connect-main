@@ -4,7 +4,10 @@ import { useState } from 'react';
 import Logo from './Logo';
 import { PricingModal, FAQModal, RegisterInfoModal, DashboardInfoModal, ContactModal } from './InfoModals';
 
+import { useLanguage } from '@/contexts/LanguageContext';
+
 const Footer = () => {
+  const { t, dir } = useLanguage();
   const [isPricingOpen, setIsPricingOpen] = useState(false);
   const [isFAQOpen, setIsFAQOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
@@ -21,7 +24,7 @@ const Footer = () => {
               <Logo size="md" className="text-primary-foreground" />
             </Link>
             <p className="text-sm text-primary-foreground/70 mb-6 leading-relaxed">
-              منصتك الموثوقة للعثور على أفضل روضات الأطفال في روضتي. 🎈
+              {t('footer.desc')}
             </p>
             <div className="flex gap-3">
               <a
@@ -29,7 +32,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-11 h-11 rounded-xl bg-primary/20 flex items-center justify-center hover:bg-primary/40 transition-all duration-300 hover:scale-110"
-                title="صفحتنا على فيسبوك"
+                title={t('footer.facebookTitle')}
               >
                 <Facebook className="w-5 h-5" />
               </a>
@@ -39,17 +42,17 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-extrabold text-lg mb-5 text-accent">🔗 روابط سريعة</h4>
+            <h4 className="font-extrabold text-lg mb-5 text-accent">🔗 {t('footer.quickLinks')}</h4>
             <ul className="space-y-3 text-sm text-primary-foreground/70">
-              <li><Link to="/" className="hover:text-primary-foreground hover:pr-2 transition-all duration-300">الرئيسية</Link></li>
-              <li><Link to="/kindergartens" className="hover:text-primary-foreground hover:pr-2 transition-all duration-300">جميع الروضات</Link></li>
-              <li><Link to="/about" className="hover:text-primary-foreground hover:pr-2 transition-all duration-300">من نحن</Link></li>
+              <li><Link to="/" className="hover:text-primary-foreground hover:pr-2 transition-all duration-300">{t('footer.home')}</Link></li>
+              <li><Link to="/kindergartens" className="hover:text-primary-foreground hover:pr-2 transition-all duration-300">{t('footer.allKindergartens')}</Link></li>
+              <li><Link to="/about" className="hover:text-primary-foreground hover:pr-2 transition-all duration-300">{t('footer.aboutUs')}</Link></li>
               <li>
                 <button 
                   onClick={() => setIsContactOpen(true)}
                   className="hover:text-primary-foreground hover:pr-2 transition-all duration-300 text-right"
                 >
-                  اتصل بنا
+                  {t('footer.contactUs')}
                 </button>
               </li>
             </ul>
@@ -57,14 +60,14 @@ const Footer = () => {
 
           {/* For Owners */}
           <div>
-            <h4 className="font-extrabold text-lg mb-5 text-secondary">🏫 لأصحاب الروضات</h4>
+            <h4 className="font-extrabold text-lg mb-5 text-secondary">🏫 {t('footer.forOwners')}</h4>
             <ul className="space-y-3 text-sm text-primary-foreground/70 flex flex-col items-start">
               <li>
                 <button 
                   onClick={() => setIsRegisterOpen(true)}
                   className="hover:text-primary-foreground hover:pr-2 transition-all duration-300 text-right w-full"
                 >
-                  سجل روضتك
+                  {t('footer.registerYourKg')}
                 </button>
               </li>
               <li>
@@ -72,7 +75,7 @@ const Footer = () => {
                   onClick={() => setIsDashboardOpen(true)}
                   className="hover:text-primary-foreground hover:pr-2 transition-all duration-300 text-right w-full"
                 >
-                  لوحة التحكم
+                  {t('footer.dashboard')}
                 </button>
               </li>
               <li>
@@ -80,7 +83,7 @@ const Footer = () => {
                   onClick={() => setIsPricingOpen(true)}
                   className="hover:text-primary-foreground hover:pr-2 transition-all duration-300 text-right w-full"
                 >
-                  الأسعار
+                  {t('footer.pricing')}
                 </button>
               </li>
               <li>
@@ -88,7 +91,7 @@ const Footer = () => {
                   onClick={() => setIsFAQOpen(true)}
                   className="hover:text-primary-foreground hover:pr-2 transition-all duration-300 text-right w-full"
                 >
-                  الأسئلة الشائعة
+                  {t('footer.faq')}
                 </button>
               </li>
             </ul>
@@ -96,13 +99,13 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h4 className="font-extrabold text-lg mb-5 text-coral">📞 تواصل معنا</h4>
+            <h4 className="font-extrabold text-lg mb-5 text-coral">📞 {t('footer.contact')}</h4>
             <ul className="space-y-4 text-sm text-primary-foreground/70">
               <li className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-primary/20 flex items-center justify-center">
                   <MapPin className="w-4 h-4 text-primary-foreground" />
                 </div>
-                <span>روضتي، الجزائر 🇩🇿</span>
+                <span>{t('footer.location')}</span>
               </li>
               <li className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-secondary/20 flex items-center justify-center">
@@ -123,7 +126,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="border-t border-primary-foreground/10 mt-10 pt-8 text-center">
           <p className="text-sm text-primary-foreground/50">
-            © {new Date().getFullYear()} روضتي. جميع الحقوق محفوظة 💕
+            © {new Date().getFullYear()} روضتي. {t('footer.rights')} 💕
           </p>
         </div>
       </div>

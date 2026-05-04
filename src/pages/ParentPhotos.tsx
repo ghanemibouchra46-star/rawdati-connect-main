@@ -89,10 +89,10 @@ const ParentPhotos = () => {
                     id: activity.id,
                     url: activity.photo_url,
                     thumbnail: activity.photo_url, // For now, same as url
-                    title: activity.description || (language === 'ar' ? 'نشاط' : language === 'fr' ? 'Activité' : 'Activity'),
+                    title: activity.description || t('common.activity'),
                     date,
-                    childName: child?.name || (language === 'ar' ? 'الطفل' : 'Child'),
-                    activity: activity.activity_type || (language === 'ar' ? 'نشاط' : 'Activity'),
+                    childName: child?.name || t('common.child'),
+                    activity: activity.activity_type || t('common.activity'),
                     liked: false // Could add a likes system later
                 };
             });
@@ -168,7 +168,7 @@ const ParentPhotos = () => {
                             <div>
                                 <h1 className="font-bold text-lg text-foreground">{t('parent.photos')}</h1>
                                 <p className="text-xs text-muted-foreground">
-                                    {filteredPhotos.length} {language === 'ar' ? 'صورة' : language === 'fr' ? 'photos' : 'photos'}
+                                    {filteredPhotos.length} {t('photos.count')}
                                 </p>
                             </div>
                         </div>
@@ -188,7 +188,7 @@ const ParentPhotos = () => {
                             onClick={() => setSelectedChild(child)}
                             className="whitespace-nowrap"
                         >
-                            {child === 'all' ? (language === 'ar' ? 'الكل' : language === 'fr' ? 'Tous' : 'All') : child}
+                             {child === 'all' ? t('common.all') : child}
                         </Button>
                     ))}
                 </div>
@@ -198,12 +198,12 @@ const ParentPhotos = () => {
                     <Card className="border-dashed">
                         <CardContent className="py-12 text-center">
                             <Image className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-                            <p className="text-muted-foreground text-lg">
-                                {language === 'ar' ? 'لا توجد صور' : language === 'fr' ? 'Pas de photos' : 'No photos'}
-                            </p>
-                            <p className="text-sm text-muted-foreground mt-2">
-                                {language === 'ar' ? 'ستظهر هنا صور أنشطة طفلك من الروضة' : language === 'fr' ? 'Les photos des activités apparaîtront ici' : 'Photos of your child\'s activities will appear here'}
-                            </p>
+                             <p className="text-muted-foreground text-lg">
+                                 {t('photos.noPhotos')}
+                             </p>
+                             <p className="text-sm text-muted-foreground mt-2">
+                                 {t('photos.noPhotosDesc')}
+                             </p>
                         </CardContent>
                     </Card>
                 ) : (

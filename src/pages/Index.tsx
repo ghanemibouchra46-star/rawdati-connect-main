@@ -56,29 +56,29 @@ const Index = () => {
   const services = [
     {
       icon: GraduationCap,
-      title: 'اختر الروضة المثالية لطفلك',
-      description: 'اكتشف أفضل الروضات في منطقتك',
+      title: t('home.perfectKgTitle'),
+      description: t('home.perfectKgDesc'),
       link: '/kindergartens',
       color: 'from-pink-500 to-pink-600'
     },
     {
       icon: BookOpen,
-      title: 'نصائح للأولياء',
-      description: 'مقالات تعليمية حول التربية والتغذية وتطوير قدرات الطفل',
+      title: t('home.tipsTitle'),
+      description: t('home.tipsDesc'),
       link: '/parenting-tips',
       color: 'from-emerald-500 to-emerald-600'
     },
     {
       icon: Stethoscope,
-      title: 'أطباء الأطفال',
-      description: 'ابحث عن أفضل أطباء الأطفال والمختصين في منطقتك',
+      title: t('home.doctorsTitle'),
+      description: t('home.doctorsDesc'),
       link: '/doctors',
       color: 'from-blue-500 to-blue-600'
     },
     {
       icon: ShoppingBag,
-      title: 'المحلات التجارية',
-      description: 'اكتشف أفضل المحلات التجارية لملابس ومستلزمات الأطفال',
+      title: t('home.storesTitle'),
+      description: t('home.storesDesc'),
       link: '/clothing-stores',
       color: 'from-orange-500 to-orange-600'
     }
@@ -107,21 +107,21 @@ const Index = () => {
           <div className="text-center max-w-4xl mx-auto">
             {/* Welcome Banner */}
             <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500/20 to-emerald-600/20 backdrop-blur-sm rounded-full shadow-lg mb-8 border border-pink-500/30">
-              <span className="text-2xl font-bold text-pink-500">مرحباً بك</span>
+              <span className="text-2xl font-bold text-pink-500">{t('home.welcome')}</span>
               <span className="text-xl">👋</span>
             </div>
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight drop-shadow-lg">
               <span className="block mb-3 text-foreground">
-                اختر الروضة
+                {t('home.heroTitle1')}
               </span>
               <span className="block text-transparent bg-gradient-to-r from-pink-500 via-pink-500 to-emerald-600 bg-clip-text drop-shadow-none">
-                المثالية لطفلك
+                {t('home.heroTitle2')}
               </span>
             </h1>
 
             <p className="text-xl md:text-2xl text-foreground/80 mb-10 max-w-2xl mx-auto leading-relaxed font-medium drop-shadow-sm inline-flex flex-wrap items-center justify-center gap-2">
-              منصتك الأولى للعثور على أفضل الروضات في منطقتك
+              {t('home.heroSubtitle')}
               <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-pink-500/20 text-pink-500">
                 <Home className="w-4 h-4" />
               </span>
@@ -137,12 +137,12 @@ const Index = () => {
               <Link to="/kindergartens">
                 <Button size="lg" variant="outline" className="gap-2 text-lg px-10 py-6 bg-card/80 backdrop-blur-sm hover:bg-card transition-all duration-300 font-semibold shadow-soft">
                   <GraduationCap className="w-6 h-6" />
-                  استكشف الروضات
+                  {t('home.exploreKindergartens')}
                 </Button>
               </Link>
               <Link to="/about">
                 <Button size="lg" variant="outline" className="gap-2 text-lg px-10 py-6 bg-card/80 backdrop-blur-sm hover:bg-card transition-all duration-300 font-semibold">
-                  من نحن
+                  {t('home.whoAreWe')}
                 </Button>
               </Link>
             </div>
@@ -158,15 +158,15 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-              أفضل الروضات في منطقتك
+              {t('home.bestInArea')}
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto mb-6">
-              استكشف أفضل الروضات مع معلومات شاملة وآراء حقيقية
+              {t('home.bestInAreaDesc')}
             </p>
             <Link to="/kindergartens">
               <Button size="lg" className="gap-2 gradient-accent border-0 shadow-soft hover:shadow-hover">
                 <GraduationCap className="w-5 h-5" />
-                استكشف الآن
+                {t('home.exploreNow')}
               </Button>
             </Link>
           </div>
@@ -184,7 +184,7 @@ const Index = () => {
           <div className="text-center mt-8">
             <Link to="/kindergartens">
               <Button variant="outline" size="lg" className="gap-2">
-                {t('kindergartens.count').replace('{count}', String(totalCount))} — {language === 'ar' ? 'عرض الكل' : language === 'fr' ? 'Voir tout' : 'View All'}
+                {t('kindergartens.count').replace('{count}', String(totalCount))} — {t('common.viewAll')}
                 <ArrowIcon className="w-4 h-4" />
               </Button>
             </Link>
@@ -197,10 +197,10 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-              لماذا روضتي؟
+              {t('home.whyRawdati')}
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              نوفر لك كل ما تحتاجه لاتخاذ القرار الصحيح
+              {t('home.whyRawdatiDesc')}
             </p>
           </div>
 
@@ -210,10 +210,10 @@ const Index = () => {
                 <GraduationCap className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-bold text-foreground mb-2">
-                روضات معتمدة
+                {t('home.certified')}
               </h3>
               <p className="text-muted-foreground">
-                جميع الروضات مرخصة وتتبع معايير الجودة التعليمية
+                {t('home.certifiedDesc')}
               </p>
             </div>
 
@@ -222,10 +222,10 @@ const Index = () => {
                 <Star className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-bold text-foreground mb-2">
-                آراء حقيقية
+                {t('home.realReviews')}
               </h3>
               <p className="text-muted-foreground">
-                آراء وتجارب آباء حقيقيين لمساعدتك في الاختيار
+                {t('home.realReviewsDesc')}
               </p>
             </div>
 
@@ -234,10 +234,10 @@ const Index = () => {
                 <MapPin className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-bold text-foreground mb-2">
-                بالقرب منك
+                {t('home.nearYou')}
               </h3>
               <p className="text-muted-foreground">
-                اعثر على روضات في بلديتك أو المناطق المجاورة
+                {t('home.nearYouDesc')}
               </p>
             </div>
 
@@ -246,10 +246,10 @@ const Index = () => {
                 <Users className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-bold text-foreground mb-2">
-                تسجيل سهل
+                {t('home.easyRegister')}
               </h3>
               <p className="text-muted-foreground">
-                سجل طفلك مباشرة عبر المنصة بخطوات بسيطة
+                {t('home.easyRegisterDesc')}
               </p>
             </div>
           </div>
@@ -261,10 +261,10 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-              خدماتنا
+              {t('home.ourServices')}
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              استكشف جميع خدماتنا المخصصة للأطفال
+              {t('home.ourServicesDesc')}
             </p>
           </div>
 
@@ -288,7 +288,7 @@ const Index = () => {
                 </Link>
                 {index === 0 && (
                   <div className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs px-2 py-1 rounded-full">
-                    جديد
+                    {t('common.new')}
                   </div>
                 )}
               </div>
@@ -301,14 +301,14 @@ const Index = () => {
       <section className="py-16 bg-gradient-to-br from-pink-500/10 to-emerald-600/10">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-            هل أنت مالك روضة؟
+            {t('home.isOwner')}
           </h2>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-            انضم إلى منصتنا ووصل إلى آلاف الآباء الباحثين عن أفضل الخيارات
+            {t('home.isOwnerDesc')}
           </p>
           <Link to="/owner-auth">
             <Button size="lg" className="gap-2 bg-gradient-to-r from-pink-500 to-emerald-600 text-white border-0 shadow-soft hover:shadow-hover transition-all duration-300">
-              سجل روضتك الآن
+              {t('home.registerKgNow')}
               <ArrowIcon className="w-4 h-4" />
             </Button>
           </Link>

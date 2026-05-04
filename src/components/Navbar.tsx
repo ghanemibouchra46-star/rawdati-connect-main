@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import Logo from './Logo';
+import LanguageSelector from './LanguageSelector';
 
 const Navbar = () => {
   const { language, dir, setLanguage, t } = useLanguage();
@@ -17,7 +18,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       toast({
-        title: language === 'ar' ? 'جاري تسجيل الخروج...' : 'Déconnexion en cours...',
+        title: t('auth.loading'),
       });
       await logout();
       // Use window.location as a more robust way to ensure a fresh state
@@ -31,9 +32,6 @@ const Navbar = () => {
     }
   };
 
-  const toggleLanguage = () => {
-    setLanguage(language === 'ar' ? 'fr' : 'ar');
-  };
 
   return (
     <nav className="bg-white/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
@@ -70,16 +68,9 @@ const Navbar = () => {
           <div className="flex items-center gap-4">
             {/* Language Toggle + Shield */}
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleLanguage}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                {language === 'ar' ? 'FR' : 'AR'}
-              </Button>
+              <LanguageSelector />
               <Link to="/admin-auth">
-                <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-500/10 hover:text-red-500 transition-all duration-300" title={language === 'ar' ? 'لوحة الأدمين' : 'Admin Panel'}>
+                <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-500/10 hover:text-red-500 transition-all duration-300" title={t('admin.title')}>
                   <Shield className="w-5 h-5 text-red-500" />
                 </Button>
               </Link>
@@ -105,13 +96,13 @@ const Navbar = () => {
                       to="/parent"
                       className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
                     >
-                      {language === 'ar' ? 'لوحة التحكم' : 'Tableau de bord'}
+                      {t('parent.title')}
                     </Link>
                     <Link
                       to="/parent/settings"
                       className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
                     >
-                      {language === 'ar' ? 'الملف الشخصي' : 'Profil'}
+                      {t('parent.settings')}
                     </Link>
                     <hr className="my-2" />
                     <button
@@ -119,7 +110,7 @@ const Navbar = () => {
                       className="w-full text-start px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2"
                     >
                       <LogOut className="w-4 h-4 ml-2" />
-                      {language === 'ar' ? 'تسجيل الخروج' : 'Déconnexion'}
+                      {t('admin.logout')}
                     </button>
                   </div>
                 </div>
@@ -129,13 +120,13 @@ const Navbar = () => {
                 <Link to="/auth">
                   <Button variant="ghost" size="sm" className="gap-2 rounded-full font-bold hover:bg-primary/10 hover:text-primary transition-all duration-300">
                     <User className="w-4 h-4" />
-                    <span className="hidden lg:inline">{language === 'ar' ? 'تسجيل الدخول' : 'Connexion'}</span>
+                    <span className="hidden lg:inline">{t('auth.login')}</span>
                   </Button>
                 </Link>
                 <Link to="/owner-auth">
                   <Button size="sm" className="gap-2 gradient-accent border-0 rounded-full shadow-soft hover:shadow-hover transition-all duration-300 text-primary-foreground font-bold hover:scale-105">
                     <Building2 className="w-4 h-4" />
-                    <span className="hidden lg:inline">{language === 'ar' ? 'أصحاب الروضات' : 'Espace crèche'}</span>
+                    <span className="hidden lg:inline">{t('nav.ownerLogin')}</span>
                   </Button>
                 </Link>
               </div>
@@ -191,7 +182,7 @@ const Navbar = () => {
                     className="block text-foreground hover:text-primary transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    {language === 'ar' ? 'لوحة التحكم' : 'Tableau de bord'}
+                    {t('parent.title')}
                   </Link>
                   <button
                     onClick={() => {
@@ -201,7 +192,7 @@ const Navbar = () => {
                     className="w-full text-left text-foreground hover:text-primary transition-colors font-medium flex items-center gap-2"
                   >
                     <LogOut className="w-4 h-4" />
-                    {language === 'ar' ? 'تسجيل الخروج' : 'Déconnexion'}
+                    {t('admin.logout')}
                   </button>
                 </div>
               ) : (
@@ -213,7 +204,7 @@ const Navbar = () => {
                   >
                     <Button variant="ghost" className="justify-start gap-2 w-full rounded-2xl font-bold py-6 text-red-500 hover:bg-red-500/10 hover:text-red-600 border border-red-100">
                       <Shield className="w-5 h-5" />
-                      {language === 'ar' ? 'لوحة الأدمين' : 'Tableau de bord admin'}
+                      {t('admin.title')}
                     </Button>
                   </Link>
                   <Link
@@ -223,7 +214,7 @@ const Navbar = () => {
                   >
                     <Button variant="outline" className="justify-start gap-2 w-full rounded-2xl font-bold py-6 border-primary/50 bg-primary/5 text-primary hover:bg-primary/10">
                       <User className="w-5 h-5" />
-                      {language === 'ar' ? 'تسجيل الدخول' : 'Connexion'}
+                      {t('auth.login')}
                     </Button>
                   </Link>
                   <Link
@@ -233,7 +224,7 @@ const Navbar = () => {
                   >
                     <Button className="justify-start gap-2 gradient-accent border-0 w-full rounded-2xl font-bold py-6 text-primary-foreground">
                       <Building2 className="w-5 h-5" />
-                      {language === 'ar' ? 'أصحاب الروضات' : 'Espace propriétaire'}
+                      {t('nav.ownerLogin')}
                     </Button>
                   </Link>
                 </div>

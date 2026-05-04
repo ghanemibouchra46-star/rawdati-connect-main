@@ -81,14 +81,12 @@ const ParentSettings = () => {
 
             if (error) {
                 toast({
-                    title: t('common.error'),
-                    description: language === 'ar' ? 'حدث خطأ أثناء الحفظ' : language === 'fr' ? 'Erreur lors de la sauvegarde' : 'Error while saving',
+                    description: t('common.error'),
                     variant: 'destructive'
                 });
             } else {
                 toast({
-                    title: t('common.updated'),
-                    description: language === 'ar' ? 'تم حفظ التغييرات بنجاح' : language === 'fr' ? 'Modifications enregistrées' : 'Changes saved successfully'
+                    description: t('common.updated'),
                 });
             }
         }
@@ -108,8 +106,7 @@ const ParentSettings = () => {
 
         if (newPassword !== confirmPassword) {
             toast({
-                title: t('common.error'),
-                description: language === 'ar' ? 'كلمة المرور غير متطابقة' : language === 'fr' ? 'Les mots de passe ne correspondent pas' : 'Passwords do not match',
+                description: t('parent.confirmPassword'),
                 variant: 'destructive'
             });
             return;
@@ -123,14 +120,12 @@ const ParentSettings = () => {
 
         if (error) {
             toast({
-                title: t('common.error'),
-                description: language === 'ar' ? 'فشل تغيير كلمة المرور' : language === 'fr' ? 'Échec du changement de mot de passe' : 'Failed to change password',
+                description: t('common.error'),
                 variant: 'destructive'
             });
         } else {
             toast({
-                title: t('common.updated'),
-                description: language === 'ar' ? 'تم تغيير كلمة المرور بنجاح' : language === 'fr' ? 'Mot de passe modifié avec succès' : 'Password changed successfully'
+                description: t('common.updated'),
             });
             setShowPasswordDialog(false);
             setNewPassword('');
@@ -188,7 +183,7 @@ const ParentSettings = () => {
                             <div>
                                 <h1 className="font-bold text-lg text-foreground">{t('parent.settings')}</h1>
                                 <p className="text-xs text-muted-foreground">
-                                    {language === 'ar' ? 'إدارة حسابك' : language === 'fr' ? 'Gérer votre compte' : 'Manage your account'}
+                                    {t('parent.manageAccount')}
                                 </p>
                             </div>
                         </div>
@@ -201,11 +196,10 @@ const ParentSettings = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <User className="w-5 h-5 text-primary" />
-                            {language === 'ar' ? 'الملف الشخصي' : language === 'fr' ? 'Profil' : 'Profile'}
+                            {t('parent.profile')}
                         </CardTitle>
                         <CardDescription>
-                            {language === 'ar' ? 'إدارة معلوماتك الشخصية' : language === 'fr' ? 'Gérer vos informations personnelles' : 'Manage your personal information'}
+                            {t('parent.profileDesc')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -218,7 +212,7 @@ const ParentSettings = () => {
                             </Avatar>
                             <Button variant="outline" size="sm" className="gap-2">
                                 <Camera className="w-4 h-4" />
-                                {language === 'ar' ? 'تغيير الصورة' : language === 'fr' ? 'Changer la photo' : 'Change Photo'}
+                                {t('parent.changePhoto')}
                             </Button>
                         </div>
 
@@ -232,7 +226,7 @@ const ParentSettings = () => {
                                     id="fullName"
                                     value={profile.fullName}
                                     onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
-                                    placeholder={language === 'ar' ? 'الاسم الكامل' : language === 'fr' ? 'Nom complet' : 'Full Name'}
+                                    placeholder={t('auth.fullName')}
                                 />
                             </div>
 
@@ -265,7 +259,7 @@ const ParentSettings = () => {
                                     className="bg-muted"
                                 />
                                 <p className="text-xs text-muted-foreground">
-                                    {language === 'ar' ? 'لا يمكن تغيير البريد الإلكتروني' : language === 'fr' ? 'L\'email ne peut pas être modifié' : 'Email cannot be changed'}
+                                    {t('parent.noEmailChange')}
                                 </p>
                             </div>
                         </div>
@@ -274,7 +268,7 @@ const ParentSettings = () => {
                             {isSaving ? (
                                 <>
                                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    {language === 'ar' ? 'جاري الحفظ...' : language === 'fr' ? 'Enregistrement...' : 'Saving...'}
+                                    {t('parent.saving')}
                                 </>
                             ) : (
                                 <>
@@ -290,19 +284,18 @@ const ParentSettings = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Bell className="w-5 h-5 text-primary" />
-                            {language === 'ar' ? 'الإشعارات' : language === 'fr' ? 'Notifications' : 'Notifications'}
+                            {t('parent.notifications')}
                         </CardTitle>
                         <CardDescription>
-                            {language === 'ar' ? 'تحكم في الإشعارات التي تصلك' : language === 'fr' ? 'Contrôlez les notifications que vous recevez' : 'Control notifications you receive'}
+                            {t('parent.notificationsDesc')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>{language === 'ar' ? 'نشاطات الطفل' : language === 'fr' ? 'Activités de l\'enfant' : 'Child Activities'}</Label>
+                                <Label>{t('parent.childActivities')}</Label>
                                 <p className="text-sm text-muted-foreground">
-                                    {language === 'ar' ? 'تلقي إشعارات عن أنشطة طفلك' : language === 'fr' ? 'Recevoir des notifications sur les activités' : 'Get notified about activities'}
+                                    {t('parent.childActivitiesDesc')}
                                 </p>
                             </div>
                             <Switch
@@ -313,9 +306,9 @@ const ParentSettings = () => {
                         <Separator />
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>{language === 'ar' ? 'الإعلانات' : language === 'fr' ? 'Annonces' : 'Announcements'}</Label>
+                                <Label>{t('parent.announcements')}</Label>
                                 <p className="text-sm text-muted-foreground">
-                                    {language === 'ar' ? 'تلقي إعلانات الروضة' : language === 'fr' ? 'Recevoir les annonces du jardin' : 'Get kindergarten announcements'}
+                                    {t('parent.announcementsDesc')}
                                 </p>
                             </div>
                             <Switch
@@ -326,9 +319,9 @@ const ParentSettings = () => {
                         <Separator />
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>{language === 'ar' ? 'التذكيرات' : language === 'fr' ? 'Rappels' : 'Reminders'}</Label>
+                                <Label>{t('parent.reminders')}</Label>
                                 <p className="text-sm text-muted-foreground">
-                                    {language === 'ar' ? 'تذكيرات الدفع والمواعيد' : language === 'fr' ? 'Rappels de paiement et rendez-vous' : 'Payment and appointment reminders'}
+                                    {t('parent.remindersDesc')}
                                 </p>
                             </div>
                             <Switch
@@ -339,9 +332,9 @@ const ParentSettings = () => {
                         <Separator />
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>{language === 'ar' ? 'رسائل المعلمات' : language === 'fr' ? 'Messages des enseignantes' : 'Teacher Messages'}</Label>
+                                <Label>{t('parent.teacherMessages')}</Label>
                                 <p className="text-sm text-muted-foreground">
-                                    {language === 'ar' ? 'رسائل مباشرة من المعلمات' : language === 'fr' ? 'Messages directs des enseignantes' : 'Direct messages from teachers'}
+                                    {t('parent.teacherMessagesDesc')}
                                 </p>
                             </div>
                             <Switch
@@ -357,10 +350,7 @@ const ParentSettings = () => {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Globe className="w-5 h-5 text-primary" />
-                            {language === 'ar' ? 'اللغة' : language === 'fr' ? 'Langue' : 'Language'}
-                        </CardTitle>
-                        <CardDescription>
-                            {language === 'ar' ? 'اختر لغة التطبيق' : language === 'fr' ? 'Choisissez la langue de l\'application' : 'Choose app language'}
+                            {t('parent.chooseLanguage')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -387,8 +377,7 @@ const ParentSettings = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Shield className="w-5 h-5 text-primary" />
-                            {language === 'ar' ? 'الأمان' : language === 'fr' ? 'Sécurité' : 'Security'}
+                            {t('parent.security')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -398,7 +387,7 @@ const ParentSettings = () => {
                             onClick={() => setShowPasswordDialog(true)}
                         >
                             <Lock className="w-4 h-4" />
-                            {language === 'ar' ? 'تغيير كلمة المرور' : language === 'fr' ? 'Changer le mot de passe' : 'Change Password'}
+                            {t('parent.changePassword')}
                         </Button>
                     </CardContent>
                 </Card>
@@ -410,12 +399,12 @@ const ParentSettings = () => {
                     onClick={handleLogout}
                 >
                     <LogOut className="w-4 h-4" />
-                    {language === 'ar' ? 'تسجيل الخروج' : language === 'fr' ? 'Déconnexion' : 'Logout'}
+                    {t('admin.logout')}
                 </Button>
 
                 {/* App Version */}
                 <p className="text-center text-xs text-muted-foreground py-4">
-                    {language === 'ar' ? 'روضتي - الإصدار' : language === 'fr' ? 'روضتي - Version' : 'روضتي - Version'} 1.0.0
+                    {t('admin.title')} - {t('admin.version')} 1.0.0
                 </p>
             </main>
 
@@ -425,17 +414,17 @@ const ParentSettings = () => {
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Lock className="w-5 h-5 text-primary" />
-                            {language === 'ar' ? 'تغيير كلمة المرور' : language === 'fr' ? 'Changer le mot de passe' : 'Change Password'}
+                            {t('parent.changePassword')}
                         </DialogTitle>
                         <DialogDescription>
-                            {language === 'ar' ? 'أدخل كلمة المرور الجديدة' : language === 'fr' ? 'Entrez votre nouveau mot de passe' : 'Enter your new password'}
+                            {t('parent.enterNewPassword')}
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
                             <Label htmlFor="newPassword">
-                                {language === 'ar' ? 'كلمة المرور الجديدة' : language === 'fr' ? 'Nouveau mot de passe' : 'New Password'}
+                                {t('parent.newPassword')}
                             </Label>
                             <div className="relative">
                                 <Input
@@ -461,7 +450,7 @@ const ParentSettings = () => {
 
                         <div className="space-y-2">
                             <Label htmlFor="confirmPassword">
-                                {language === 'ar' ? 'تأكيد كلمة المرور' : language === 'fr' ? 'Confirmer le mot de passe' : 'Confirm Password'}
+                                {t('parent.confirmPassword')}
                             </Label>
                             <div className="relative">
                                 <Input
@@ -504,12 +493,12 @@ const ParentSettings = () => {
                             {isChangingPassword ? (
                                 <>
                                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    {language === 'ar' ? 'جاري التغيير...' : language === 'fr' ? 'Modification...' : 'Changing...'}
+                                    {t('parent.changing')}
                                 </>
                             ) : (
                                 <>
                                     <Check className="w-4 h-4" />
-                                    {language === 'ar' ? 'تغيير' : language === 'fr' ? 'Changer' : 'Change'}
+                                    {t('parent.change')}
                                 </>
                             )}
                         </Button>

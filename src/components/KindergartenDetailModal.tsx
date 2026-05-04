@@ -103,7 +103,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
 
       L.marker([kindergarten.coordinates.lat, kindergarten.coordinates.lng])
         .addTo(mapInstanceRef.current)
-        .bindPopup(language === 'ar' ? kindergarten?.name_ar : kindergarten?.nameFr)
+        .bindPopup(kindergarten[`name${language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En'}`] || kindergarten.name_ar)
         .openPopup();
 
       // Fix for Leaflet in a modal not loading tiles properly
@@ -184,9 +184,9 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
     setCurrentImageIndex((prev) => (prev - 1 + (kindergarten?.images?.length || 1)) % (kindergarten?.images?.length || 1));
   };
 
-  const name = language === 'ar' ? kindergarten?.name_ar : kindergarten?.nameFr;
-  const description = language === 'ar' ? kindergarten?.description_ar : kindergarten?.descriptionFr;
-  const municipality = language === 'ar' ? kindergarten?.municipality_ar : kindergarten?.municipalityFr;
+  const name = kindergarten[`name${language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En'}`] || kindergarten.name_ar;
+  const description = kindergarten[`description${language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En'}`] || kindergarten.description_ar;
+  const municipality = kindergarten[`municipality${language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En'}`] || kindergarten.municipality_ar;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -252,7 +252,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
             <div className="flex items-center gap-2 px-4 py-2 bg-muted rounded-xl">
               <Star className="w-5 h-5 text-accent fill-accent" />
               <span className="font-bold text-foreground">{kindergarten.rating}</span>
-              <span className="text-muted-foreground">({kindergarten.reviewCount} {language === 'ar' ? 'تقييم' : 'avis'})</span>
+              <span className="text-muted-foreground">({kindergarten.reviewCount} {t('common.rating')})</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 bg-muted rounded-xl">
               <MapPin className="w-5 h-5 text-coral" />
@@ -270,8 +270,8 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
               </a>
             )}
             <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-xl">
-              <span className="font-bold text-primary">{kindergarten.pricePerMonth.toLocaleString()} {language === 'ar' ? 'دج' : 'DA'}</span>
-              <span className="text-muted-foreground">/{language === 'ar' ? 'شهر' : 'mois'}</span>
+              <span className="font-bold text-primary">{kindergarten.pricePerMonth.toLocaleString()} {t('common.da')}</span>
+              <span className="text-muted-foreground">/{t('common.month')}</span>
             </div>
             {kindergarten.hasAutismWing && (
               <div className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-xl border border-purple-200">
@@ -285,18 +285,18 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
           <div className="mb-6 bg-muted/50 rounded-xl p-4 border border-border/50">
             <h3 className="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
               <Coins className="w-5 h-5 text-yellow-500" />
-              {language === 'ar' ? 'تفصيلات السعر' : 'Détails des tarifs'}
+              {t('details.priceDetails')}
             </h3>
             <div className="space-y-2">
               {(kindergarten?.priceBreakdown || []).map((item) => (
                 <div key={item.id} className="flex justify-between items-center p-2 bg-card rounded-lg border border-border/30">
                   <div className="flex flex-col">
                     <span className="font-medium text-sm">
-                      {language === 'ar' ? item?.name_ar : item?.nameFr}
-                      {item.optional && <span className="text-xs text-muted-foreground mx-1">({language === 'ar' ? 'اختياري' : 'Optionnel'})</span>}
+                      {item[`name${language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En'}`] || item.name_ar}
+                      {item.optional && <span className="text-xs text-muted-foreground mx-1">({t('details.optional')})</span>}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {item.type === 'annual' ? (language === 'ar' ? 'سنوي' : 'Annuel') : (language === 'ar' ? 'شهري' : 'Mensuel')}
+                      {item.type === 'annual' ? t('details.annual') : t('details.monthly')}
                     </span>
                   </div>
                   <span className="font-bold text-primary">
@@ -305,9 +305,9 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                 </div>
               ))}
               <div className="pt-2 mt-2 border-t border-border flex justify-between items-center bg-primary/5 p-3 rounded-lg">
-                <span className="font-bold">{language === 'ar' ? 'المجموع الشهري التقديري' : 'Total mensuel estimé'}</span>
+                <span className="font-bold">{t('details.totalEstimated')}</span>
                 <span className="font-bold text-lg text-primary">
-                  {kindergarten.pricePerMonth.toLocaleString()} {language === 'ar' ? 'دج' : 'DA'}
+                  {kindergarten.pricePerMonth.toLocaleString()} {t('common.da')}
                 </span>
               </div>
             </div>
@@ -318,7 +318,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
             <div className="mb-6 bg-gradient-to-r from-amber-50 to-amber-100 rounded-xl p-4 border border-amber-200">
               <h3 className={`text-lg font-bold text-foreground mb-3 ${dir === 'rtl' ? 'text-right' : 'text-left'} flex items-center gap-2`}>
                 <Coins className="w-5 h-5 text-amber-600" />
-                {language === 'ar' ? 'معلومات الدفع' : 'Informations de paiement'}
+                {t('details.paymentInfo')}
               </h3>
               <div className="bg-white/70 rounded-lg p-3">
                 <p className={`text-sm text-foreground ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
@@ -378,14 +378,11 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
           {/* Activities and Programs */}
           {((kindergarten.activities && kindergarten.activities.length > 0) || (kindergarten.programs && kindergarten.programs.length > 0)) && (
             <div className="mb-6">
-              <h3 className={`text-lg font-bold text-foreground mb-3 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{language === 'ar' ? 'البرامج والأنشطة' : 'Activités et Programmes'}</h3>
+              <h3 className={`text-lg font-bold text-foreground mb-3 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t('details.programsAndActivities')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {/* Traditional Activities */}
                 {(kindergarten?.activities || []).slice(0, 6).map((activity) => (
-                  <ActivityCard key={activity.id} activity={{
-                    ...activity,
-                    name_ar: language === 'ar' ? activity?.name_ar : activity?.nameFr
-                  }} />
+                  <ActivityCard key={activity.id} activity={activity} />
                 ))}
 
                 {/* Custom Programs */}
@@ -395,8 +392,8 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                       {prog.icon}
                     </div>
                     <div>
-                      <h4 className="font-bold text-sm">{language === 'ar' ? prog?.name_ar : prog?.nameFr}</h4>
-                      <p className="text-xs text-muted-foreground">{language === 'ar' ? prog?.description_ar : prog?.descriptionFr}</p>
+                      <h4 className="font-bold text-sm">{prog[`name${language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En'}`] || prog.name_ar}</h4>
+                      <p className="text-xs text-muted-foreground">{prog[`description${language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En'}`] || prog.description_ar}</p>
                     </div>
                   </div>
                 ))}
@@ -407,13 +404,13 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
           {/* Kindergarten Gallery */}
           {kindergarten.kindergartenGallery && kindergarten.kindergartenGallery.length > 0 && (
             <div className="mb-6">
-              <h3 className={`text-lg font-bold text-foreground mb-3 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{language === 'ar' ? 'معرض صور الروضة' : 'Galerie de la crèche'}</h3>
+              <h3 className={`text-lg font-bold text-foreground mb-3 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t('details.gallery')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {kindergarten.kindergartenGallery.map((item) => (
                   <div key={item.id} className="group relative aspect-video rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
                     <img
                       src={item.image}
-                      alt={language === 'ar' ? item.title_ar : item.titleFr}
+                      alt={item[`title${language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En'}`] || item.title_ar}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       onError={(e) => {
                         e.currentTarget.src = '/placeholder.svg';
@@ -422,11 +419,11 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-3">
                       <div className="text-white">
                         <h4 className="font-bold text-sm mb-1">
-                          {language === 'ar' ? item.title_ar : item.titleFr}
+                          {item[`title${language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En'}`] || item.title_ar}
                         </h4>
-                        {(item.description_ar || item.descriptionFr) && (
+                        {(item.description_ar || item.descriptionFr || item.descriptionEn) && (
                           <p className="text-xs opacity-90">
-                            {language === 'ar' ? item.description_ar : item.descriptionFr}
+                            {item[`description${language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En'}`] || item.description_ar}
                           </p>
                         )}
                         <div className="mt-1">
@@ -436,8 +433,8 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
                               : 'bg-green-500/30 text-green-200'
                           }`}>
                             {item.category === 'activity' 
-                              ? (language === 'ar' ? 'نشاط' : 'Activité') 
-                              : (language === 'ar' ? 'برنامج' : 'Programme')
+                              ? t('common.activity')
+                              : t('common.program')
                             }
                           </span>
                         </div>
@@ -452,14 +449,14 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
           {/* Videos Section */}
           {kindergarten.videos && kindergarten.videos.length > 0 && (
             <div className="mb-6">
-              <h3 className={`text-lg font-bold text-foreground mb-3 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{language === 'ar' ? 'فيديوهات الروضة' : 'Vidéos de la crèche'}</h3>
+              <h3 className={`text-lg font-bold text-foreground mb-3 ${dir === 'rtl' ? 'text-right' : 'text-left'}`}>{t('details.videos')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {kindergarten.videos.map((video) => (
                   <div key={video.id} className="aspect-video rounded-xl overflow-hidden border bg-black shadow-soft">
                     <iframe
                       className="w-full h-full"
                       src={video.url.replace('watch?v=', 'embed/')}
-                      title={language === 'ar' ? video.title_ar : video.titleFr}
+                      title={video[`title${language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En'}`] || video.title_ar}
                       frameBorder="0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
@@ -475,19 +472,19 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
             <div className="mb-6">
               <h3 className={`text-lg font-bold text-foreground mb-3 ${dir === 'rtl' ? 'text-right' : 'text-left'} flex items-center gap-2`}>
                 <Layout className="w-5 h-5 text-purple-500" />
-                {language === 'ar' ? 'مرافق الروضة (من الداخل)' : 'Installations (Intérieur)'}
+                {t('details.facilities')}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {(kindergarten?.facilities || []).map((facility, index) => (
                   <div key={index} className="group relative aspect-video rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
                     <img
                       src={facility.image}
-                      alt={language === 'ar' ? facility?.name_ar : facility?.nameFr}
+                      alt={facility[`name${language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En'}`] || facility.name_ar}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-3">
                       <span className="text-white font-bold text-sm">
-                        {language === 'ar' ? facility.name_ar : facility.nameFr}
+                        {facility[`name${language === 'ar' ? '_ar' : language === 'fr' ? 'Fr' : 'En'}`] || facility.name_ar}
                       </span>
                     </div>
                   </div>
@@ -636,7 +633,7 @@ const KindergartenDetailModal = ({ kindergarten, isOpen, onClose, onRegister, on
               className="flex-1 h-14 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-bold text-lg rounded-xl transition-all flex items-center justify-center gap-2"
             >
               <Calendar className="w-5 h-5" />
-              {language === 'ar' ? 'حجز موعد زيارة' : 'Réserver une visite'}
+              {t('details.bookAppointment')}
             </Button>
             <Button
               onClick={onRegister}

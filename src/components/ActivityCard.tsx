@@ -4,8 +4,10 @@ interface Activity {
   id: string;
   name_ar: string;
   nameFr: string;
+  nameEn?: string;
   descriptionAr?: string;
   descriptionFr?: string;
+  descriptionEn?: string;
   description: string;
   schedule: string;
   icon: string;
@@ -18,9 +20,9 @@ interface ActivityCardProps {
 const ActivityCard = ({ activity }: ActivityCardProps) => {
   const { language, dir } = useLanguage();
 
-  const name = language === 'ar' ? activity.name_ar : activity.nameFr;
+  const name = language === 'ar' ? activity.name_ar : language === 'fr' ? activity.nameFr : activity.nameEn || activity.nameFr;
   // Fallback for description if localized fields aren't present yet in all data
-  const description = (language === 'ar' ? activity.descriptionAr : activity.descriptionFr) || activity.description;
+  const description = (language === 'ar' ? activity.descriptionAr : language === 'fr' ? activity.descriptionFr : activity.descriptionEn || activity.descriptionFr) || activity.description;
 
   return (
     <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl p-4 border border-border/30 hover:shadow-soft transition-all duration-300" dir={dir}>
