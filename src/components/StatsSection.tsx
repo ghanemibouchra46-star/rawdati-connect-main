@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { GraduationCap, MapPin, Users, Star, Sparkles } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface StatItem {
   icon: React.ElementType;
@@ -10,17 +11,13 @@ interface StatItem {
   gradient: string;
 }
 
-const stats: StatItem[] = [
-  { icon: GraduationCap, value: 6, suffix: '+', label: 'روضة معتمدة', emoji: '🏫', gradient: 'gradient-accent' },
-  { icon: MapPin, value: 5, suffix: '', label: 'بلديات', emoji: '📍', gradient: 'bg-gradient-to-br from-coral to-primary' },
-  { icon: Users, value: 500, suffix: '+', label: 'ولي مسجل', emoji: '👨‍👩‍👧', gradient: 'bg-gradient-to-br from-secondary to-mint' },
-  { icon: Star, value: 4.6, suffix: '', label: 'متوسط التقييم', emoji: '⭐', gradient: 'bg-gradient-to-br from-accent to-secondary' },
-];
-
 const AnimatedCounter = ({ target, suffix, decimals = 0 }: { target: number; suffix: string; decimals?: number }) => {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
+    // Only animate if target is > 0
+    if (target <= 0) return;
+    
     const duration = 2000;
     const steps = 60;
     const increment = target / steps;
@@ -48,6 +45,60 @@ const AnimatedCounter = ({ target, suffix, decimals = 0 }: { target: number; suf
 };
 
 const StatsSection = () => {
+  const [dynamicStats, setDynamicStats] = useState<StatItem[]>([
+    { icon: GraduationCap, value: 0, suffix: '+', label: 'روضة معتمدة', emoji: '🏫', gradient: 'gradient-accent' },
+    { icon: MapPin, value: 0, suffix: '', label: 'بلديات', emoji: '📍', gradient: 'bg-gradient-to-br from-coral to-primary' },
+    { icon: Users, value: 0, suffix: '+', label: 'ولي مسجل', emoji: '👨‍👩‍👧', gradient: 'bg-gradient-to-br from-secondary to-mint' },
+    { icon: Star, value: 0, suffix: '', label: 'متوسط التقييم', emoji: '⭐', gradient: 'bg-gradient-to-br from-accent to-secondary' },
+  ]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        // 1. Fetch Kindergartens count & Average Rating & Municipalities
+        const { data: kindergartens, error: kgError } = await supabase
+          .from('kindergartens')
+          .select('rating, municipality');
+
+        let kgCount = 0;
+        let avgRating = 0;
+        let municipalitiesCount = 0;
+
+        if (!kgError && kindergartens) {
+          kgCount = kindergartens.length;
+          
+          if (kgCount > 0) {
+            // Calculate average rating
+            const totalRating = kindergartens.reduce((acc, kg) => acc + (kg.rating || 0), 0);
+            avgRating = totalRating / kgCount;
+
+            // Calculate unique municipalities
+            const uniqueMunicipalities = new Set(kindergartens.map(kg => kg.municipality));
+            municipalitiesCount = uniqueMunicipalities.size;
+          }
+        }
+
+        // 2. Fetch Parents count
+        const { count: parentCount, error: parentError } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('role', 'parent');
+
+        // Update stats
+        setDynamicStats([
+          { icon: GraduationCap, value: kgCount || 6, suffix: '+', label: 'روضة معتمدة', emoji: '🏫', gradient: 'gradient-accent' },
+          { icon: MapPin, value: municipalitiesCount || 5, suffix: '', label: 'بلديات', emoji: '📍', gradient: 'bg-gradient-to-br from-coral to-primary' },
+          { icon: Users, value: parentCount || 500, suffix: '+', label: 'ولي مسجل', emoji: '👨‍👩‍👧', gradient: 'bg-gradient-to-br from-secondary to-mint' },
+          { icon: Star, value: avgRating || 4.6, suffix: '', label: 'متوسط التقييم', emoji: '⭐', gradient: 'bg-gradient-to-br from-accent to-secondary' },
+        ]);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   return (
     <section className="py-16 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 relative overflow-hidden">
       {/* Playful decorative elements */}
@@ -70,7 +121,7 @@ const StatsSection = () => {
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-          {stats.map((stat, index) => (
+          {dynamicStats.map((stat, index) => (
             <div
               key={index}
               className="relative group"
