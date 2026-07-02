@@ -107,21 +107,10 @@ const OwnerAuth = () => {
       const role = fetchedProfile?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
 
       if (role === 'owner') {
-        if (fetchedProfile?.status === 'approved') {
-          // Role is correct — now commit profile to global state
-          await refreshProfile(currentUser.id, fetchedProfile);
-          toast({ title: t('auth.welcome'), description: t('auth.success') });
-          navigate('/owner');
-        } else {
-          await supabase.auth.signOut();
-          toast({
-            title: 'قيد المراجعة',
-            description: 'حسابك لا يزال قيد المراجعة من قبل الإدارة.',
-            variant: 'destructive',
-          });
-          setIsLoading(false);
-          return;
-        }
+        // Role is correct — now commit profile to global state
+        await refreshProfile(currentUser.id, fetchedProfile);
+        toast({ title: t('auth.welcome'), description: t('auth.success') });
+        navigate('/owner');
       } else if (role === 'admin') {
         // Prevent admins from logging in on the owner page
         console.log("Admin detected on owner login, signing out...");
