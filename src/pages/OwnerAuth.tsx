@@ -347,6 +347,51 @@ const OwnerAuth = () => {
       }
 
       if (data.user) {
+        // إنشاء سجل الروضة تلقائياً في قاعدة البيانات
+        const kindergartenId = `kg-${data.user.id.substring(0, 8)}`;
+        
+        const { error: kgError } = await supabase
+          .from('kindergartens')
+          .insert({
+            id: kindergartenId,
+            name_ar: signupKindergartenName,
+            name_fr: signupKindergartenName,
+            municipality: 'mascara',
+            municipality_ar: 'معسكر',
+            municipality_fr: 'Mascara',
+            address: '',
+            address_ar: '',
+            address_fr: '',
+            phone: signupPhone,
+            price_per_month: 0,
+            age_min: 3,
+            age_max: 6,
+            working_hours_open: '07:30',
+            working_hours_close: '17:00',
+            rating: 0,
+            review_count: 0,
+            images: [],
+            services: [],
+            activities: [],
+            facilities: [],
+            price_breakdown: [],
+            has_autism_wing: false,
+            description_ar: '',
+            description_fr: '',
+          });
+
+        if (!kgError) {
+          // ربط الروضة بصاحبها
+          await supabase
+            .from('owner_kindergartens')
+            .insert({
+              owner_id: data.user.id,
+              kindergarten_id: kindergartenId,
+            });
+        } else {
+          console.error('Error creating kindergarten:', kgError);
+        }
+
         setVerificationEmail(signupEmail);
         setShowVerification(true);
         toast({
