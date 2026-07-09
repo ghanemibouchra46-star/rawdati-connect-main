@@ -248,7 +248,7 @@ const ParentDashboard = () => {
                 <div className="flex justify-center md:justify-start">
                     <SubscriptionInterface onActivate={() => {
                         setActivePayment({
-                            amount: 500, // Daily follow-up service price
+                            amount: 1500, // Daily follow-up service price
                             serviceName: t('parent.followUpService')
                         });
                     }} />
