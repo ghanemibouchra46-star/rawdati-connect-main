@@ -336,6 +336,25 @@ const OwnerAuth = () => {
       }
 
       if (data.user) {
+        // تحديث الملف الشخصي لضمان حفظ رقم الهاتف وصلاحية صاحب الروضة
+        await supabase
+          .from('profiles')
+          .update({
+            full_name: signupName,
+            phone: signupPhone,
+            role: 'owner',
+            user_type: 'kindergarten'
+          })
+          .eq('id', data.user.id);
+
+        // إضافة الصلاحية في جدول الصلاحيات
+        await supabase
+          .from('user_roles')
+          .insert({
+            user_id: data.user.id,
+            role: 'owner'
+          });
+
         // إنشاء سجل الروضة تلقائياً في قاعدة البيانات
         const kindergartenId = `kg-${data.user.id.substring(0, 8)}`;
         
