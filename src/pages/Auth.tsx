@@ -21,7 +21,7 @@ const Auth = () => {
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
-  const [signupRole, setSignupRole] = useState<'parent' | 'owner' | 'admin'>('parent');
+  const [signupRole] = useState<'parent' | 'owner' | 'admin'>('parent');
   const [showVerification, setShowVerification] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -554,26 +554,14 @@ const Auth = () => {
 
                 <TabsContent value="signup">
                   <form onSubmit={handleSignup} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>{t('auth.role') || (language === 'ar' ? 'نوع الحساب' : 'Type de compte')}</Label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button
-                          type="button"
-                          variant={signupRole === 'parent' ? 'default' : 'outline'}
-                          className={`text-xs px-2 ${signupRole === 'parent' ? 'gradient-accent border-0' : ''}`}
-                          onClick={() => setSignupRole('parent')}
-                        >
-                          {language === 'ar' ? 'ولي أمر' : 'Parent'}
-                        </Button>
-                        <Button
-                          type="button"
-                          variant={signupRole === 'owner' ? 'default' : 'outline'}
-                          className={`text-xs px-2 ${signupRole === 'owner' ? 'gradient-accent border-0' : ''}`}
-                          onClick={() => setSignupRole('owner')}
-                        >
-                          {language === 'ar' ? 'مدير روضة' : 'Directeur'}
-                        </Button>
-                      </div>
+                    {/* This page is for parents only. Owner signup is at /owner-auth */}
+                    <div className="bg-muted/50 rounded-lg p-3 text-center text-sm">
+                      <p className="text-muted-foreground">
+                        {language === 'ar' ? 'تسجيل حساب ولي أمر' : 'Inscription Parent'}
+                      </p>
+                      <Link to="/owner-auth" className="text-xs text-primary hover:underline mt-1 inline-block">
+                        {language === 'ar' ? 'هل أنت مدير روضة؟ سجل من هنا' : 'Vous êtes directeur ? Inscrivez-vous ici'}
+                      </Link>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-name">{t('auth.fullName')}</Label>
