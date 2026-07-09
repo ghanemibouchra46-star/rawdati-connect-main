@@ -103,12 +103,20 @@ const OwnerAuth = () => {
       const adminEmails = ['bouchragh1268967@gmail.com', 'ghanemibouchra46@gmail.com', 'rawdati245@gmail.com'];
       const isAdminEmail = adminEmails.includes(userEmail);
       const metadataRole = currentUser.user_metadata?.role || currentUser.app_metadata?.role;
+      
+      // FIX: If the database trigger accidentally set them to parent but they registered as an owner, trust the metadata!
+      let role = fetchedProfile?.role;
+      if (metadataRole === 'owner' && role === 'parent') {
+         role = 'owner';
+         if (fetchedProfile) fetchedProfile.role = 'owner';
+      }
+      
       // Respect existing profile role first, then fallback to admin whitelist
-      const role = fetchedProfile?.role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
+      role = role || (isAdminEmail ? 'admin' : metadataRole) || 'parent';
 
       if (role === 'owner') {
-        // Role is correct — now commit profile to global state
-        await refreshProfile(currentUser.id, fetchedProfile);
+        // Role is correct — now commit profile to global state (fetch without existingProfile to trigger auto-fix)
+        await refreshProfile(currentUser.id);
         toast({ title: t('auth.welcome'), description: t('auth.success') });
         navigate('/owner');
       } else if (role === 'admin') {

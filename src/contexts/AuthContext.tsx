@@ -53,11 +53,84 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
     
     if (targetId) {
-      const { data: profileData } = await supabase
+      let { data: profileData } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', targetId)
         .single();
+        
+      // FIX OWNER INITIALIZATION BUG
+      // If the database trigger failed to assign the 'owner' role during signup
+      // (e.g. because of missing RLS or trigger bugs), we fix it here once they are authenticated!
+      if (profileData) {
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (currentUser) {
+           const metadataRole = currentUser.user_metadata?.role;
+           if (metadataRole === 'owner' && profileData.role !== 'owner') {
+               console.log("Fixing owner profile synchronization...");
+               
+               // Fix profile
+               await supabase.from('profiles').update({ 
+                   role: 'owner', 
+                   user_type: 'kindergarten',
+                   phone: currentUser.user_metadata?.phone || profileData.phone,
+                   full_name: currentUser.user_metadata?.full_name || profileData.full_name
+               }).eq('id', targetId);
+               
+               // Fix user_roles
+               await supabase.from('user_roles').insert({ 
+                   user_id: targetId, 
+                   role: 'owner' 
+               });
+               
+               // Ensure kindergarten exists
+               const kgId = `kg-${targetId.substring(0, 8)}`;
+               const kgName = currentUser.user_metadata?.kindergarten_name || 'روضة جديدة';
+               
+               const { data: existingKg } = await supabase.from('owner_kindergartens').select('*').eq('owner_id', targetId).maybeSingle();
+               
+               if (!existingKg) {
+                   await supabase.from('kindergartens').insert({
+                     id: kgId,
+                     name_ar: kgName,
+                     name_fr: kgName,
+                     municipality: 'mascara',
+                     municipality_ar: 'معسكر',
+                     municipality_fr: 'Mascara',
+                     address: '',
+                     address_ar: '',
+                     address_fr: '',
+                     phone: currentUser.user_metadata?.phone || '',
+                     price_per_month: 0,
+                     age_min: 3,
+                     age_max: 6,
+                     working_hours_open: '07:30',
+                     working_hours_close: '17:00',
+                     rating: 0,
+                     review_count: 0,
+                     images: [],
+                     services: [],
+                     activities: [],
+                     facilities: [],
+                     price_breakdown: [],
+                     has_autism_wing: false,
+                     description_ar: '',
+                     description_fr: '',
+                   });
+                   
+                   await supabase.from('owner_kindergartens').insert({
+                     owner_id: targetId,
+                     kindergarten_id: kgId,
+                   });
+               }
+               
+               // Refetch profile to get the updated data
+               const { data: updatedProfile } = await supabase.from('profiles').select('*').eq('id', targetId).single();
+               profileData = updatedProfile || profileData;
+           }
+        }
+      }
+
       setProfile(profileData);
       setLoading(false);
       return profileData;
