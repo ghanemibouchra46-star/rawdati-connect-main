@@ -140,7 +140,7 @@ const OwnerDashboard = () => {
   const [isTrialActive, setIsTrialActive] = useState(true); // Default to true as requested
   const [activePayment, setActivePayment] = useState<any>(null);
 
-  const isAuthorized = profile && profile.role === 'owner' && profile.status === 'approved';
+  const isAuthorized = profile && profile.role === 'owner';
 
   const fetchDashboardData = async (uid: string) => {
     if (!uid) return;
@@ -214,20 +214,16 @@ const OwnerDashboard = () => {
 
   useEffect(() => {
     if (!authLoading) {
-      if (profile && profile.role === 'owner' && profile.status === 'approved') {
+      if (profile && profile.role === 'owner') {
         fetchDashboardData(profile.id);
       } else if (profile) {
-        // Logged in but not authorized or approved
+        // Logged in but not authorized
         toast({
-          title: profile.role !== 'owner' ? 'غير مصرح' : 'قيد المراجعة',
-          description: profile.role !== 'owner' 
-            ? 'ليس لديك صلاحية الوصول لهذه الصفحة'
-            : 'حسابك لا يزال قيد المراجعة من قبل الإدارة.',
+          title: 'غير مصرح',
+          description: 'ليس لديك صلاحية الوصول لهذه الصفحة',
           variant: 'destructive',
         });
-        if (profile.role !== 'owner' || profile.status === 'rejected') {
-          authLogout();
-        }
+        authLogout();
         navigate('/owner-auth');
         setIsLoading(false);
       } else {

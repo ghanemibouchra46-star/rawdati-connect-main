@@ -66,7 +66,7 @@ const OwnerAuth = () => {
     if (authProfile) {
       if (authProfile.role === 'admin') {
         navigate('/admin', { replace: true });
-      } else if (authProfile.role === 'owner' && authProfile.status === 'approved') {
+      } else if (authProfile.role === 'owner') {
         navigate('/owner', { replace: true });
       }
       // Parents are not auto-redirected from here to allow handleLogin to show the error
