@@ -11,6 +11,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface PaymentProcessProps {
   kindergarten: Kindergarten;
@@ -21,6 +24,8 @@ interface PaymentProcessProps {
 
 const PaymentProcess = ({ kindergarten, bookingData, onComplete, onSuccess }: PaymentProcessProps) => {
   const { language, dir } = useLanguage();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'baridi'>('card');
   const [paymentData, setPaymentData] = useState({
@@ -75,19 +80,35 @@ const PaymentProcess = ({ kindergarten, bookingData, onComplete, onSuccess }: Pa
     setIsProcessing(true);
 
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (!user) throw new Error('يجب تسجيل الدخول أولاً');
       
-      const txId = 'TX-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          amount: bookingData?.amount || kindergarten?.pricePerMonth || 2000,
+          userId: user.id,
+          kindergartenId: kindergarten?.id,
+          planType: bookingData?.planType || 'monthly',
+          paymentType: bookingData?.paymentType || 'platform_subscription',
+          childName: bookingData?.childName,
+          parentName: bookingData?.parentName,
+          requestId: bookingData?.requestId
+        }
+      });
+
+      if (error) throw error;
       
-      if (onSuccess) {
-        onSuccess(txId);
+      if (data?.checkout_url) {
+        window.location.href = data.checkout_url;
+      } else {
+        throw new Error('حدث خطأ أثناء إنشاء جلسة الدفع');
       }
-      
-      handleNext();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Payment error:', error);
-    } finally {
+      toast({
+        title: 'خطأ في الدفع',
+        description: error.message || 'حدث خطأ أثناء الاتصال بالبوابة',
+        variant: 'destructive'
+      });
       setIsProcessing(false);
     }
   };

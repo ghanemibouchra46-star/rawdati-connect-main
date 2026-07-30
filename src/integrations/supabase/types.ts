@@ -104,6 +104,7 @@ export type Database = {
           kindergarten_gallery: Json | null
           is_premium: boolean
           payment_info: string | null
+          subscription_status: string | null
         }
         Insert: {
           id: string
@@ -138,6 +139,7 @@ export type Database = {
           kindergarten_gallery?: Json | null
           is_premium?: boolean
           payment_info?: string | null
+          subscription_status?: string | null
         }
         Update: {
           id?: string
@@ -172,6 +174,7 @@ export type Database = {
           kindergarten_gallery?: Json | null
           is_premium?: boolean
           payment_info?: string | null
+          subscription_status?: string | null
         }
         Relationships: []
       }
@@ -327,6 +330,8 @@ export type Database = {
           auto_renew: boolean
           cancelled_at: string | null
           payment_proof_url: string | null
+          is_trial: boolean | null
+          trial_duration_days: number | null
           created_at: string
           updated_at: string
         }
@@ -343,6 +348,8 @@ export type Database = {
           auto_renew?: boolean
           cancelled_at?: string | null
           payment_proof_url?: string | null
+          is_trial?: boolean | null
+          trial_duration_days?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -359,6 +366,53 @@ export type Database = {
           auto_renew?: boolean
           cancelled_at?: string | null
           payment_proof_url?: string | null
+          is_trial?: boolean | null
+          trial_duration_days?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      payment_transactions: {
+        Row: {
+          id: string
+          user_id: string
+          kindergarten_id: string | null
+          chargily_checkout_id: string | null
+          amount: number
+          currency: string | null
+          payment_type: string
+          plan_type: string | null
+          status: string | null
+          metadata: Json | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          kindergarten_id?: string | null
+          chargily_checkout_id?: string | null
+          amount: number
+          currency?: string | null
+          payment_type: string
+          plan_type?: string | null
+          status?: string | null
+          metadata?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          kindergarten_id?: string | null
+          chargily_checkout_id?: string | null
+          amount?: number
+          currency?: string | null
+          payment_type?: string
+          plan_type?: string | null
+          status?: string | null
+          metadata?: Json | null
           created_at?: string
           updated_at?: string
         }

@@ -394,6 +394,7 @@ const OwnerAuth = () => {
             has_autism_wing: false,
             description_ar: '',
             description_fr: '',
+            subscription_status: 'trial',
           });
 
         if (!kgError) {
@@ -404,6 +405,24 @@ const OwnerAuth = () => {
               owner_id: data.user.id,
               kindergarten_id: kindergartenId,
             });
+            
+          // إنشاء اشتراك تجريبي مفتوح
+          const startDate = new Date();
+          const endDate = new Date();
+          endDate.setFullYear(endDate.getFullYear() + 10); // مفتوح لعشر سنوات كافتراضي
+          
+          await supabase.from('platform_subscriptions').insert({
+            user_id: data.user.id,
+            plan_type: 'monthly',
+            price: 0,
+            status: 'active',
+            is_trial: true,
+            trial_duration_days: null,
+            start_date: startDate.toISOString(),
+            end_date: endDate.toISOString(),
+            payment_method: 'trial',
+            auto_renew: false,
+          });
         } else {
           console.error('Error creating kindergarten:', kgError);
         }

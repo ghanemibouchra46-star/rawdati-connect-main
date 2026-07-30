@@ -70,6 +70,7 @@ import { arDZ, fr } from 'date-fns/locale';
 import { useSubscriptionRequests } from '@/hooks/useSubscriptionRequests';
 import PlatformSubscriptionButton from '@/components/PlatformSubscriptionButton';
 import SubscriptionInterface from '@/components/SubscriptionInterface';
+import { useTrialStatus } from '@/hooks/useTrialStatus';
 
 // Types
 interface Child {
@@ -137,7 +138,9 @@ const OwnerDashboard = () => {
     images: [],
     programs: []
   });
-  const [isTrialActive, setIsTrialActive] = useState(true); // Default to true as requested
+  
+  const { status: trialStatus, loading: trialLoading } = useTrialStatus(profile?.id);
+  const isTrialActive = trialStatus === 'trial' || trialStatus === 'active';
   const [activePayment, setActivePayment] = useState<any>(null);
 
   const isAuthorized = profile && profile.role === 'owner';
@@ -233,6 +236,40 @@ const OwnerDashboard = () => {
       }
     }
   }, [profile, authLoading, navigate]);
+
+  // Realtime subscription for registration requests
+  useEffect(() => {
+    if (!kindergartenId) return;
+
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'registration_requests',
+          filter: `kindergarten_id=eq.${kindergartenId}`,
+        },
+        (payload) => {
+          console.log('Realtime update for registration_requests:', payload);
+          // Refetch data when a change occurs
+          if (profile) fetchDashboardData(profile.id);
+          
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: language === 'ar' ? 'طلب تسجيل جديد' : 'Nouvelle demande',
+              description: language === 'ar' ? 'تم استلام طلب تسجيل جديد' : 'Une nouvelle demande d\'inscription a été reçue',
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [kindergartenId, profile, language, toast]);
 
   const handleLogout = async () => {
     try {
@@ -450,7 +487,9 @@ const OwnerDashboard = () => {
                 <SubscriptionInterface onActivate={() => {
                     setActivePayment({
                       amount: 2000, // Professional account activation price
-                      serviceName: language === 'ar' ? 'تفعيل الحساب المهني' : 'Activation Compte Professionnel'
+                      serviceName: language === 'ar' ? 'تفعيل الحساب المهني' : 'Activation Compte Professionnel',
+                      paymentType: 'platform_subscription',
+                      planType: 'monthly'
                     });
                   }} />
               )}
@@ -571,7 +610,9 @@ const OwnerDashboard = () => {
           <SubscriptionInterface onActivate={() => {
             setActivePayment({
               amount: 2000, // Professional account activation price
-              serviceName: language === 'ar' ? 'تفعيل الحساب المهني' : 'Activation Compte Professionnel'
+              serviceName: language === 'ar' ? 'تفعيل الحساب المهني' : 'Activation Compte Professionnel',
+              paymentType: 'platform_subscription',
+              planType: 'monthly'
             });
           }} />
         </div>

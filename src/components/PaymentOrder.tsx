@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import { CreditCard, Calendar, Hash, Banknote, CheckCircle2, Wallet, ArrowRight, Upload, Camera, ShieldCheck, Info } from 'lucide-react';
+import { CreditCard, Calendar, Hash, Banknote, CheckCircle2, Wallet, ArrowRight, Upload, Camera, ShieldCheck, Info, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Kindergarten } from '@/data/kindergartens';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface PaymentOrderProps {
   orderId: string;
@@ -19,13 +22,45 @@ type PaymentMethod = 'edahabia' | 'baridimob';
 
 const PaymentOrder = ({ orderId, date, amount, status, kindergarten, onClose }: PaymentOrderProps) => {
   const { t, language, dir } = useLanguage();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [step, setStep] = useState<PaymentStep>('selection');
   const [method, setMethod] = useState<PaymentMethod>('edahabia');
   const [receipt, setReceipt] = useState<File | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleNext = () => {
-    if (step === 'selection') setStep('details');
-    else if (step === 'details') setStep('upload');
+  const handleCheckout = async () => {
+    setIsProcessing(true);
+    try {
+      if (!user) throw new Error('يجب تسجيل الدخول أولاً');
+      
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          amount: amount,
+          userId: user.id,
+          kindergartenId: kindergarten.id,
+          planType: 'monthly',
+          paymentType: 'enrollment',
+          requestId: orderId
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.checkout_url) {
+        window.location.href = data.checkout_url;
+      } else {
+        throw new Error('حدث خطأ أثناء إنشاء جلسة الدفع');
+      }
+    } catch (error: any) {
+      console.error('Payment error:', error);
+      toast({
+        title: 'خطأ في الدفع',
+        description: error.message || 'حدث خطأ أثناء الاتصال بالبوابة',
+        variant: 'destructive'
+      });
+      setIsProcessing(false);
+    }
   };
 
   const handleBack = () => {
@@ -126,10 +161,11 @@ const PaymentOrder = ({ orderId, date, amount, status, kindergarten, onClose }: 
 
       <div className="flex flex-col gap-3 pt-4">
         <Button 
-          onClick={handleNext}
+          onClick={handleCheckout}
+          disabled={isProcessing}
           className="w-full h-14 gradient-accent border-0 rounded-xl shadow-soft hover:shadow-hover transition-all duration-300 text-primary-foreground font-bold text-lg gap-2"
         >
-          <CreditCard className="w-5 h-5" />
+          {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <CreditCard className="w-5 h-5" />}
           {t('payment.payNow')}
         </Button>
       </div>

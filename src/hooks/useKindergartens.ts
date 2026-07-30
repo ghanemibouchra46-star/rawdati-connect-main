@@ -292,10 +292,11 @@ export function useKindergartens() {
     queryFn: async () => {
       console.log("🚀 useKindergartens - Fetching all kindergartens...");
       try {
-        // Fetch ALL kindergartens without status filter to ensure they always appear
+        // Fetch kindergartens that are either in trial/active subscription or approved
         const { data, error } = await supabase
           .from('kindergartens')
           .select('*')
+          .or('subscription_status.in.(trial,active),status.eq.approved')
           .order('rating', { ascending: false });
 
         if (error) {
