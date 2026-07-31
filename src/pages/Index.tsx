@@ -3,7 +3,6 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import StatsSection from '@/components/StatsSection';
 import KindergartenCard from '@/components/KindergartenCard';
-import { kindergartens as localKindergartens } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { GraduationCap, ArrowLeft, ArrowRight, Star, MapPin, Users, Search, Home, BookOpen, Stethoscope, ShoppingBag } from 'lucide-react';
@@ -18,12 +17,8 @@ const Index = () => {
   const { t, language, dir } = useLanguage();
   const navigate = useNavigate();
   const { data: supabaseKindergartens } = useKindergartens();
-  const featuredList = (supabaseKindergartens && supabaseKindergartens.length > 0)
-    ? supabaseKindergartens.slice(0, FEATURED_COUNT)
-    : localKindergartens.slice(0, FEATURED_COUNT);
-  const totalCount = (supabaseKindergartens && supabaseKindergartens.length > 0)
-    ? supabaseKindergartens.length
-    : localKindergartens.length;
+  const featuredList = supabaseKindergartens?.slice(0, FEATURED_COUNT) ?? [];
+  const totalCount = supabaseKindergartens?.length ?? 0;
   const ArrowIcon = dir === 'rtl' ? ArrowLeft : ArrowRight;
 
   const handleSearch = (query: string) => {

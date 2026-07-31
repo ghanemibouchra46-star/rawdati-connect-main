@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { kindergartens, type Kindergarten, type Activity, type Facility, type PriceItem, type KindergartenGallery } from '@/data/kindergartens';
+import { type Kindergarten, type Activity, type Facility, type PriceItem, type KindergartenGallery } from '@/data/kindergartens';
 import { normalizeArabic } from '@/lib/arabicUtils';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -163,55 +163,50 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
     ? rawCoords as { lat: number; lng: number }
     : null;
 
-  // Fallback to static mock data if coordinates are missing in DB
+  // Default coordinates when DB row has no coordinate values
   if (!coords) {
-    if (row?.name_ar?.includes('الفيانس')) {
-      coords = { lat: 35.3950, lng: 0.1450 }; // المنطقة 8
-    } else if (row?.name_ar?.includes('براعم الوفاء')) {
-      coords = { lat: 35.3880, lng: 0.1500 }; // القسم 77
-    } else if (row?.name_ar?.includes('اليسر اكاديمي')) {
-      coords = { lat: 35.4050, lng: 0.1300 }; // القسم 94
-    } else {
-      const mockK = kindergartens.find(k => k.name_ar === row?.name_ar || k.name_ar === row?.name_fr);
-      coords = mockK ? mockK.coordinates : { lat: 35.3975, lng: 0.1397 }; // Default to Mascara
-    }
+    coords = { lat: 35.3975, lng: 0.1397 };
   }
 
   return {
     id: row?.id || '',
-    name: row?.name_ar || '',
-    name_ar: row?.name_ar || '',
-    nameFr: row?.name_fr || '',
+    name: row?.name_ar || row?.name_fr || row?.name_en || 'روضة بدون اسم',
+    name_ar: row?.name_ar || row?.name_fr || row?.name_en || 'روضة بدون اسم',
+    nameFr: row?.name_fr || row?.name_ar || row?.name_en || 'Garderie sans nom',
+    nameEn: row?.name_en || row?.name_fr || row?.name_ar || 'Kindergarten',
     municipality: normalizeMunicipality(row?.municipality || row?.municipality_ar || ''),
-    municipality_ar: row?.municipality_ar || '',
-    municipalityFr: row?.municipality_fr || '',
-    address: row?.address_ar || '',
-    address_ar: row?.address_ar || '',
-    addressFr: row?.address_fr || '',
+    municipality_ar: row?.municipality_ar || row?.municipality || '',
+    municipalityFr: row?.municipality_fr || row?.municipality_ar || row?.municipality || '',
+    municipalityEn: row?.municipality_en || row?.municipality_fr || row?.municipality_ar || row?.municipality || '',
+    address: row?.address_ar || row?.address_fr || row?.address_en || '',
+    address_ar: row?.address_ar || row?.address_fr || row?.address_en || '',
+    addressFr: row?.address_fr || row?.address_ar || row?.address_en || '',
+    addressEn: row?.address_en || row?.address_fr || row?.address_ar || '',
     phone: row?.phone || '',
-    pricePerMonth: Number(row?.price_per_month) || 0,
-    ageRange: { min: row?.age_min || 3, max: row?.age_max || 6 },
+    pricePerMonth: Number(row?.price_per_month ?? 0) || 0,
+    ageRange: { min: Number(row?.age_min ?? 3) || 3, max: Number(row?.age_max ?? 6) || 6 },
     workingHours: { open: row?.working_hours_open || '07:30', close: row?.working_hours_close || '17:00' },
-    rating: Number(row?.rating) || 0,
-    reviewCount: row?.review_count ?? 0,
+    rating: Number(row?.rating ?? 0) || 0,
+    reviewCount: Number(row?.review_count ?? 0) || 0,
     images: (images?.length > 0 ? images : ['/placeholder.svg']),
     facilities: (facilities as unknown) as Facility[],
-    services: parsePostgresArray(row?.services).map(normalizeServiceName),
-    activities: activities,
-    hasAutismWing: row?.has_autism_wing ?? false,
-    instagram: row?.instagram,
-    videos: row?.videos || [],
-    programs: row?.programs || [],
+    services: (parsePostgresArray(row?.services) || []).map(normalizeServiceName).filter(Boolean),
+    activities: (activities || []) as Activity[],
+    hasAutismWing: row?.has_autism_wing === true,
+    instagram: row?.instagram || null,
+    videos: Array.isArray(row?.videos) ? row.videos : [],
+    programs: Array.isArray(row?.programs) ? row.programs : [],
     partners: {
-      doctors: parsePostgresArray(row?.doctors || row?.doctor_info),
+      doctors: (parsePostgresArray(row?.doctors || row?.doctor_info) || []).filter(Boolean),
       stores: []
     },
-    description: row?.description_ar || '',
-    description_ar: row?.description_ar || '',
-    descriptionFr: row?.description_fr || '',
+    description: row?.description_ar || row?.description_fr || row?.description_en || '',
+    description_ar: row?.description_ar || row?.description_fr || row?.description_en || '',
+    descriptionFr: row?.description_fr || row?.description_ar || row?.description_en || '',
+    descriptionEn: row?.description_en || row?.description_fr || row?.description_ar || '',
     coordinates: coords,
     priceBreakdown: (priceBreakdown as unknown) as PriceItem[],
-    isPremium: row?.is_premium || false,
+    isPremium: row?.is_premium === true,
     paymentInfo: row?.payment_info || null,
     kindergartenGallery: (() => {
       try {
@@ -296,19 +291,18 @@ export function useKindergartens() {
         const { data, error } = await supabase
           .from('kindergartens')
           .select('*')
-          .or('subscription_status.in.(trial,active),status.eq.approved')
           .order('rating', { ascending: false });
 
         if (error) {
           console.error("❌ Error fetching kindergartens from Supabase:", error?.message);
-          return kindergartens; // fallback to local data
+          return []; // do not show dummy data when DB fetch fails
         }
 
         console.log(`📊 Found ${data?.length || 0} kindergartens in DB`);
 
         if (!data || data.length === 0) {
-          console.warn("⚠️ No kindergartens found in DB, using local fallback");
-          return kindergartens; // fallback to local data
+          console.warn("⚠️ No kindergartens found in DB");
+          return [];
         }
 
         const mappedData = (data ?? []).map((row: any) => {
@@ -318,13 +312,14 @@ export function useKindergartens() {
           }
           try {
             const mapped = mapRowToKindergarten(row);
-            if (!mapped?.name_ar) {
-              console.warn(`⚠️ Skipped kindergarten with no name:`, row?.id);
+            const nameText = mapped?.name_ar || mapped?.nameFr || mapped?.nameEn || '';
+            if (!nameText) {
+              console.warn(`⚠️ Skipped kindergarten with no readable name:`, row?.id);
               return null;
             }
             return mapped;
           } catch (e) {
-            console.error(`❌ Error mapping kindergarten ${row?.id} (${row?.name_ar}):`, e);
+            console.error(`❌ Error mapping kindergarten ${row?.id} (${row?.name_ar || row?.name_fr || ''}):`, e);
             return null;
           }
         }).filter(Boolean) as Kindergarten[];
@@ -333,7 +328,7 @@ export function useKindergartens() {
         return mappedData;
       } catch (e) {
         console.error("❌ Global error in useKindergartens:", e);
-        return kindergartens; // fallback to local data
+        return [];
       }
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes to reduce refetches

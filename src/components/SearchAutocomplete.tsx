@@ -4,7 +4,7 @@ import { Search, MapPin, GraduationCap } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { kindergartens as localKindergartens, Kindergarten } from '@/data/kindergartens';
+import { Kindergarten } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -23,9 +23,7 @@ const SearchAutocomplete = ({ onSearch, className }: SearchAutocompleteProps) =>
     const [inputValue, setInputValue] = useState('');
 
     const kindergartens = useMemo(() => {
-        return (supabaseKindergartens && supabaseKindergartens.length > 0)
-            ? supabaseKindergartens
-            : localKindergartens;
+        return supabaseKindergartens || [];
     }, [supabaseKindergartens]);
 
     const filteredItems = useMemo(() => {

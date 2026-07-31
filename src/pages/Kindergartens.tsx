@@ -6,7 +6,7 @@ import KindergartenDetailModal from '@/components/KindergartenDetailModal';
 import RegistrationModal from '@/components/RegistrationModal';
 import Footer from '@/components/Footer';
 import BookingModal from '@/components/BookingModal';
-import { kindergartens as localKindergartens, Kindergarten, filterableActivities } from '@/data/kindergartens';
+import { type Kindergarten, filterableActivities } from '@/data/kindergartens';
 import { useKindergartens } from '@/hooks/useKindergartens';
 import { GraduationCap, Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -46,7 +46,6 @@ const Kindergartens = () => {
   const kindergartens = supabaseKindergartens || [];
 
   console.log("Kindergartens.tsx - supabaseKindergartens:", supabaseKindergartens);
-  console.log("Kindergartens.tsx - localKindergartens:", localKindergartens);
   console.log("Kindergartens.tsx - final kindergartens:", kindergartens);
   console.log("Kindergartens.tsx - isLoadingKg:", isLoadingKg);
 
