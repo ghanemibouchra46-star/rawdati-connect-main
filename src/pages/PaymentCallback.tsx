@@ -23,7 +23,7 @@ export default function PaymentCallback() {
       return;
     }
 
-    const verifyPayment = async () => {
+    const verifyPayment = async (attempt = 0) => {
       try {
         const { data, error } = await supabase
           .from('payment_transactions')
@@ -35,12 +35,23 @@ export default function PaymentCallback() {
         
         setPaymentType(data.payment_type);
         
-        // If status is paid, or the URL param is success (as fallback until webhook syncs)
         if (data.status === 'paid' || statusParam === 'success') {
           setStatus('success');
-        } else {
-          setStatus('failure');
+          return;
         }
+
+        if (data.status && ['failed', 'cancelled', 'expired'].includes(data.status)) {
+          setStatus('failure');
+          return;
+        }
+
+        if (attempt < 8) {
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          await verifyPayment(attempt + 1);
+          return;
+        }
+
+        setStatus('failure');
       } catch (e) {
         console.error("Verification error", e);
         setStatus('failure');

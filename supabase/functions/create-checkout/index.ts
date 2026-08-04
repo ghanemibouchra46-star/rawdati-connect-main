@@ -21,7 +21,7 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
     if (userError || !user) throw new Error('Unauthorized')
 
-    const { amount, kindergartenId, planType, paymentType, childName, parentName, requestId } = await req.json()
+    const { amount, kindergartenId, planType, paymentType, childName, parentName, requestId, provider = 'chargily' } = await req.json()
 
     // Create a transaction record in pending state using service_role to bypass RLS
     const supabaseAdmin = createClient(
@@ -37,6 +37,8 @@ serve(async (req) => {
         amount: amount,
         payment_type: paymentType,
         plan_type: planType,
+        provider,
+        provider_status: 'pending',
         metadata: { childName, parentName, request_id: requestId }
       })
       .select()
@@ -83,14 +85,19 @@ serve(async (req) => {
       throw new Error(`Chargily Error: ${JSON.stringify(chargilyData)}`)
     }
 
-    // Update tx with chargily_checkout_id
+    // Update tx with provider details
     await supabaseAdmin
       .from('payment_transactions')
-      .update({ chargily_checkout_id: chargilyData.id })
+      .update({
+        chargily_checkout_id: chargilyData.id,
+        provider: 'chargily',
+        provider_reference: chargilyData.id,
+        provider_status: chargilyData.status || 'pending'
+      })
       .eq('id', tx.id)
 
     return new Response(
-      JSON.stringify({ checkout_url: chargilyData.checkout_url }),
+      JSON.stringify({ checkout_url: chargilyData.checkout_url, tx_id: tx.id, provider: 'chargily' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )
   } catch (error) {

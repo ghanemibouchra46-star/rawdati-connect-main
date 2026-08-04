@@ -45,11 +45,16 @@ serve(async (req) => {
     }
 
     const status = payload.type === 'checkout.paid' ? 'paid' : 'failed'
+    const providerStatus = checkoutData?.status || (payload.type === 'checkout.paid' ? 'paid' : 'failed')
 
     // Update Transaction
     await supabaseAdmin
       .from('payment_transactions')
-      .update({ status })
+      .update({
+        status,
+        provider_status: providerStatus,
+        provider_reference: checkoutData?.id || null
+      })
       .eq('id', txId)
 
     if (status === 'paid') {

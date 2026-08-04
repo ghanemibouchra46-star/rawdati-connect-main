@@ -33,6 +33,12 @@ const PaymentOrder = ({ orderId, date, amount, status, kindergarten, onClose }: 
     setIsProcessing(true);
     try {
       if (!user) throw new Error('يجب تسجيل الدخول أولاً');
+
+      toast({
+        title: language === 'ar' ? 'تم إرسال الرمز عبر الهاتف' : 'Le code a été envoyé au téléphone',
+        description: language === 'ar' ? 'جارٍ متابعة عملية الدفع...' : 'Paiement en cours...',
+        duration: 4000,
+      });
       
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: {
