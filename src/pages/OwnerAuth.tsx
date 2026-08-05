@@ -394,6 +394,7 @@ const OwnerAuth = () => {
             has_autism_wing: false,
             description_ar: '',
             description_fr: '',
+            status: 'approved',
             subscription_status: 'trial',
           });
 

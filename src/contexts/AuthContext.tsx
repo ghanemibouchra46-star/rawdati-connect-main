@@ -116,6 +116,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                      has_autism_wing: false,
                      description_ar: '',
                      description_fr: '',
+                     status: 'approved',
+                     subscription_status: 'trial',
                    });
                    
                    await supabase.from('owner_kindergartens').insert({

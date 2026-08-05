@@ -291,6 +291,7 @@ export function useKindergartens() {
         const { data, error } = await supabase
           .from('kindergartens')
           .select('*')
+          .or('subscription_status.eq.trial,subscription_status.eq.active,status.eq.approved')
           .order('rating', { ascending: false });
 
         if (error) {

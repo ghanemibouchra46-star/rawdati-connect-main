@@ -60,6 +60,16 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
       if (error) throw error;
 
       setSubmittedRequest(data);
+
+      try {
+        await supabase.functions.invoke('send-owner-registration-email', {
+          body: {
+            registrationRequestId: data.id
+          }
+        })
+      } catch (sendError) {
+        console.error('Owner email send failed:', sendError)
+      }
       
       toast.success(t('registration.successTitle'));
       
