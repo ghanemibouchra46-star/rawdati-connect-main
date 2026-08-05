@@ -55,7 +55,7 @@ const StatsSection = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // 1. Fetch Kindergartens count & Average Rating & Municipalities
+        // 1. Fetch kindergartens and compute the real metrics
         const { data: kindergartens, error: kgError } = await supabase
           .from('kindergartens')
           .select('rating, municipality');
@@ -66,30 +66,25 @@ const StatsSection = () => {
 
         if (!kgError && kindergartens) {
           kgCount = kindergartens.length;
-          
-          if (kgCount > 0) {
-            // Calculate average rating
-            const totalRating = kindergartens.reduce((acc, kg) => acc + (kg.rating || 0), 0);
-            avgRating = totalRating / kgCount;
 
-            // Calculate unique municipalities
-            const uniqueMunicipalities = new Set(kindergartens.map(kg => kg.municipality));
-            municipalitiesCount = uniqueMunicipalities.size;
-          }
+          const totalRating = kindergartens.reduce((acc, kg) => acc + (kg.rating || 0), 0);
+          avgRating = kgCount > 0 ? totalRating / kgCount : 0;
+
+          const uniqueMunicipalities = new Set(kindergartens.map(kg => kg.municipality).filter(Boolean));
+          municipalitiesCount = uniqueMunicipalities.size;
         }
 
-        // 2. Fetch Parents count
+        // 2. Fetch parents count from profiles
         const { count: parentCount, error: parentError } = await supabase
           .from('profiles')
           .select('*', { count: 'exact', head: true })
           .eq('role', 'parent');
 
-        // Update stats
         setDynamicStats([
-          { icon: GraduationCap, value: kgCount || 6, suffix: '+', label: 'روضة معتمدة', emoji: '🏫', gradient: 'gradient-accent' },
-          { icon: MapPin, value: municipalitiesCount || 5, suffix: '', label: 'بلديات', emoji: '📍', gradient: 'bg-gradient-to-br from-coral to-primary' },
-          { icon: Users, value: parentCount || 500, suffix: '+', label: 'ولي مسجل', emoji: '👨‍👩‍👧', gradient: 'bg-gradient-to-br from-secondary to-mint' },
-          { icon: Star, value: avgRating || 4.6, suffix: '', label: 'متوسط التقييم', emoji: '⭐', gradient: 'bg-gradient-to-br from-accent to-secondary' },
+          { icon: GraduationCap, value: kgCount, suffix: '+', label: 'روضة معتمدة', emoji: '🏫', gradient: 'gradient-accent' },
+          { icon: MapPin, value: municipalitiesCount, suffix: '', label: 'بلديات', emoji: '📍', gradient: 'bg-gradient-to-br from-coral to-primary' },
+          { icon: Users, value: parentCount ?? 0, suffix: '+', label: 'ولي مسجل', emoji: '👨‍👩‍👧', gradient: 'bg-gradient-to-br from-secondary to-mint' },
+          { icon: Star, value: avgRating, suffix: '', label: 'متوسط التقييم', emoji: '⭐', gradient: 'bg-gradient-to-br from-accent to-secondary' },
         ]);
       } catch (error) {
         console.error('Error fetching stats:', error);
