@@ -287,11 +287,11 @@ export function useKindergartens() {
     queryFn: async () => {
       console.log("🚀 useKindergartens - Fetching all kindergartens...");
       try {
-        // Fetch kindergartens that are either in trial/active subscription or approved
+        // Fetch all kindergartens available to the current user/session.
+        // The Supabase RLS policies should control which rows are visible.
         const { data, error } = await supabase
           .from('kindergartens')
           .select('*')
-          .or('subscription_status.eq.trial,subscription_status.eq.active,status.eq.approved')
           .order('rating', { ascending: false });
 
         if (error) {
