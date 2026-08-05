@@ -100,19 +100,6 @@ interface PaymentRecord {
   payment_date?: string;
 }
 
-// Mock data for display fallback
-const mockKindergarten = {
-  id: '1',
-  name: 'روضة',
-  municipality: 'روضتي',
-  address: 'حي 500 مسكن، روضتي',
-  phone: '0555 12 34 56',
-  pricePerMonth: 5000,
-  workingHours: '07:00 - 17:00',
-  images: ['/placeholder.svg'],
-  services: ['وجبات', 'نقل مدرسي', 'لغات']
-};
-
 const OwnerDashboard = () => {
   const { t, language, dir } = useLanguage();
   const { toast } = useToast();
@@ -473,7 +460,7 @@ const OwnerDashboard = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-foreground">{language === 'ar' ? 'لوحة التحكم' : 'Tableau de bord'}</h1>
-                <p className="text-sm text-muted-foreground">{mockKindergarten.name}</p>
+                <p className="text-sm text-muted-foreground">{editData.name_ar || editData.name || (language === 'ar' ? 'روضة' : 'Kindergarten')}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -1325,15 +1312,15 @@ const OwnerDashboard = () => {
           <TabsContent value="info" className="space-y-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <div><CardTitle>{t('modal.details')}</CardTitle><CardDescription>{mockKindergarten.address}</CardDescription></div>
+                <div><CardTitle>{t('modal.details')}</CardTitle><CardDescription>{editData.address_ar || editData.address || '—'}</CardDescription></div>
                 <Button variant="outline" onClick={() => setIsEditing(true)}><Edit className="w-4 h-4 ml-1" />{language === 'ar' ? 'تعديل' : 'Modifier'}</Button>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1"><label className="text-xs text-muted-foreground">اسم الروضة</label><p className="font-medium">{mockKindergarten.name}</p></div>
-                  <div className="space-y-1"><label className="text-xs text-muted-foreground">البلدية</label><p className="font-medium">{mockKindergarten.municipality}</p></div>
-                  <div className="space-y-1"><label className="text-xs text-muted-foreground">رقم الهاتف</label><p className="font-medium">{editData.phone || mockKindergarten.phone}</p></div>
-                  <div className="space-y-1"><label className="text-xs text-muted-foreground">السعر الشهري</label><p className="font-medium">{mockKindergarten.pricePerMonth} دج</p></div>
+                  <div className="space-y-1"><label className="text-xs text-muted-foreground">اسم الروضة</label><p className="font-medium">{editData.name_ar || editData.name || (language === 'ar' ? 'روضة' : 'Kindergarten')}</p></div>
+                  <div className="space-y-1"><label className="text-xs text-muted-foreground">البلدية</label><p className="font-medium">{editData.municipality_ar || editData.municipality || editData.city || '—'}</p></div>
+                  <div className="space-y-1"><label className="text-xs text-muted-foreground">رقم الهاتف</label><p className="font-medium">{editData.phone || '—'}</p></div>
+                  <div className="space-y-1"><label className="text-xs text-muted-foreground">السعر الشهري</label><p className="font-medium">{(editData.price_per_month ?? editData.pricePerMonth ?? 0).toLocaleString()} دج</p></div>
                   <div className="space-y-1"><label className="text-xs text-muted-foreground">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</label><p className="font-medium">{editData.email || '-'}</p></div>
                   <div className="space-y-1"><label className="text-xs text-muted-foreground">{language === 'ar' ? 'آخر تحديث' : 'Dernière mise à jour'}</label><p className="font-medium">{editData.updated_at ? format(new Date(editData.updated_at), 'dd/MM/yyyy HH:mm') : '-'}</p></div>
                 </div>
@@ -1346,7 +1333,7 @@ const OwnerDashboard = () => {
       {/* Advanced Payment Process */}
       {activePayment && (
         <PaymentProcess 
-          kindergarten={mockKindergarten as any}
+          kindergarten={editData as any}
           bookingData={activePayment}
           onComplete={() => setActivePayment(null)}
           onSuccess={(txId) => {
