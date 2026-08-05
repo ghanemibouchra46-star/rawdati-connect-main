@@ -29,6 +29,7 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
     foodAllergies: ''
   });
   const [submittedRequest, setSubmittedRequest] = useState<any>(null);
+  const [notificationStatus, setNotificationStatus] = useState<'idle' | 'sent' | 'failed'>('idle');
 
   if (!isOpen || !kindergarten) return null;
 
@@ -62,13 +63,32 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
       setSubmittedRequest(data);
 
       try {
-        await supabase.functions.invoke('send-owner-registration-email', {
+        const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-owner-registration-email', {
           body: {
-            registrationRequestId: data.id
+            registrationRequestId: data.id,
+            kindergartenId: kindergarten.id,
+            kindergartenName: name,
+            parentName: formData.parentName,
+            childName: formData.childName,
+            childAge: formData.childAge,
+            parentPhone: formData.phone,
+            parentEmail: formData.email || null,
+            requestMessage: formData.message || null,
           }
         })
+
+        if (emailError) throw emailError;
+
+        if (emailResult && typeof emailResult === 'object' && 'error' in emailResult) {
+          throw new Error(String((emailResult as any).error));
+        }
+
+        setNotificationStatus('sent');
+        toast.success(language === 'ar' ? 'تم حفظ الطلب وإرسال إشعار البريد إلى صاحب الروضة' : 'Demande enregistrée et notification envoyée au directeur');
       } catch (sendError) {
-        console.error('Owner email send failed:', sendError)
+        console.error('Owner email send failed:', sendError);
+        setNotificationStatus('failed');
+        toast.error(language === 'ar' ? 'تم حفظ الطلب لكن فشل إرسال إشعار البريد' : 'La demande a été enregistrée mais l’email de notification a échoué');
       }
       
       toast.success(t('registration.successTitle'));
@@ -125,14 +145,25 @@ const RegistrationModal = ({ kindergarten, isOpen, onClose }: RegistrationModalP
         </div>
 
         {submittedRequest ? (
-          <PaymentOrder 
-            orderId={submittedRequest.id}
-            date={submittedRequest.created_at}
-            amount={kindergarten.pricePerMonth || 0}
-            status={submittedRequest.status}
-            kindergarten={kindergarten}
-            onClose={onClose}
-          />
+          <div className="space-y-4">
+            <div className={`rounded-xl border px-4 py-3 text-sm ${notificationStatus === 'sent' ? 'border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400' : notificationStatus === 'failed' ? 'border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-400' : 'border-border bg-muted/40 text-muted-foreground'}`}>
+              {notificationStatus === 'sent' ? (
+                language === 'ar' ? 'تم إرسال إشعار البريد الإلكتروني إلى صاحب الروضة.' : 'Une notification email a été envoyée au directeur de la crèche.'
+              ) : notificationStatus === 'failed' ? (
+                language === 'ar' ? 'تم حفظ الطلب، لكن لم يتم إرسال إشعار البريد الإلكتروني.' : 'La demande a bien été enregistrée, mais la notification email n’a pas pu être envoyée.'
+              ) : (
+                language === 'ar' ? 'تم حفظ الطلب بنجاح.' : 'La demande a bien été enregistrée.'
+              )}
+            </div>
+            <PaymentOrder 
+              orderId={submittedRequest.id}
+              date={submittedRequest.created_at}
+              amount={kindergarten.pricePerMonth || 0}
+              status={submittedRequest.status}
+              kindergarten={kindergarten}
+              onClose={onClose}
+            />
+          </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">

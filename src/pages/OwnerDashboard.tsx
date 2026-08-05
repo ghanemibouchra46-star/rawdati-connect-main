@@ -464,7 +464,7 @@ const OwnerDashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {/* Professional Account Subscription */}
+              {/* Pofessional Account Subscription */}
               {isTrialActive ? (
                 <Badge className="bg-amber-500 hover:bg-amber-600 text-white gap-1 px-3 py-1.5 rounded-xl border-none shadow-sm">
                   <Crown className="w-4 h-4 fill-white" />

@@ -2,6 +2,7 @@ import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
 const resendApiKey = Deno.env.get('RESEND_API_KEY')
+const resendFrom = Deno.env.get('RESEND_FROM') || 'Rawdati Connect <noreply@rawdati-connect.com>'
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -14,10 +15,22 @@ serve(async (req) => {
   }
 
   try {
-    const { registrationRequestId } = await req.json()
+    const body = await req.json()
+    const {
+      registrationRequestId,
+      kindergartenId,
+      kindergartenName: explicitKindergartenName,
+      parentName: explicitParentName,
+      childName: explicitChildName,
+      childAge: explicitChildAge,
+      parentPhone: explicitParentPhone,
+      parentEmail: explicitParentEmail,
+      requestMessage: explicitRequestMessage,
+      ownerEmail: explicitOwnerEmail,
+    } = body || {}
 
-    if (!registrationRequestId) {
-      throw new Error('registrationRequestId is required')
+    if (!registrationRequestId && !kindergartenId) {
+      throw new Error('registrationRequestId or kindergartenId is required')
     }
 
     const supabaseAdmin = createClient(
@@ -25,54 +38,67 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { data: request, error: requestError } = await supabaseAdmin
-      .from('registration_requests')
-      .select('*, kindergarten_id')
-      .eq('id', registrationRequestId)
-      .single()
+    let request: any = null
+    let kindergarten: any = null
 
-    if (requestError || !request) {
-      throw new Error('Registration request not found')
+    if (registrationRequestId) {
+      const { data, error } = await supabaseAdmin
+        .from('registration_requests')
+        .select('*, kindergarten_id')
+        .eq('id', registrationRequestId)
+        .single()
+
+      request = data
+      if (error || !request) {
+        throw new Error('Registration request not found')
+      }
     }
 
-    const { data: kindergarten, error: kgError } = await supabaseAdmin
-      .from('kindergartens')
-      .select('id, name_ar, name_fr')
-      .eq('id', request.kindergarten_id)
-      .single()
+    const resolvedKindergartenId = request?.kindergarten_id || kindergartenId
 
-    if (kgError || !kindergarten) {
-      throw new Error('Kindergarten not found')
+    if (resolvedKindergartenId) {
+      const { data, error } = await supabaseAdmin
+        .from('kindergartens')
+        .select('id, name_ar, name_fr')
+        .eq('id', resolvedKindergartenId)
+        .single()
+
+      kindergarten = data
+      if (error || !kindergarten) {
+        throw new Error('Kindergarten not found')
+      }
     }
 
-    const { data: ownerLink, error: ownerLinkError } = await supabaseAdmin
-      .from('owner_kindergartens')
-      .select('owner_id')
-      .eq('kindergarten_id', kindergarten.id)
-      .single()
+    let ownerEmail = explicitOwnerEmail || null
+    let ownerName = 'صاحب الروضة'
 
-    if (ownerLinkError || !ownerLink) {
-      throw new Error('Owner linkage not found')
+    if (!ownerEmail && kindergarten?.id) {
+      const { data: ownerLink, error: ownerLinkError } = await supabaseAdmin
+        .from('owner_kindergartens')
+        .select('owner_id')
+        .eq('kindergarten_id', kindergarten.id)
+        .single()
+
+      if (!ownerLinkError && ownerLink?.owner_id) {
+        const { data: ownerUser, error: ownerUserError } = await supabaseAdmin.auth.admin.getUserById(ownerLink.owner_id)
+        if (!ownerUserError && ownerUser?.user) {
+          ownerEmail = ownerUser.user.email || null
+          ownerName = ownerUser.user.user_metadata?.full_name || `${kindergarten.name_ar}`
+        }
+      }
     }
 
-    const { data: ownerUser, error: ownerUserError } = await supabaseAdmin.auth.admin.getUserById(ownerLink.owner_id)
-    if (ownerUserError || !ownerUser?.user) {
-      throw new Error('Owner user not found')
-    }
-
-    const ownerEmail = ownerUser.user.email
     if (!ownerEmail) {
       throw new Error('Owner email not available')
     }
 
-    const ownerName = ownerUser.user.user_metadata?.full_name || `${kindergarten.name_ar}`
-    const parentName = request.parent_name || 'ولي الأمر'
-    const childName = request.child_name || 'الطفل'
-    const childAge = request.child_age ? `${request.child_age}` : 'غير محدد'
-    const parentPhone = request.phone || 'غير متوفر'
-    const parentEmail = request.email || 'غير متوفر'
-    const requestMessage = request.message || ''
-    const kindergartenName = kindergarten.name_ar || kindergarten.name_fr || 'الروضه'
+    const parentName = explicitParentName || request?.parent_name || 'ولي الأمر'
+    const childName = explicitChildName || request?.child_name || 'الطفل'
+    const childAge = explicitChildAge || request?.child_age ? `${explicitChildAge || request?.child_age}` : 'غير محدد'
+    const parentPhone = explicitParentPhone || request?.phone || 'غير متوفر'
+    const parentEmail = explicitParentEmail || request?.email || 'غير متوفر'
+    const requestMessage = explicitRequestMessage || request?.message || ''
+    const kindergartenName = explicitKindergartenName || kindergarten?.name_ar || kindergarten?.name_fr || 'الروضه'
 
     if (resendApiKey && ownerEmail) {
       const emailBody = `
@@ -98,7 +124,7 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'Rawdati Connect <noreply@rawdati-connect.com>',
+          from: resendFrom,
           to: [ownerEmail],
           subject: `تسجيل جديد في ${kindergartenName}`,
           html: emailBody,
@@ -112,8 +138,8 @@ serve(async (req) => {
     }
 
     return new Response('Owner email processed successfully', { status: 200 })
-  } catch (error) {
+  } catch (error: any) {
     console.error(error)
-    return new Response(`Error: ${error.message}`, { status: 400 })
+    return new Response(`Error: ${error?.message || 'Unknown error'}`, { status: 400 })
   }
 })
