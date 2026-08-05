@@ -208,10 +208,10 @@ const AdminDashboard = () => {
             // 2. Fetch Users (Failure-tolerant)
             let usersWithRoles: any[] = [];
             const { data: rpcData, error: rpcError } = await supabase.rpc('get_profiles_with_roles_for_admin');
-            
-            if (!rpcError && rpcData) {
-                const rpcList = Array.isArray(rpcData) ? rpcData : [rpcData];
-                usersWithRoles = rpcList.map((row: any) => ({
+            const shouldFallback = rpcError || !rpcData || (Array.isArray(rpcData) && rpcData.length === 0);
+
+            if (!shouldFallback && Array.isArray(rpcData)) {
+                usersWithRoles = rpcData.map((row: any) => ({
                     id: row.id,
                     full_name: row.full_name,
                     phone: row.phone,
@@ -221,17 +221,28 @@ const AdminDashboard = () => {
                     role: row.role || 'parent'
                 }));
             } else {
-                // Fallback to direct profiles select
-                const { data: pRes, error: pError } = await supabase.from('profiles').select('*');
-                const { data: rRes } = await supabase.from('user_roles').select('*');
-                if (!pError) {
-                    const profiles = pRes || [];
-                    const roles = rRes || [];
-                    usersWithRoles = profiles.map((p: any) => ({
-                        ...p,
-                        role: roles.find((r: any) => r.user_id === p.id)?.role || 'parent'
-                    }));
+                if (rpcError) {
+                    console.warn('❌ Admin: get_profiles_with_roles_for_admin RPC failed:', rpcError.message);
+                } else {
+                    console.warn('⚠️ Admin: get_profiles_with_roles_for_admin returned no rows, falling back to direct profile/user_roles query');
                 }
+
+                const { data: pRes, error: pError } = await supabase.from('profiles').select('*');
+                const { data: rRes, error: rError } = await supabase.from('user_roles').select('*');
+
+                if (pError) {
+                    console.error('❌ Admin: Error fetching profiles fallback:', pError.message);
+                }
+                if (rError) {
+                    console.error('❌ Admin: Error fetching user_roles fallback:', rError.message);
+                }
+
+                const profiles = pRes || [];
+                const roles = rRes || [];
+                usersWithRoles = profiles.map((p: any) => ({
+                    ...p,
+                    role: roles.find((r: any) => r.user_id === p.id)?.role || 'parent'
+                }));
             }
             setUsers(usersWithRoles);
 
@@ -241,27 +252,52 @@ const AdminDashboard = () => {
                 .select('*')
                 .order('created_at', { ascending: false });
             
+            const registrationRows = (regData || []).map((row: any) => ({
+                ...row,
+                status: ['pending', 'approved', 'rejected'].includes(row.status) ? row.status : 'pending'
+            })) as RegistrationRequest[];
+
             if (!regError) {
-                setRegistrationRequests(regData || []);
+                setRegistrationRequests(registrationRows);
             } else {
                 setRegistrationRequests(localMockRegs);
             }
 
-            // 4. Update Stats
-            const activeOwners = usersWithRoles.filter(u => u.role === 'owner').length;
-            const activeParents = usersWithRoles.filter(u => u.role === 'parent').length;
-            const pendingKGs = finalKGs.filter(kg => kg.status === 'pending').length;
-            
-            // Fix: Use the same registration data that was set above (including mocks if needed)
-            const finalRegs = !regError ? (regData || []) : localMockRegs;
-            const pendingRegs = finalRegs.filter(reg => reg.status === 'pending').length;
+            // 4. Update Stats from the database whenever possible
+            const [
+                { count: totalUsersCount },
+                { count: totalOwnersCount },
+                { count: totalParentsCount },
+                { count: pendingKGCount },
+                { count: pendingRegCount }
+            ] = await Promise.all([
+                supabase.from('profiles').select('id', { count: 'exact', head: true }),
+                supabase.from('user_roles').select('id', { count: 'exact', head: true }).eq('role', 'owner'),
+                supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'parent'),
+                supabase.from('kindergartens').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+                supabase.from('registration_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+            ]).catch(error => {
+                console.error('❌ Admin: Failed to fetch stats counts directly:', error);
+                return [
+                    { count: null },
+                    { count: null },
+                    { count: null },
+                    { count: null },
+                    { count: null }
+                ];
+            });
+
+            const activeOwners = totalOwnersCount ?? usersWithRoles.filter(u => u.role === 'owner').length;
+            const activeParents = totalParentsCount ?? usersWithRoles.filter(u => u.role === 'parent').length;
+            const finalPendingKGs = pendingKGCount ?? finalKGs.filter(kg => kg.status === 'pending').length;
+            const finalPendingRegs = pendingRegCount ?? (regError ? localMockRegs.filter(reg => reg.status === 'pending').length : registrationRows.filter(reg => reg.status === 'pending').length);
 
             setStats({
-                totalUsers: usersWithRoles.length,
+                totalUsers: totalUsersCount ?? usersWithRoles.length,
                 totalKindergartens: finalKGs.length,
-                pendingApprovals: pendingKGs + pendingRegs,
-                activeParents: activeParents,
-                activeOwners: activeOwners
+                pendingApprovals: finalPendingKGs + finalPendingRegs,
+                activeParents,
+                activeOwners
             });
 
         } catch (error) {
