@@ -288,8 +288,7 @@ export function useKindergartens() {
       console.log("🚀 useKindergartens - Fetching all kindergartens...");
       const { data, error } = await supabase
         .from('kindergartens')
-        .select('*')
-        .order('created_at', { ascending: false }); // جلب جميع الروضات بدون حد أقصى
+        .select('*'); // جلب جميع الروضات بدون حد أقصى
 
       if (error) {
         console.error("❌ Error fetching kindergartens from Supabase:", error.message);
