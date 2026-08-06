@@ -204,19 +204,6 @@ const ParentSchedule = () => {
         return date.toDateString() === today.toDateString();
     };
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="text-center">
-                    <Baby className="w-12 h-12 text-primary mx-auto animate-bounce" />
-                    <p className="mt-4 text-muted-foreground">{t('auth.loading')}</p>
-                </div>
-            </div>
-        );
-    }
-
-    const selectedDay = weekSchedule[selectedDayIndex];
-
     return (
         <div className="min-h-screen bg-gradient-to-b from-background to-muted/30" dir={dir}>
             {/* Header */}
