@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Baby, Calendar, ArrowRight, Clock, BookOpen, Utensils, Moon, Music, Palette, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import LanguageSelector from '@/components/LanguageSelector';
+import { useWeeklySchedule } from '@/hooks/useWeeklySchedule';
 
 interface ScheduleItem {
     id: string;
@@ -27,166 +28,143 @@ interface DaySchedule {
     items: ScheduleItem[];
 }
 
+const normalizeDayKey = (day?: string) => {
+    if (!day) return '';
+    const normalized = day.toLowerCase().trim();
+    if (['sunday', 'sun', 'الأحد', 'dimanche'].some(value => normalized.includes(value))) return 'sunday';
+    if (['monday', 'mon', 'الاثنين', 'lundi'].some(value => normalized.includes(value))) return 'monday';
+    if (['tuesday', 'tue', 'الثلاثاء', 'mardi'].some(value => normalized.includes(value))) return 'tuesday';
+    if (['wednesday', 'wed', 'الأربعاء', 'mercredi'].some(value => normalized.includes(value))) return 'wednesday';
+    if (['thursday', 'thu', 'الخميس', 'jeudi'].some(value => normalized.includes(value))) return 'thursday';
+    return '';
+};
+
+const normalizeScheduleType = (type?: string): ScheduleItem['type'] => {
+    if (!type) return 'activity';
+    const lower = type.toLowerCase();
+    if (lower.includes('learn') || lower.includes('تعلم')) return 'learning';
+    if (lower.includes('meal') || lower.includes('وجبة') || lower.includes('غداء') || lower.includes('breakfast') || lower.includes('lunch')) return 'meal';
+    if (lower.includes('nap') || lower.includes('قيلولة') || lower.includes('sleep')) return 'nap';
+    if (lower.includes('art') || lower.includes('فنون') || lower.includes('رسم')) return 'art';
+    if (lower.includes('music') || lower.includes('موسيقى') || lower.includes('song')) return 'music';
+    if (lower.includes('play') || lower.includes('لعب') || lower.includes('free')) return 'play';
+    return 'activity';
+};
+
 const ParentSchedule = () => {
     const { profile, loading: authLoading } = useAuth();
     const { t, dir, language } = useLanguage();
     const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(true);
-    const [weekSchedule, setWeekSchedule] = useState<DaySchedule[]>([]);
+    const [kindergartenId, setKindergartenId] = useState('');
     const [selectedDayIndex, setSelectedDayIndex] = useState(0);
     const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
+    const [pageLoading, setPageLoading] = useState(true);
+
+    const { data: scheduleData, isLoading: scheduleLoading } = useWeeklySchedule(kindergartenId);
 
     useEffect(() => {
         if (!authLoading) {
-            if (profile) {
-                loadSchedule();
-            } else {
+            if (!profile) {
                 navigate('/auth');
+                return;
             }
+
+            const loadKindergartenId = async () => {
+                try {
+                    const { data, error } = await supabase
+                        .from('registration_requests')
+                        .select('kindergarten_id')
+                        .eq('user_id', profile.id)
+                        .limit(1)
+                        .maybeSingle();
+
+                    if (error) {
+                        console.error('Error loading kindergarten ID for schedule:', error);
+                    }
+
+                    if (data?.kindergarten_id) {
+                        setKindergartenId(data.kindergarten_id);
+                    }
+                } catch (error) {
+                    console.error('Error loading kindergarten ID for schedule:', error);
+                } finally {
+                    setPageLoading(false);
+                }
+            };
+
+            loadKindergartenId();
         }
-    }, [profile, authLoading, navigate]);
+    }, [authLoading, profile, navigate]);
 
     useEffect(() => {
-        // This useEffect now depends on authLoading and profile to ensure schedule loads only after auth check
-        if (!authLoading && profile) {
-            loadSchedule();
+        if (currentWeekOffset === 0) {
+            const todayIndex = new Date().getDay();
+            if (todayIndex < 5) {
+                setSelectedDayIndex(todayIndex);
+            }
+        } else {
+            setSelectedDayIndex(0);
         }
-    }, [currentWeekOffset, language, authLoading, profile]);
+    }, [currentWeekOffset]);
 
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday'] as const;
 
-    const loadSchedule = () => {
+    const weekSchedule = useMemo(() => {
         const today = new Date();
-        today.setDate(today.getDate() + (currentWeekOffset * 7));
+        today.setDate(today.getDate() + currentWeekOffset * 7);
         const sunday = new Date(today);
         sunday.setDate(today.getDate() - today.getDay());
 
-        const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday'];
-
-        const schedule: DaySchedule[] = days.map((day, index) => {
+        return days.map((day, index) => {
             const date = new Date(sunday);
             date.setDate(sunday.getDate() + index);
+            const items = (scheduleData || [])
+                .filter((item: any) => normalizeDayKey(item.day_of_week) === day)
+                .sort((a: any, b: any) => a.time_slot.localeCompare(b.time_slot))
+                .map((item: any) => ({
+                    id: item.id,
+                    time: item.time_slot || '',
+                    title: item.title || '',
+                    description: item.description || '',
+                    type: normalizeScheduleType(item.activity_type),
+                    duration: item.duration || '30 min'
+                }));
+
             return {
-                day: day,
-                dayAr: t('days.' + day, 'ar'),
-                dayFr: t('days.' + day, 'fr'),
+                day,
+                dayAr: t('days.' + day),
+                dayFr: t('days.' + day),
                 date: date.toISOString().split('T')[0],
-                items: getScheduleItems(index)
+                items
             };
         });
+    }, [currentWeekOffset, scheduleData, t]);
 
-        setWeekSchedule(schedule);
-        // Set today as default if it's in the week
-        const todayIndex = new Date().getDay();
-        if (todayIndex < 5 && currentWeekOffset === 0) {
-            setSelectedDayIndex(todayIndex);
-        }
-        setIsLoading(false);
-    };
+    const isLoading = pageLoading || authLoading || scheduleLoading;
 
-    const getScheduleItems = (dayIndex: number): ScheduleItem[] => {
-        const baseSchedule: ScheduleItem[] = [
-            {
-                id: '1',
-                time: '08:00',
-                title: t('schedule.welcome'),
-                description: t('schedule.welcomeDesc'),
-                type: 'play',
-                duration: '30 min'
-            },
-            {
-                id: '2',
-                time: '08:30',
-                title: t('schedule.learning1'),
-                description: t('schedule.learning1Desc'),
-                type: 'learning',
-                duration: '45 min'
-            },
-            {
-                id: '3',
-                time: '09:15',
-                title: t('schedule.breakfast'),
-                description: t('schedule.breakfastDesc'),
-                type: 'meal',
-                duration: '30 min'
-            },
-            {
-                id: '4',
-                time: '09:45',
-                title: t('schedule.art'),
-                description: t('schedule.artDesc'),
-                type: 'art',
-                duration: '45 min'
-            },
-            {
-                id: '5',
-                time: '10:30',
-                title: t('schedule.outdoor'),
-                description: t('schedule.outdoorDesc'),
-                type: 'play',
-                duration: '45 min'
-            },
-            {
-                id: '6',
-                time: '11:15',
-                title: t('schedule.music'),
-                description: t('schedule.musicDesc'),
-                type: 'music',
-                duration: '30 min'
-            },
-            {
-                id: '7',
-                time: '11:45',
-                title: t('schedule.lunch'),
-                description: t('schedule.lunchDesc'),
-                type: 'meal',
-                duration: '45 min'
-            },
-            {
-                id: '8',
-                time: '12:30',
-                title: t('schedule.nap'),
-                description: t('schedule.napDesc'),
-                type: 'nap',
-                duration: '1h 30min'
-            },
-            {
-                id: '9',
-                time: '14:00',
-                title: t('schedule.learning2'),
-                description: t('schedule.learning2Desc'),
-                type: 'learning',
-                duration: '45 min'
-            },
-            {
-                id: '10',
-                time: '14:45',
-                title: t('schedule.freePlay'),
-                description: t('schedule.freePlayDesc'),
-                type: 'play',
-                duration: '45 min'
-            },
-            {
-                id: '11',
-                time: '15:30',
-                title: t('schedule.departure'),
-                description: t('schedule.departureDesc'),
-                type: 'activity',
-                duration: '30 min'
-            }
-        ];
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="text-center">
+                    <Baby className="w-12 h-12 text-primary mx-auto animate-bounce" />
+                    <p className="mt-4 text-muted-foreground">{t('auth.loading')}</p>
+                </div>
+            </div>
+        );
+    }
 
-        // Add some variation based on day
-        if (dayIndex === 1 || dayIndex === 3) { // Monday, Wednesday
-            baseSchedule[3] = {
-                ...baseSchedule[3],
-                title: t('schedule.sports'),
-                description: t('schedule.sportsDesc'),
-                type: 'activity'
-            };
-        }
+    const selectedDay = weekSchedule[selectedDayIndex];
 
-        return baseSchedule;
-    };
+    if (!kindergartenId) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="text-center">
+                    <Baby className="w-12 h-12 text-primary mx-auto animate-bounce" />
+                    <p className="mt-4 text-muted-foreground">{t('notif.noNotifsDesc')}</p>
+                </div>
+            </div>
+        );
+    }
 
     const getTypeIcon = (type: string) => {
         switch (type) {

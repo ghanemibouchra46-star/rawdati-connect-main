@@ -1,109 +1,99 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Baby, Bell, ArrowRight, CheckCircle, Info, AlertTriangle, Calendar, MessageCircle, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import LanguageSelector from '@/components/LanguageSelector';
+import { useParentNotifications, useMarkNotificationRead } from '@/hooks/useWeeklySchedule';
 
 interface Notification {
     id: string;
-    type: 'activity' | 'announcement' | 'reminder' | 'message';
+    type: string;
     title: string;
     description: string;
     time: string;
     isRead: boolean;
-    childName?: string;
-    icon: 'activity' | 'announcement' | 'reminder' | 'message';
+    childName?: string | null;
 }
 
 const ParentNotifications = () => {
     const { profile, loading: authLoading } = useAuth();
     const { t, dir, language } = useLanguage();
     const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(true);
-    const [notifications, setNotifications] = useState<Notification[]>([]);
     const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
+    const { data: rawNotifications, isLoading: notificationsLoading } = useParentNotifications();
+    const { mutate: markNotificationRead } = useMarkNotificationRead();
+
     useEffect(() => {
-        if (!authLoading) {
-            if (profile) {
-                loadNotifications();
-            } else {
-                navigate('/auth');
-            }
+        if (!authLoading && !profile) {
+            navigate('/auth');
         }
     }, [profile, authLoading, navigate]);
 
-    const loadNotifications = () => {
-        // Demo notifications data
-        const demoNotifications: Notification[] = [
-            {
-                id: '1',
-                type: 'activity',
-                title: t('notif.activity'),
-                description: language === 'ar' ? 'أحمد تعلم الحروف الأبجدية اليوم وأظهر تقدماً ملحوظاً!' : language === 'fr' ? 'Ahmed a appris l\'alphabet aujourd\'hui et a montré des progrès remarquables!' : 'Ahmed learned the alphabet today and showed remarkable progress!',
-                time: language === 'ar' ? 'منذ 30 دقيقة' : language === 'fr' ? 'Il y a 30 min' : '30 min ago',
-                isRead: false,
-                childName: language === 'ar' ? 'أحمد' : 'Ahmed',
-                icon: 'activity'
-            },
-            {
-                id: '2',
-                type: 'announcement',
-                title: t('notif.announcement'),
-                description: language === 'ar' ? 'سيتم تنظيم رحلة ترفيهية يوم الأحد القادم. يرجى تحضير وجبة خفيفة لطفلك.' : language === 'fr' ? 'Une sortie récréative sera organisée dimanche prochain. Veuillez préparer une collation.' : 'A recreational trip will be organized next Sunday. Please prepare a snack for your child.',
-                time: language === 'ar' ? 'منذ ساعة' : language === 'fr' ? 'Il y a 1 heure' : '1 hour ago',
-                isRead: false,
-                icon: 'announcement'
-            },
-            {
-                id: '3',
-                type: 'reminder',
-                title: t('notif.reminder'),
-                description: language === 'ar' ? 'يرجى تسديد رسوم الشهر القادم قبل تاريخ 10 فبراير.' : language === 'fr' ? 'Veuillez régler les frais du mois prochain avant le 10 février.' : 'Please pay next month\'s fees before February 10th.',
-                time: language === 'ar' ? 'منذ ساعتين' : language === 'fr' ? 'Il y a 2 heures' : '2 hours ago',
-                isRead: true,
-                icon: 'reminder'
-            },
-            {
-                id: '4',
-                type: 'activity',
-                title: language === 'ar' ? 'وقت اللعب' : language === 'fr' ? 'Temps de jeu' : 'Playtime',
-                description: language === 'ar' ? 'سارة لعبت مع أصدقائها في الحديقة وقضت وقتاً ممتعاً.' : language === 'fr' ? 'Sara a joué avec ses amis dans le jardin et a passé un bon moment.' : 'Sara played with her friends in the garden and had a great time.',
-                time: language === 'ar' ? 'منذ 3 ساعات' : language === 'fr' ? 'Il y a 3 heures' : '3 hours ago',
-                isRead: true,
-                childName: language === 'ar' ? 'سارة' : 'Sara',
-                icon: 'activity'
-            },
-            {
-                id: '5',
-                type: 'message',
-                title: t('notif.message'),
-                description: language === 'ar' ? 'أود إعلامكم أن أحمد أظهر موهبة في الرسم. ننصح بتشجيعه في المنزل.' : language === 'fr' ? 'Je voudrais vous informer qu\'Ahmed a montré un talent pour le dessin. Nous vous conseillons de l\'encourager à la maison.' : 'I would like to inform you that Ahmed has shown a talent for drawing. We recommend encouraging him at home.',
-                time: language === 'ar' ? 'أمس' : language === 'fr' ? 'Hier' : 'Yesterday',
-                isRead: true,
-                childName: language === 'ar' ? 'أحمد' : 'Ahmed',
-                icon: 'message'
-            },
-            {
-                id: '6',
-                type: 'announcement',
-                title: language === 'ar' ? 'عطلة نهاية الأسبوع' : language === 'fr' ? 'Congé de fin de semaine' : 'Weekend Holiday',
-                description: language === 'ar' ? 'ستكون الروضة مغلقة يوم الخميس القادم بمناسبة العيد الوطني.' : language === 'fr' ? 'Le jardin d\'enfants sera fermé jeudi prochain à l\'occasion de la fête nationale.' : 'The kindergarten will be closed next Thursday for the national holiday.',
-                time: language === 'ar' ? 'منذ يومين' : language === 'fr' ? 'Il y a 2 jours' : '2 days ago',
-                isRead: true,
-                icon: 'announcement'
-            }
-        ];
-        setNotifications(demoNotifications);
-        setIsLoading(false);
+    const formatNotificationTime = (timestamp: string) => {
+        const date = new Date(timestamp);
+        const diffSeconds = Math.floor((Date.now() - date.getTime()) / 1000);
+
+        if (diffSeconds < 60) {
+            return language === 'ar' ? 'قبل لحظات' : language === 'fr' ? 'Il y a quelques secondes' : 'just now';
+        }
+        if (diffSeconds < 3600) {
+            const minutes = Math.floor(diffSeconds / 60);
+            return language === 'ar'
+                ? `قبل ${minutes} دقيقة`
+                : language === 'fr'
+                    ? `Il y a ${minutes} min`
+                    : `${minutes} min ago`;
+        }
+        if (diffSeconds < 86400) {
+            const hours = Math.floor(diffSeconds / 3600);
+            return language === 'ar'
+                ? `قبل ${hours} ساعة`
+                : language === 'fr'
+                    ? `Il y a ${hours} h`
+                    : `${hours} hour${hours > 1 ? 's' : ''} ago`;
+        }
+
+        return date.toLocaleDateString(language === 'ar' ? 'ar-DZ' : language === 'fr' ? 'fr-FR' : 'en-US', {
+            day: 'numeric',
+            month: 'short'
+        });
     };
+
+    const notifications = useMemo(() => {
+        return (rawNotifications || []).map((item: any) => ({
+            id: item.id,
+            type: item.type || 'info',
+            title: item.title || item.message || '',
+            description: item.message || '',
+            time: item.created_at ? formatNotificationTime(item.created_at) : '',
+            isRead: item.is_read ?? false,
+            childName: item.child_name || null,
+        })) as Notification[];
+    }, [rawNotifications, formatNotificationTime]);
+
+    const filteredNotifications = useMemo(
+        () => (filter === 'unread' ? notifications.filter(n => !n.isRead) : notifications),
+        [filter, notifications]
+    );
+
+    const unreadCount = notifications.filter(n => !n.isRead).length;
+
+    const markAsRead = (id: string) => {
+        markNotificationRead(id);
+    };
+
+    const markAllAsRead = () => {
+        notifications.filter(n => !n.isRead).forEach(n => markNotificationRead(n.id));
+    };
+
+    const isLoading = authLoading || notificationsLoading;
 
     const getNotificationIcon = (type: string) => {
         switch (type) {
@@ -135,23 +125,7 @@ const ParentNotifications = () => {
         }
     };
 
-    const markAsRead = (id: string) => {
-        setNotifications(prev =>
-            prev.map(n => n.id === id ? { ...n, isRead: true } : n)
-        );
-    };
-
-    const markAllAsRead = () => {
-        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-    };
-
-    const filteredNotifications = filter === 'unread'
-        ? notifications.filter(n => !n.isRead)
-        : notifications;
-
-    const unreadCount = notifications.filter(n => !n.isRead).length;
-
-    if (isLoading) {
+    const isLoading = authLoading || notificationsLoading;
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="text-center">

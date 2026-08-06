@@ -17,9 +17,12 @@ export type Database = {
       notifications: {
         Row: {
           created_at: string
+          child_name: string | null
           id: string
           is_read: boolean
+          kindergarten_id: string | null
           message: string
+          parent_id: string | null
           related_id: string | null
           title: string
           type: string
@@ -27,9 +30,12 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          child_name?: string | null
           id?: string
           is_read?: boolean
+          kindergarten_id?: string | null
           message: string
+          parent_id?: string | null
           related_id?: string | null
           title: string
           type?: string
@@ -37,13 +43,52 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          child_name?: string | null
           id?: string
           is_read?: boolean
+          kindergarten_id?: string | null
           message?: string
+          parent_id?: string | null
           related_id?: string | null
           title?: string
           type?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      schedules: {
+        Row: {
+          activity_type: string | null
+          created_at: string
+          day_of_week: string
+          description: string | null
+          duration: string | null
+          id: string
+          kindergarten_id: string
+          time_slot: string
+          title: string
+        }
+        Insert: {
+          activity_type?: string | null
+          created_at?: string
+          day_of_week: string
+          description?: string | null
+          duration?: string | null
+          id?: string
+          kindergarten_id: string
+          time_slot: string
+          title: string
+        }
+        Update: {
+          activity_type?: string | null
+          created_at?: string
+          day_of_week?: string
+          description?: string | null
+          duration?: string | null
+          id?: string
+          kindergarten_id?: string
+          time_slot?: string
+          title?: string
         }
         Relationships: []
       }
