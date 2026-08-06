@@ -126,6 +126,7 @@ const ParentNotifications = () => {
     };
 
     const isPageLoading = authLoading || notificationsLoading;
+    if (isPageLoading) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="text-center">
@@ -254,8 +255,6 @@ const ParentNotifications = () => {
             </main>
         </div>
     );
-    </div>
-  );
 };
 
 export default ParentNotifications;
