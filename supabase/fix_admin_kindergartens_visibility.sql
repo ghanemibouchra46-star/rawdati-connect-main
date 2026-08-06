@@ -1,6 +1,6 @@
 -- =====================================================
 -- FIX: Ensure ALL kindergartens are visible to admins
--- AND approved kindergartens are visible to everyone
+-- AND everyone can view all kindergartens publicly
 -- =====================================================
 
 -- 1. Drop all existing policies on kindergartens to start clean
@@ -8,17 +8,24 @@ DROP POLICY IF EXISTS "Public can view kindergartens" ON public.kindergartens;
 DROP POLICY IF EXISTS "Admins can manage kindergartens" ON public.kindergartens;
 DROP POLICY IF EXISTS "Owners can view their kindergartens" ON public.kindergartens;
 DROP POLICY IF EXISTS "Anyone can view approved kindergartens" ON public.kindergartens;
+DROP POLICY IF EXISTS "Public can view approved kindergartens" ON public.kindergartens;
 
 -- 2. Enable RLS
 ALTER TABLE public.kindergartens ENABLE ROW LEVEL SECURITY;
 
--- 3. Policy: Anyone (anon + authenticated) can see APPROVED kindergartens
-CREATE POLICY "Public can view approved kindergartens"
+-- 3. Set default status for new kindergartens to approved
+ALTER TABLE public.kindergartens
+ALTER COLUMN status SET DEFAULT 'approved';
+
+-- 4. Policy: Anyone (anon + authenticated) can view all kindergartens
+CREATE POLICY "Public can view all kindergartens"
 ON public.kindergartens
 FOR SELECT
-USING (status = 'approved');
+USING (true);
 
--- 4. Policy: Admins can see ALL kindergartens and perform all operations
+GRANT SELECT ON public.kindergartens TO anon, authenticated;
+
+-- 5. Policy: Admins can see ALL kindergartens and perform all operations
 -- Checks both user_roles table AND profiles.role for maximum compatibility
 CREATE POLICY "Admins full access to kindergartens"
 ON public.kindergartens
@@ -36,7 +43,7 @@ USING (
   )
 );
 
--- 5. Policy: Owners can see their own kindergartens
+-- 6. Policy: Owners can see their own kindergartens
 CREATE POLICY "Owners can view own kindergartens"
 ON public.kindergartens
 FOR SELECT
@@ -48,7 +55,7 @@ USING (
   )
 );
 
--- 6. Verify: Show all kindergartens in the table
+-- 7. Verify: Show all kindergartens in the table
 SELECT id, name_ar, name_fr, status, municipality_ar 
 FROM public.kindergartens
 ORDER BY created_at DESC;

@@ -283,56 +283,48 @@ const mapRowToKindergarten = (row: any): Kindergarten => {
 
 export function useKindergartens() {
   const query = useQuery({
-    queryKey: ['kindergartens'],
+    queryKey: ['kindergartens-all'],
     queryFn: async () => {
       console.log("🚀 useKindergartens - Fetching all kindergartens...");
-      try {
-        // Fetch all kindergartens available to the current user/session.
-        // The Supabase RLS policies should control which rows are visible.
-        const { data, error } = await supabase
-          .from('kindergartens')
-          .select('*')
-          .order('rating', { ascending: false });
+      const { data, error } = await supabase
+        .from('kindergartens')
+        .select('*')
+        .order('created_at', { ascending: false }); // جلب جميع الروضات بدون حد أقصى
 
-        if (error) {
-          console.error("❌ Error fetching kindergartens from Supabase:", error?.message);
-          return []; // do not show dummy data when DB fetch fails
-        }
+      if (error) {
+        console.error("❌ Error fetching kindergartens from Supabase:", error.message);
+        throw new Error(error.message);
+      }
 
-        console.log(`📊 Found ${data?.length || 0} kindergartens in DB`);
-
-        if (!data || data.length === 0) {
-          console.warn("⚠️ No kindergartens found in DB");
-          return [];
-        }
-
-        const mappedData = (data ?? []).map((row: any) => {
-          if (!row?.id) {
-            console.warn("⚠️ Skipping row without ID:", row);
-            return null;
-          }
-          try {
-            const mapped = mapRowToKindergarten(row);
-            const nameText = mapped?.name_ar || mapped?.nameFr || mapped?.nameEn || '';
-            if (!nameText) {
-              console.warn(`⚠️ Skipped kindergarten with no readable name:`, row?.id);
-              return null;
-            }
-            return mapped;
-          } catch (e) {
-            console.error(`❌ Error mapping kindergarten ${row?.id} (${row?.name_ar || row?.name_fr || ''}):`, e);
-            return null;
-          }
-        }).filter(Boolean) as Kindergarten[];
-
-        console.log(`✨ Successfully loaded ${mappedData.length} kindergartens`);
-        return mappedData;
-      } catch (e) {
-        console.error("❌ Global error in useKindergartens:", e);
+      if (!data || data.length === 0) {
+        console.warn("⚠️ No kindergartens found in DB");
         return [];
       }
+
+      const mappedData = data.map((row: any) => {
+        if (!row?.id) {
+          console.warn("⚠️ Skipping row without ID:", row);
+          return null;
+        }
+
+        try {
+          const mapped = mapRowToKindergarten(row);
+          const nameText = mapped?.name_ar || mapped?.nameFr || mapped?.nameEn || '';
+          if (!nameText) {
+            console.warn(`⚠️ Skipped kindergarten with no readable name:`, row?.id);
+            return null;
+          }
+          return mapped;
+        } catch (e) {
+          console.error(`❌ Error mapping kindergarten ${row?.id} (${row?.name_ar || row?.name_fr || ''}):`, e);
+          return null;
+        }
+      }).filter(Boolean) as Kindergarten[];
+
+      console.log(`✨ Successfully loaded ${mappedData.length} kindergartens`);
+      return mappedData;
     },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes to reduce refetches
+    staleTime: 1000 * 60 * 5, // تخزين موقت لمدة 5 دقائق
     retry: 2,
   });
 

@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS public.kindergartens (
   description_ar TEXT,
   description_fr TEXT,
   coordinates JSONB,
+  status TEXT NOT NULL DEFAULT 'approved' CHECK (status IN ('pending', 'approved', 'rejected')),
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
@@ -33,13 +34,17 @@ CREATE TABLE IF NOT EXISTS public.kindergartens (
 -- Enable RLS
 ALTER TABLE public.kindergartens ENABLE ROW LEVEL SECURITY;
 
--- Anyone can read kindergartens (public listing)
-CREATE POLICY "Public can view kindergartens"
+-- Allow anyone to read all kindergartens
+DROP POLICY IF EXISTS "Public can view kindergartens" ON public.kindergartens;
+CREATE POLICY "Public can view all kindergartens"
 ON public.kindergartens
 FOR SELECT
 USING (true);
 
+GRANT SELECT ON public.kindergartens TO anon, authenticated;
+
 -- Only admins can insert/update/delete (for future admin panel)
+DROP POLICY IF EXISTS "Admins can manage kindergartens" ON public.kindergartens;
 CREATE POLICY "Admins can manage kindergartens"
 ON public.kindergartens
 FOR ALL
